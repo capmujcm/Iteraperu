@@ -101,6 +101,11 @@ async function query(text, params = []) {
 // Plugins
 // -----------------------------------------------------------------------------
 fastify.register(require('@fastify/cors'), { origin: true });
+fastify.register(require('@fastify/static'), {
+  root: path.join(__dirname),
+  prefix: '/',
+  decorateReply: true
+});
 
 // -----------------------------------------------------------------------------
 // Rutas API
@@ -309,16 +314,8 @@ fastify.post('/api/leads', async (request, reply) => {
 });
 
 // -----------------------------------------------------------------------------
-// Servir Archivos Estáticos
+// Rutas de Páginas
 // -----------------------------------------------------------------------------
-fastify.register(require('@fastify/static'), {
-  root: path.join(__dirname),
-  prefix: '/',
-  decorateReply: true,
-  wildcard: false
-});
-
-fastify.get('/', async (req, reply) => reply.sendFile('index.html'));
 fastify.get('/brand', async (req, reply) => reply.sendFile('brand-deck.html'));
 fastify.get('/evento', async (req, reply) => reply.sendFile('evento-plataforma/prototipo.html'));
 
