@@ -7,6 +7,18 @@ const fastify = require('fastify')({
 const db = require('./db');
 const { seedDatabase } = require('./db/seed');
 
+// Inicializar datos en memoria inmediatamente al arrancar
+seedDatabase().catch(err => console.warn('[Seed startup]:', err.message));
+
+// Global Error Handler
+fastify.setErrorHandler((error, request, reply) => {
+  console.error('[Fastify Global Error]:', error);
+  reply.status(error.statusCode || 500).send({
+    error: error.message || 'Error interno del servidor',
+    code: error.code
+  });
+});
+
 // Plugins
 fastify.register(require('@fastify/cors'), { origin: true });
 fastify.register(require('@fastify/static'), {
@@ -28,12 +40,13 @@ fastify.register(require('./api/qa.routes'));
 // Healthcheck & Diagnóstico
 // -----------------------------------------------------------------------------
 fastify.get('/api/health', async () => {
+  const count = (db.inMemoryStore && db.inMemoryStore.asistentes && db.inMemoryStore.asistentes.length) || 0;
   return {
     status: 'ok',
     uptime: process.uptime(),
     memory: process.memoryUsage().rss,
     db: db.isConnected() ? 'connected' : 'memory_ready',
-    attendeesCount: db.inMemoryStore.asistentes.length
+    attendeesCount: count
   };
 });
 
@@ -73,17 +86,15 @@ fastify.get('/evento', async (req, reply) => {
 });
 
 // -----------------------------------------------------------------------------
-// Inicialización del Servidor y Seeder
+// Inicialización del Servidor
 // -----------------------------------------------------------------------------
 const port = process.env.PORT || 3000;
 const host = '0.0.0.0';
 
-fastify.listen({ port, host }, async (err, address) => {
+fastify.listen({ port, host }, (err, address) => {
   if (err) {
     console.error(err);
     process.exit(1);
   }
-  // Auto-seed de datos demo para presentaciones inmediatas
-  await seedDatabase();
   console.log(`[ITERA Engine] Servidor Fastify ejecutándose en ${address}`);
 });
