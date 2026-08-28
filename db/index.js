@@ -11,7 +11,7 @@ try {
     ssl: process.env.NODE_ENV === 'production' && !connectionString.includes('localhost') 
       ? { rejectUnauthorized: false } 
       : false,
-    max: 3,                  // Máximo 3 conexiones concurrentes para ultra-bajo consumo de RAM
+    max: 3,
     idleTimeoutMillis: 10000,
     connectionTimeoutMillis: 5000
   });
@@ -23,7 +23,7 @@ try {
   console.warn('[PostgreSQL Init Error]:', e.message);
 }
 
-// In-Memory store para resiliencia total si la DB está en arranque
+// In-Memory store completo
 const inMemoryStore = {
   eventos: [
     {
@@ -38,6 +38,7 @@ const inMemoryStore = {
   ],
   asistentes: [],
   checkins: [],
+  stands: [],
   standsLeads: [],
   preguntas: []
 };
