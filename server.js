@@ -314,10 +314,19 @@ fastify.post('/api/leads', async (request, reply) => {
 });
 
 // -----------------------------------------------------------------------------
-// Rutas de Páginas
+// Rutas de Páginas & Roles Directos
 // -----------------------------------------------------------------------------
 fastify.get('/brand', async (req, reply) => reply.sendFile('brand-deck.html'));
 fastify.get('/evento', async (req, reply) => reply.sendFile('evento-plataforma/prototipo.html'));
+
+// URLs dedicadas por rol
+fastify.get('/asistente', async (req, reply) => reply.sendFile('evento-plataforma/prototipo.html'));
+fastify.get('/persona', async (req, reply) => reply.sendFile('evento-plataforma/prototipo.html'));
+fastify.get('/empresa', async (req, reply) => reply.sendFile('evento-plataforma/prototipo.html'));
+fastify.get('/organizador', async (req, reply) => reply.sendFile('evento-plataforma/prototipo.html'));
+fastify.get('/proveedor', async (req, reply) => reply.sendFile('evento-plataforma/prototipo.html'));
+fastify.get('/staff', async (req, reply) => reply.sendFile('evento-plataforma/prototipo.html'));
+fastify.get('/ayuda', async (req, reply) => reply.sendFile('evento-plataforma/prototipo.html'));
 
 // -----------------------------------------------------------------------------
 // Arranque

@@ -1546,6 +1546,21 @@ function showRole(r){
   stopCams();
   if(r==='organizador')showD('org-dashboard');
 }
+
+// Auto-selección de rol según la URL o parámetro (?role=...)
+(function autoSelectRole(){
+  const p = new URLSearchParams(window.location.search).get('role');
+  const path = window.location.pathname.toLowerCase();
+  if (p === 'persona' || p === 'asistente' || path.includes('asistente') || path.includes('persona')) {
+    showRole('asistente');
+  } else if (p === 'empresa' || p === 'stand' || path.includes('empresa')) {
+    showRole('empresa');
+  } else if (p === 'organizador' || p === 'admin' || path.includes('organizador')) {
+    showRole('organizador');
+  } else if (p === 'proveedor' || p === 'staff' || p === 'ayuda' || path.includes('staff') || path.includes('proveedor') || path.includes('ayuda')) {
+    showRole('ayuda');
+  }
+})();
 function hostOf(sc){
   for(const id of ['asBody','empBody','ayudaBody']){
     const b=el(id); if(b&&b.querySelector('[data-sc="'+sc+'"]'))return b;
