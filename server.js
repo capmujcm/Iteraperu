@@ -7,18 +7,6 @@ const fastify = require('fastify')({
 const db = require('./db');
 const { seedDatabase } = require('./db/seed');
 
-// Inicializar datos en memoria inmediatamente al arrancar
-seedDatabase().catch(err => console.warn('[Seed startup]:', err.message));
-
-// Global Error Handler
-fastify.setErrorHandler((error, request, reply) => {
-  console.error('[Fastify Global Error]:', error);
-  reply.status(error.statusCode || 500).send({
-    error: error.message || 'Error interno del servidor',
-    code: error.code
-  });
-});
-
 // Plugins
 fastify.register(require('@fastify/cors'), { origin: true });
 fastify.register(require('@fastify/static'), {
@@ -28,7 +16,7 @@ fastify.register(require('@fastify/static'), {
 });
 
 // -----------------------------------------------------------------------------
-// Registro Modular de Rutas API
+// Rutas Modulares
 // -----------------------------------------------------------------------------
 fastify.register(require('./api/events.routes'));
 fastify.register(require('./api/attendees.routes'));
@@ -88,13 +76,21 @@ fastify.get('/evento', async (req, reply) => {
 // -----------------------------------------------------------------------------
 // Inicialización del Servidor
 // -----------------------------------------------------------------------------
-const port = process.env.PORT || 3000;
+const port = Number(process.env.PORT) || 3000;
 const host = '0.0.0.0';
 
-fastify.listen({ port, host }, (err, address) => {
+fastify.listen({ port, host }, async (err, address) => {
   if (err) {
     console.error(err);
     process.exit(1);
   }
-  console.log(`[ITERA Engine] Servidor Fastify ejecutándose en ${address}`);
+  console.log(`[ITERA Engine] Servidor ejecutándose en ${address}`);
+  
+  // Ejecutar migraciones automáticas y seeder de inicio
+  try {
+    await db.autoMigrate();
+    await seedDatabase();
+  } catch (e) {
+    console.warn('[Startup Seed]:', e.message);
+  }
 });
