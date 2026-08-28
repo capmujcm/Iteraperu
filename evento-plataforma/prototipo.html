@@ -1544,7 +1544,10 @@ function showRole(r){
   Object.entries(APPS).forEach(([k,v])=>el(v).classList.toggle('hide',k!==r));
   document.querySelectorAll('#roles button').forEach(b=>b.classList.toggle('active',b.dataset.role===r));
   stopCams();
-  if(r==='organizador')showD('org-dashboard');
+  if(r==='organizador') showD('org-dashboard');
+  else if(r==='empresa') showScreen('emp-dashboard');
+  else if(r==='ayuda') showScreen('ay-home');
+  else if(r==='asistente') showScreen('as-landing');
 }
 
 // Auto-selección de rol según la URL o parámetro (?role=...)
