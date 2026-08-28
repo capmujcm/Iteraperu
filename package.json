@@ -1,10 +1,10 @@
 {
   "name": "iteraperu",
   "version": "1.0.0",
-  "description": "ITERA Platform & API — Ultra-low footprint enterprise backend",
+  "description": "ITERA Platform & API",
   "main": "server.js",
   "scripts": {
-    "start": "node --max-old-space-size=128 server.js",
+    "start": "node server.js",
     "dev": "node --watch server.js"
   },
   "dependencies": {

@@ -1,11 +1,10 @@
 const path = require('path');
 
-// Capturadores globales de seguridad para prevenir caídas del proceso
 process.on('uncaughtException', (err) => {
-  console.warn('[Global Uncaught Exception Handled]:', err.message);
+  console.warn('[Uncaught Exception]:', err.message);
 });
 process.on('unhandledRejection', (reason) => {
-  console.warn('[Global Unhandled Rejection Handled]:', reason);
+  console.warn('[Unhandled Rejection]:', reason);
 });
 
 const fastify = require('fastify')({
@@ -20,15 +19,8 @@ const { seedDatabase } = require('./db/seed');
 fastify.register(require('@fastify/cors'), { origin: true });
 
 // -----------------------------------------------------------------------------
-// 1. Rutas API
+// 1. Healthcheck & Diagnóstico (Inmediato)
 // -----------------------------------------------------------------------------
-fastify.register(require('./api/events.routes'));
-fastify.register(require('./api/attendees.routes'));
-fastify.register(require('./api/tickets.routes'));
-fastify.register(require('./api/stands.routes'));
-fastify.register(require('./api/qa.routes'));
-
-// Healthcheck
 fastify.get('/api/health', async () => {
   const count = (db.inMemoryStore && db.inMemoryStore.asistentes && db.inMemoryStore.asistentes.length) || 0;
   return {
@@ -63,7 +55,16 @@ fastify.post('/api/leads', async (request, reply) => {
 });
 
 // -----------------------------------------------------------------------------
-// 2. Servir Archivos Estáticos
+// 2. Rutas Modulares API
+// -----------------------------------------------------------------------------
+fastify.register(require('./api/events.routes'));
+fastify.register(require('./api/attendees.routes'));
+fastify.register(require('./api/tickets.routes'));
+fastify.register(require('./api/stands.routes'));
+fastify.register(require('./api/qa.routes'));
+
+// -----------------------------------------------------------------------------
+// 3. Servir Archivos Estáticos
 // -----------------------------------------------------------------------------
 fastify.register(require('@fastify/static'), {
   root: path.join(__dirname),
@@ -86,22 +87,22 @@ fastify.get('/evento', async (req, reply) => {
 });
 
 // -----------------------------------------------------------------------------
-// Inicialización del Servidor
+// Arranque Asíncrono Limpio
 // -----------------------------------------------------------------------------
-const port = Number(process.env.PORT) || 3000;
-const host = '0.0.0.0';
+const start = async () => {
+  try {
+    const port = Number(process.env.PORT) || 3000;
+    const address = await fastify.listen({ port, host: '0.0.0.0' });
+    console.log(`[ITERA Engine] Servidor listo en ${address}`);
 
-fastify.listen({ port, host }, async (err, address) => {
-  if (err) {
-    console.error('[Fastify Listen Error]:', err);
+    // Tareas de fondo no bloqueantes
+    db.autoMigrate()
+      .then(() => seedDatabase())
+      .catch(e => console.warn('[Seed background]:', e.message));
+  } catch (err) {
+    console.error('[Startup Crash]:', err);
     process.exit(1);
   }
-  console.log(`[ITERA Engine] Servidor ejecutándose en ${address}`);
-  
-  try {
-    await db.autoMigrate();
-    await seedDatabase();
-  } catch (e) {
-    console.warn('[Startup Seed]:', e.message);
-  }
-});
+};
+
+start();
