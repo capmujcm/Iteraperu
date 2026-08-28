@@ -1,6 +1,15 @@
 const path = require('path');
+
+// Capturadores globales de seguridad para prevenir caídas del proceso
+process.on('uncaughtException', (err) => {
+  console.warn('[Global Uncaught Exception Handled]:', err.message);
+});
+process.on('unhandledRejection', (reason) => {
+  console.warn('[Global Unhandled Rejection Handled]:', reason);
+});
+
 const fastify = require('fastify')({
-  logger: process.env.NODE_ENV === 'production' ? { level: 'error' } : true,
+  logger: false,
   disableRequestLogging: true
 });
 
@@ -11,7 +20,7 @@ const { seedDatabase } = require('./db/seed');
 fastify.register(require('@fastify/cors'), { origin: true });
 
 // -----------------------------------------------------------------------------
-// 1. Registro de Rutas API (Primero para evitar conflicto con estáticos)
+// 1. Rutas API
 // -----------------------------------------------------------------------------
 fastify.register(require('./api/events.routes'));
 fastify.register(require('./api/attendees.routes'));
@@ -54,7 +63,7 @@ fastify.post('/api/leads', async (request, reply) => {
 });
 
 // -----------------------------------------------------------------------------
-// 2. Servir Archivos Estáticos (Con wildcard: false para no interceptar APIs)
+// 2. Servir Archivos Estáticos
 // -----------------------------------------------------------------------------
 fastify.register(require('@fastify/static'), {
   root: path.join(__dirname),
@@ -84,7 +93,7 @@ const host = '0.0.0.0';
 
 fastify.listen({ port, host }, async (err, address) => {
   if (err) {
-    console.error(err);
+    console.error('[Fastify Listen Error]:', err);
     process.exit(1);
   }
   console.log(`[ITERA Engine] Servidor ejecutándose en ${address}`);

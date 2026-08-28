@@ -7,23 +7,27 @@ let isConnected = false;
 
 if (connectionString) {
   try {
+    // En Railway la red interna (.railway.internal) es TCP directo sin SSL
+    const isInternalRailway = connectionString.includes('.railway.internal') || connectionString.includes('localhost');
+    const sslConfig = isInternalRailway ? false : { rejectUnauthorized: false };
+
     pool = new Pool({
       connectionString,
-      ssl: !connectionString.includes('localhost') ? { rejectUnauthorized: false } : false,
+      ssl: sslConfig,
       max: 3,
       idleTimeoutMillis: 10000,
-      connectionTimeoutMillis: 5000
+      connectionTimeoutMillis: 4000
     });
 
     pool.on('error', (err) => {
-      console.warn('[PostgreSQL Pool]:', err.message);
+      console.warn('[PostgreSQL Pool Non-Fatal]:', err.message);
     });
   } catch (e) {
-    console.warn('[PostgreSQL Init]:', e.message);
+    console.warn('[PostgreSQL Init Non-Fatal]:', e.message);
   }
 }
 
-// In-Memory store garantizado
+// In-Memory store completo y siempre disponible
 const inMemoryStore = {
   eventos: [
     {
@@ -50,13 +54,13 @@ async function query(text, params = []) {
       isConnected = true;
       return res;
     } catch (err) {
-      console.warn('[DB Query]:', err.message);
+      console.warn('[DB Query Non-Fatal Fallback]:', err.message);
     }
   }
   return { rows: [], rowCount: 0 };
 }
 
-// Auto-creación de tablas si PostgreSQL está conectado
+// Auto-creación no bloqueante de tablas
 async function autoMigrate() {
   if (!pool) return;
   try {
@@ -106,9 +110,9 @@ async function autoMigrate() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `);
-    console.log('[DB Auto-Migrate] Tablas de PostgreSQL creadas o verificadas exitosamente.');
+    console.log('[DB Auto-Migrate] Tablas de PostgreSQL listas.');
   } catch (err) {
-    console.warn('[DB Auto-Migrate]:', err.message);
+    console.warn('[DB Auto-Migrate Catch]:', err.message);
   }
 }
 
