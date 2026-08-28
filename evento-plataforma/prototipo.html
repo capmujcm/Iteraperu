@@ -196,6 +196,7 @@
       <button data-role="organizador">Organizador</button>
       <button data-role="ayuda">Punto de ayuda</button>
     </div>
+    <span class="pill p-good" id="apiStatusBadge" style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;padding:0.25rem 0.55rem;">● API En Vivo</span>
     <div class="grow"></div>
     <div class="dayswitch" id="dayswitch" title="Día simulado del evento">
       <button data-day="1" class="active">Día 1</button>
@@ -203,7 +204,7 @@
     </div>
     <button class="pbtn hot" id="btnProyeccion">▶ Modo proyección</button>
     <button class="pbtn" id="btnIndex">☰ 44 pantallas</button>
-    <button class="pbtn" id="btnReset" title="Reiniciar datos de la demo">⟳</button>
+    <button class="pbtn" id="btnReset" title="Reiniciar base de datos y demo">⟳ Cargar Demo</button>
   </div>
 </header>
 
@@ -2282,4 +2283,98 @@ el('ay-cp-q').addEventListener('input',function(){
     box.innerHTML='<div class="flash good">✓ Perfil actualizado</div>';
   });
 });
+
+/* ===================================================================
+   ITERA Real-Time API Synchronization Bridge (Railway Backend)
+   =================================================================== */
+(function initApiBridge() {
+  const badge = el('apiStatusBadge');
+  
+  // 1. Comprobar salud del servidor y memoria
+  fetch('/api/health')
+    .then(r => r.json())
+    .then(data => {
+      if (badge) {
+        badge.className = 'pill p-good';
+        badge.textContent = `● API Online (${Math.round(data.memory / 1024 / 1024)}MB RAM)`;
+      }
+    })
+    .catch(() => {
+      if (badge) {
+        badge.className = 'pill p-warn';
+        badge.textContent = '● Modo Offline (Local)';
+      }
+    });
+
+  // 2. Seeder Trigger Button (Cargar Demo con 1 clic)
+  const resetBtn = el('btnReset');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', async (e) => {
+      resetBtn.disabled = true;
+      resetBtn.textContent = 'Cargando Demo...';
+      try {
+        await fetch('/api/events/seed', { method: 'POST' });
+        localStorage.removeItem('itera_evt_v2');
+        if (badge) badge.textContent = '✓ Base de datos reinicializada';
+        setTimeout(() => location.reload(), 500);
+      } catch (err) {
+        localStorage.removeItem('itera_evt_v2');
+        location.reload();
+      }
+    });
+  }
+
+  // 3. Check-in en Puerta en Vivo
+  const valInput = el('ay-val-q');
+  if (valInput) {
+    valInput.addEventListener('keydown', async (e) => {
+      if (e.key === 'Enter') {
+        const val = valInput.value.trim();
+        if (!val) return;
+        try {
+          const res = await fetch('/api/tickets/checkin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: val, dni: val })
+          });
+          const data = await res.json();
+          const box = el('ayValResult');
+          if (box) {
+            if (data.success) {
+              box.innerHTML = `<div class="flash ${data.isDuplicate ? 'warn' : 'good'}">${data.message} — ${data.attendee.nombre} ${data.attendee.apellido} (${(data.attendee.tipo_ticket||'General').toUpperCase()})</div>`;
+            } else {
+              box.innerHTML = `<div class="flash bad">✕ ${data.error || 'Ticket no encontrado'}</div>`;
+            }
+          }
+        } catch (err) {}
+      }
+    });
+  }
+
+  // 4. Captura de Leads en Stand (Sincronización en vivo)
+  window.apiScanStandLead = async function(standId, attendeeCode, notas) {
+    try {
+      const res = await fetch('/api/stands/scan-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stand_id: standId, attendee_code: attendeeCode, notas })
+      });
+      return await res.json();
+    } catch (e) {
+      return { success: false };
+    }
+  };
+
+  // 5. Preguntas en Vivo & Upvotes
+  window.apiAskQuestion = async function(autor, pregunta) {
+    try {
+      const res = await fetch('/api/qa/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ autor, pregunta })
+      });
+      return await res.json();
+    } catch (e) {}
+  };
+})();
 </script>

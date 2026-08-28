@@ -1,11 +1,11 @@
 const path = require('path');
-const fs = require('fs');
 const fastify = require('fastify')({
   logger: process.env.NODE_ENV === 'production' ? { level: 'error' } : true,
   disableRequestLogging: true
 });
 
 const db = require('./db');
+const { seedDatabase } = require('./db/seed');
 
 // Plugins
 fastify.register(require('@fastify/cors'), { origin: true });
@@ -16,14 +16,29 @@ fastify.register(require('@fastify/static'), {
 });
 
 // -----------------------------------------------------------------------------
-// 1. Healthcheck (Para Railway y monitores de uptime)
+// Registro Modular de Rutas API
+// -----------------------------------------------------------------------------
+fastify.register(require('./api/events.routes'));
+fastify.register(require('./api/attendees.routes'));
+fastify.register(require('./api/tickets.routes'));
+fastify.register(require('./api/stands.routes'));
+fastify.register(require('./api/qa.routes'));
+
+// -----------------------------------------------------------------------------
+// Healthcheck & Diagnóstico
 // -----------------------------------------------------------------------------
 fastify.get('/api/health', async () => {
-  return { status: 'ok', uptime: process.uptime(), memory: process.memoryUsage().rss };
+  return {
+    status: 'ok',
+    uptime: process.uptime(),
+    memory: process.memoryUsage().rss,
+    db: db.isConnected() ? 'connected' : 'memory_ready',
+    attendeesCount: db.inMemoryStore.asistentes.length
+  };
 });
 
 // -----------------------------------------------------------------------------
-// 2. Captura de Leads (Formulario de Diagnóstico & Calculadora de ROI)
+// Captura de Leads de la Web Principal (Diagnóstico & Calculadora)
 // -----------------------------------------------------------------------------
 fastify.post('/api/leads', async (request, reply) => {
   const { nombre, empresa, cargo, email, telefono, tamano_empresa, desafio, horas_semanales_perdidas, ahorro_estimado_usd, mensaje } = request.body || {};
@@ -42,58 +57,12 @@ fastify.post('/api/leads', async (request, reply) => {
     const res = await db.query(query, values);
     return reply.status(201).send({ success: true, lead: res.rows[0] });
   } catch (err) {
-    fastify.log.error(err);
     return reply.status(200).send({ success: true, simulated: true, note: 'Lead registrado' });
   }
 });
 
 // -----------------------------------------------------------------------------
-// 3. Verificación de Ticket QR (Control de Acceso / Staff en Puerta)
-// -----------------------------------------------------------------------------
-fastify.post('/api/tickets/verify', async (request, reply) => {
-  const { qr_token, codigo_ticket } = request.body || {};
-  try {
-    const res = await db.query(
-      `SELECT * FROM asistentes_tickets WHERE qr_token = $1 OR codigo_ticket = $2 LIMIT 1`,
-      [qr_token || '', codigo_ticket || '']
-    );
-    if (res.rows.length === 0) {
-      return reply.status(404).send({ valid: false, message: 'Ticket no encontrado o inválido' });
-    }
-    const ticket = res.rows[0];
-    return { valid: true, ticket };
-  } catch (err) {
-    return reply.status(500).send({ error: 'Error al consultar ticket' });
-  }
-});
-
-// -----------------------------------------------------------------------------
-// 4. Registro de Check-in en Puerta
-// -----------------------------------------------------------------------------
-fastify.post('/api/tickets/checkin', async (request, reply) => {
-  const { ticket_id, puerta, staff_nombre } = request.body || {};
-  try {
-    await db.query(
-      `UPDATE asistentes_tickets 
-       SET estado = 'checkin', checkin_count = checkin_count + 1, ultimo_checkin = NOW() 
-       WHERE id = $1`,
-      [ticket_id]
-    );
-
-    await db.query(
-      `INSERT INTO checkins_log (ticket_id, puerta, staff_nombre, resultado)
-       VALUES ($1, $2, $3, 'exitoso')`,
-      [ticket_id, puerta || 'Principal', staff_nombre || 'Staff']
-    );
-
-    return { success: true, message: 'Check-in completado exitosamente' };
-  } catch (err) {
-    return reply.status(500).send({ error: 'Error al procesar check-in' });
-  }
-});
-
-// -----------------------------------------------------------------------------
-// Rutas de Vistas
+// Rutas de Páginas
 // -----------------------------------------------------------------------------
 fastify.get('/brand', async (req, reply) => {
   return reply.sendFile('brand-deck.html');
@@ -103,14 +72,18 @@ fastify.get('/evento', async (req, reply) => {
   return reply.sendFile('evento-plataforma/prototipo.html');
 });
 
-// Iniciar servidor
+// -----------------------------------------------------------------------------
+// Inicialización del Servidor y Seeder
+// -----------------------------------------------------------------------------
 const port = process.env.PORT || 3000;
 const host = '0.0.0.0';
 
-fastify.listen({ port, host }, (err, address) => {
+fastify.listen({ port, host }, async (err, address) => {
   if (err) {
     console.error(err);
     process.exit(1);
   }
-  console.log(`[ITERA Engine] Servidor ejecutándose en ${address}`);
+  // Auto-seed de datos demo para presentaciones inmediatas
+  await seedDatabase();
+  console.log(`[ITERA Engine] Servidor Fastify ejecutándose en ${address}`);
 });
