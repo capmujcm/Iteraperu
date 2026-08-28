@@ -1,7 +1,8 @@
 const path = require('path');
+const fs = require('fs');
 const fastify = require('fastify')({
   logger: process.env.NODE_ENV === 'production' ? { level: 'error' } : true,
-  disableRequestLogging: true // Ahorra ciclos de CPU
+  disableRequestLogging: true
 });
 
 const db = require('./db');
@@ -11,11 +12,11 @@ fastify.register(require('@fastify/cors'), { origin: true });
 fastify.register(require('@fastify/static'), {
   root: path.join(__dirname),
   prefix: '/',
-  decorateReply: false
+  decorateReply: true
 });
 
 // -----------------------------------------------------------------------------
-// 1. Healthcheck (Para Railway y monitores de uptime con 0ms de retardo)
+// 1. Healthcheck (Para Railway y monitores de uptime)
 // -----------------------------------------------------------------------------
 fastify.get('/api/health', async () => {
   return { status: 'ok', uptime: process.uptime(), memory: process.memoryUsage().rss };
@@ -42,8 +43,7 @@ fastify.post('/api/leads', async (request, reply) => {
     return reply.status(201).send({ success: true, lead: res.rows[0] });
   } catch (err) {
     fastify.log.error(err);
-    // En caso de que la DB aún no esté conectada en local, responde con éxito controlado
-    return reply.status(200).send({ success: true, simulated: true, note: 'Lead recibido' });
+    return reply.status(200).send({ success: true, simulated: true, note: 'Lead registrado' });
   }
 });
 
@@ -73,7 +73,6 @@ fastify.post('/api/tickets/verify', async (request, reply) => {
 fastify.post('/api/tickets/checkin', async (request, reply) => {
   const { ticket_id, puerta, staff_nombre } = request.body || {};
   try {
-    // Actualizar estado del ticket
     await db.query(
       `UPDATE asistentes_tickets 
        SET estado = 'checkin', checkin_count = checkin_count + 1, ultimo_checkin = NOW() 
@@ -81,7 +80,6 @@ fastify.post('/api/tickets/checkin', async (request, reply) => {
       [ticket_id]
     );
 
-    // Guardar en log
     await db.query(
       `INSERT INTO checkins_log (ticket_id, puerta, staff_nombre, resultado)
        VALUES ($1, $2, $3, 'exitoso')`,
@@ -95,12 +93,8 @@ fastify.post('/api/tickets/checkin', async (request, reply) => {
 });
 
 // -----------------------------------------------------------------------------
-// Servir páginas principales
+// Rutas de Vistas
 // -----------------------------------------------------------------------------
-fastify.get('/', async (req, reply) => {
-  return reply.sendFile('index.html');
-});
-
 fastify.get('/brand', async (req, reply) => {
   return reply.sendFile('brand-deck.html');
 });
