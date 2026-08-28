@@ -9,14 +9,9 @@ const { seedDatabase } = require('./db/seed');
 
 // Plugins
 fastify.register(require('@fastify/cors'), { origin: true });
-fastify.register(require('@fastify/static'), {
-  root: path.join(__dirname),
-  prefix: '/',
-  decorateReply: true
-});
 
 // -----------------------------------------------------------------------------
-// Rutas Modulares
+// 1. Registro de Rutas API (Primero para evitar conflicto con estáticos)
 // -----------------------------------------------------------------------------
 fastify.register(require('./api/events.routes'));
 fastify.register(require('./api/attendees.routes'));
@@ -24,9 +19,7 @@ fastify.register(require('./api/tickets.routes'));
 fastify.register(require('./api/stands.routes'));
 fastify.register(require('./api/qa.routes'));
 
-// -----------------------------------------------------------------------------
-// Healthcheck & Diagnóstico
-// -----------------------------------------------------------------------------
+// Healthcheck
 fastify.get('/api/health', async () => {
   const count = (db.inMemoryStore && db.inMemoryStore.asistentes && db.inMemoryStore.asistentes.length) || 0;
   return {
@@ -38,9 +31,7 @@ fastify.get('/api/health', async () => {
   };
 });
 
-// -----------------------------------------------------------------------------
-// Captura de Leads de la Web Principal (Diagnóstico & Calculadora)
-// -----------------------------------------------------------------------------
+// Captura de Leads de la Web Principal
 fastify.post('/api/leads', async (request, reply) => {
   const { nombre, empresa, cargo, email, telefono, tamano_empresa, desafio, horas_semanales_perdidas, ahorro_estimado_usd, mensaje } = request.body || {};
 
@@ -63,8 +54,20 @@ fastify.post('/api/leads', async (request, reply) => {
 });
 
 // -----------------------------------------------------------------------------
-// Rutas de Páginas
+// 2. Servir Archivos Estáticos (Con wildcard: false para no interceptar APIs)
 // -----------------------------------------------------------------------------
+fastify.register(require('@fastify/static'), {
+  root: path.join(__dirname),
+  prefix: '/',
+  decorateReply: true,
+  wildcard: false
+});
+
+// Rutas de Páginas
+fastify.get('/', async (req, reply) => {
+  return reply.sendFile('index.html');
+});
+
 fastify.get('/brand', async (req, reply) => {
   return reply.sendFile('brand-deck.html');
 });
@@ -86,7 +89,6 @@ fastify.listen({ port, host }, async (err, address) => {
   }
   console.log(`[ITERA Engine] Servidor ejecutándose en ${address}`);
   
-  // Ejecutar migraciones automáticas y seeder de inicio
   try {
     await db.autoMigrate();
     await seedDatabase();
