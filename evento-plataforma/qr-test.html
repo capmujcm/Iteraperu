@@ -1,0 +1,326 @@
+<title>qr engine test</title>
+<style>body{background:#111;color:#eee;font-family:monospace;padding:20px;}
+canvas{background:#fff;image-rendering:pixelated;}
+#log{white-space:pre-wrap;margin-top:12px;}</style>
+<div id="wrap"></div>
+<div id="log"></div>
+
+<script>
+/* ===================== Motor QR (from scratch, GF(256), versiones 1-6, EC level L/M) ===================== */
+const QR = (function(){
+  // GF(256) log/antilog tables, polinomio primitivo 0x11D (estándar QR)
+  const EXP = new Array(512), LOG = new Array(256);
+  (function(){
+    let x = 1;
+    for (let i = 0; i < 255; i++){
+      EXP[i] = x;
+      LOG[x] = i;
+      x <<= 1;
+      if (x & 0x100) x ^= 0x11D;
+    }
+    for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+  })();
+  function gmul(a, b){ if (a === 0 || b === 0) return 0; return EXP[LOG[a] + LOG[b]]; }
+
+  // Genera el polinomio generador RS de grado n: producto (x - a^0)(x - a^1)...(x - a^(n-1)).
+  // El array queda de MAYOR a menor grado (poly[0] = coeficiente líder, siempre 1 por ser mónico).
+  function rsGenerator(n){
+    let poly = [1];
+    for (let i = 0; i < n; i++){
+      const r = EXP[i];
+      const next = new Array(poly.length + 1).fill(0);
+      next[0] = poly[0];
+      for (let k = 1; k < poly.length; k++){
+        next[k] = poly[k] ^ gmul(r, poly[k - 1]);
+      }
+      next[poly.length] = gmul(r, poly[poly.length - 1]);
+      poly = next;
+    }
+    return poly;
+  }
+
+  function rsEncode(dataCodewords, ecCount){
+    const gen = rsGenerator(ecCount);
+    const res = dataCodewords.slice();
+    const buf = res.concat(new Array(ecCount).fill(0));
+    for (let i = 0; i < dataCodewords.length; i++){
+      const coef = buf[i];
+      if (coef === 0) continue;
+      for (let j = 0; j < gen.length; j++){
+        buf[i + j] ^= gmul(gen[j], coef);
+      }
+    }
+    return buf.slice(dataCodewords.length);
+  }
+
+  // Tabla: versiones 1-5, nivel L, un solo bloque (sin interleaving).
+  // Nuestros payloads son códigos cortos (código de asistente/proveedor), nunca
+  // se acercan al límite de V5 — se evita a propósito la complejidad de bloques múltiples.
+  const VERS = {
+    1: {total:26, ec:7,  size:21},
+    2: {total:44, ec:10, size:25},
+    3: {total:70, ec:15, size:29},
+    4: {total:100,ec:20, size:33},
+    5: {total:134,ec:26, size:37}
+  };
+  // posiciones de patrones de alineación (V1 no tiene)
+  const ALIGN = {2:[6,18],3:[6,22],4:[6,26],5:[6,30]};
+  const MAX_BYTES = VERS[5].total - VERS[5].ec - 2;
+
+  function bestVersion(byteLen){
+    if (byteLen > MAX_BYTES){
+      throw new Error('Payload demasiado largo para este generador QR (máx ' + MAX_BYTES + ' bytes, versiones 1–5).');
+    }
+    for (const v of [1,2,3,4,5]){
+      const info = VERS[v];
+      // cabecera modo(4b)+longitud(8b)=12 bits = 1.5 bytes; margen simple:
+      if (byteLen <= (info.total - info.ec) - 2) return v;
+    }
+    return 5;
+  }
+
+  function bitsFromByteMode(bytes, dataCapacityBytes){
+    // modo byte = 0100, longitud en 8 bits (versiones 1-9), luego los bytes, terminador 0000, relleno a byte
+    let bits = '0100' + bytes.length.toString(2).padStart(8,'0');
+    for (const b of bytes) bits += b.toString(2).padStart(8,'0');
+    const totalBits = dataCapacityBytes * 8;
+    bits += '0'.repeat(Math.min(4, totalBits - bits.length));
+    while (bits.length % 8 !== 0) bits += '0';
+    const pad = ['11101100','00010001'];
+    let pi = 0;
+    while (bits.length < totalBits){ bits += pad[pi % 2]; pi++; }
+    const codewords = [];
+    for (let i = 0; i < bits.length; i += 8) codewords.push(parseInt(bits.slice(i, i+8), 2));
+    return codewords;
+  }
+
+  function formatBits(ecLevelBits, maskBits){
+    // BCH(15,5) sobre indicador de formato, generador 0x537, máscara final 0x5412
+    let data = (ecLevelBits << 3) | maskBits; // 5 bits
+    let g = data << 10;
+    for (let i = 14; i >= 10; i--){
+      if (g & (1 << i)) g ^= (0x537 << (i - 10));
+    }
+    const full = ((data << 10) | g) ^ 0x5412;
+    return full.toString(2).padStart(15,'0').split('').map(c => c === '1');
+  }
+
+  function buildMatrix(version, dataCodewords, ecLevelBits){
+    const size = VERS[version].size;
+    const m = Array.from({length:size}, () => new Array(size).fill(null));
+    const reserved = Array.from({length:size}, () => new Array(size).fill(false));
+
+    function setReserved(r,c){ if (r>=0&&r<size&&c>=0&&c<size) reserved[r][c] = true; }
+    function place(r,c,v){ if (r>=0&&r<size&&c>=0&&c<size){ m[r][c] = v; reserved[r][c] = true; } }
+
+    function finder(r0,c0){
+      for (let r=-1;r<=7;r++) for (let c=-1;c<=7;c++){
+        const rr=r0+r, cc=c0+c;
+        if (rr<0||cc<0||rr>=size||cc>=size) continue;
+        let on;
+        if (r>=0 && r<=6 && c>=0 && c<=6){
+          on = (r===0||r===6||c===0||c===6||(r>=2&&r<=4&&c>=2&&c<=4));
+        } else on = false;
+        place(rr,cc,on);
+      }
+    }
+    finder(0,0); finder(0,size-7); finder(size-7,0);
+
+    // patrones de alineación: se descarta cualquier combinación cuyo bloque 5x5
+    // se solape con el área de un buscador (con separador), no solo las 3 esquinas literales.
+    const al = ALIGN[version];
+    if (al){
+      const coords = [];
+      for (const a of al) for (const b of al) coords.push([a,b]);
+      const finderZones = [
+        [-1,7,-1,7],                     // superior-izquierda
+        [-1,7, size-8,size],             // superior-derecha
+        [size-8,size, -1,7]              // inferior-izquierda
+      ];
+      function overlapsFinder(r0,c0){
+        const r1=r0-2, r2=r0+2, c1=c0-2, c2=c0+2;
+        return finderZones.some(([fr1,fr2,fc1,fc2]) => r1<=fr2 && r2>=fr1 && c1<=fc2 && c2>=fc1);
+      }
+      for (const [r0,c0] of coords){
+        if (overlapsFinder(r0,c0)) continue;
+        for (let r=-2;r<=2;r++) for (let c=-2;c<=2;c++){
+          const on = (Math.max(Math.abs(r),Math.abs(c)) !== 1);
+          place(r0+r, c0+c, on);
+        }
+      }
+    }
+
+    // líneas de temporización
+    for (let i=8;i<size-8;i++){
+      if (m[6][i] === null) place(6,i, i%2===0);
+      if (m[i][6] === null) place(i,6, i%2===0);
+    }
+    // módulo oscuro
+    place(size-8, 8, true);
+
+    // reservar áreas de info de formato (se llenan después)
+    for (let i=0;i<9;i++){ setReserved(8,i); setReserved(i,8); }
+    for (let i=0;i<8;i++){ setReserved(8,size-1-i); setReserved(size-1-i,8); }
+
+    // ----- colocar datos en zigzag, saltando columna del timing y áreas reservadas -----
+    // convertir codewords a bits (con EC ya anexado)
+    const gen = rsGenerator(0); // no-op, EC ya calculado fuera
+    const bits = [];
+    for (const cw of dataCodewords) for (let b=7;b>=0;b--) bits.push((cw>>b)&1);
+
+    let bi = 0;
+    let dir = -1; // hacia arriba
+    let col = size - 1;
+    const order = []; // registra el orden exacto de colocación, para poder decodificar igual
+    while (col > 0){
+      if (col === 6) col--; // saltar columna de timing
+      for (let i=0;i<size;i++){
+        const row = dir === -1 ? size-1-i : i;
+        for (const c of [col, col-1]){
+          if (reserved[row][c]) continue;
+          order.push([row, c]);
+          const bit = bi < bits.length ? bits[bi] : 0;
+          bi++;
+          m[row][c] = !!bit; // se aplicará máscara después
+        }
+      }
+      dir = -dir;
+      col -= 2;
+    }
+
+    // aplicar máscara 0: (row+col)%2===0  -> invierte módulos de datos (no reservados)
+    const maskFn = (r,c) => ((r + c) % 2 === 0);
+    for (let r=0;r<size;r++) for (let c=0;c<size;c++){
+      if (!reserved[r][c]){
+        if (maskFn(r,c)) m[r][c] = !m[r][c];
+      }
+    }
+
+    // escribir info de formato (EC level bits + máscara=0)
+    const fb = formatBits(ecLevelBits, 0);
+    // fb tiene 15 bits: colocación estándar
+    const fmtCoordsA = [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
+    for (let i=0;i<15;i++){ const [r,c]=fmtCoordsA[i]; m[r][c] = fb[i]; }
+    const fmtCoordsB = [[size-1,8],[size-2,8],[size-3,8],[size-4,8],[size-5,8],[size-6,8],[size-7,8],
+                        [8,size-8],[8,size-7],[8,size-6],[8,size-5],[8,size-4],[8,size-3],[8,size-2],[8,size-1]];
+    for (let i=0;i<15;i++){ const [r,c]=fmtCoordsB[i]; m[r][c] = fb[i]; }
+    place(size-8,8,true);
+
+    return { matrix: m, order };
+  }
+
+  function encode(text){
+    const bytes = Array.from(new TextEncoder().encode(text));
+    const version = bestVersion(bytes.length);
+    const info = VERS[version];
+    const dataCap = info.total - info.ec;
+    const data = bitsFromByteMode(bytes, dataCap);
+    const ec = rsEncode(data, info.ec);
+    const all = data.concat(ec);
+    const { matrix, order } = buildMatrix(version, all, 1);
+    return { matrix, order, version, size: info.size, ec: info.ec };
+  }
+
+  // ---- decodificador propio: relee el bitmap ya renderizado, sin depender de BarcodeDetector ----
+  function decode(matrix, size, order, ecCount){
+    // 1) leer info de formato (primera copia) y deshacer su máscara fija
+    const fmtCoordsA = [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
+    let fmtBits = 0;
+    for (const [r,c] of fmtCoordsA) fmtBits = (fmtBits << 1) | (matrix[r][c] ? 1 : 0);
+    const unmasked = fmtBits ^ 0x5412;
+    const dataField = (unmasked >> 10) & 0x1F;
+    const ecLevelBits = (dataField >> 3) & 0x3;
+    const maskId = dataField & 0x7;
+
+    // 2) deshacer la máscara de datos (solo máscara 0 en este generador)
+    const maskFn = (r,c) => ((r + c) % 2 === 0);
+    const bits = [];
+    for (const [r,c] of order){
+      let v = matrix[r][c];
+      if (maskId === 0 && maskFn(r,c)) v = !v;
+      bits.push(v ? 1 : 0);
+    }
+    const codewords = [];
+    for (let i=0;i+8<=bits.length;i+=8){
+      let b = 0; for (let k=0;k<8;k++) b = (b<<1) | bits[i+k];
+      codewords.push(b);
+    }
+
+    // 3) verificación Reed-Solomon: evaluar el codeword completo en las raíces del generador
+    const rsOk = syndromesZero(codewords, ecCount);
+
+    // 4) interpretar cabecera modo-byte y extraer el texto
+    let bi2 = 0;
+    function readBits(n){ let v=0; for(let i=0;i<n;i++){ v=(v<<1)|bits[bi2]; bi2++; } return v; }
+    const mode = readBits(4);
+    const len = readBits(8);
+    const outBytes = [];
+    for (let i=0;i<len;i++) outBytes.push(readBits(8));
+    const text = new TextDecoder().decode(new Uint8Array(outBytes));
+
+    return { text, mode, ecLevelBits, maskId, rsOk };
+  }
+
+  function syndromesZero(codewords, ecCount){
+    for (let i=0;i<ecCount;i++){
+      let s = 0;
+      for (const cw of codewords) s = gmul(s, EXP[i]) ^ cw;
+      if (s !== 0) return false;
+    }
+    return true;
+  }
+
+  return { encode, decode };
+})();
+
+function drawQR(matrix, size, canvas, scale){
+  canvas.width = (size + 8) * scale;
+  canvas.height = (size + 8) * scale;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#000';
+  for (let r=0;r<size;r++) for (let c=0;c<size;c++){
+    if (matrix[r][c]) ctx.fillRect((c+4)*scale, (r+4)*scale, scale, scale);
+  }
+}
+
+async function runCase(payload){
+  const enc = QR.encode(payload);
+  const canvas = document.createElement('canvas');
+  canvas.title = payload;
+  document.getElementById('wrap').appendChild(canvas);
+  drawQR(enc.matrix, enc.size, canvas, 6);
+
+  let out = 'payload:  ' + payload + '\nversión:  ' + enc.version + '  tamaño: ' + enc.size + 'x' + enc.size + '\n';
+
+  const dec = QR.decode(enc.matrix, enc.size, enc.order, enc.ec);
+  out += 'RS síndromes: ' + (dec.rsOk ? 'OK (cero errores)' : 'FALLO — hay discrepancia de bits') + '\n';
+  out += 'mask leído: ' + dec.maskId + '  ec leído: ' + dec.ecLevelBits + '\n';
+  out += 'texto decodificado: "' + dec.text + '"\n';
+  out += (dec.text === payload ? '>>> COINCIDE EXACTAMENTE <<<' : '>>> NO COINCIDE — BUG <<<');
+
+  if ('BarcodeDetector' in window){
+    try {
+      const detector = new BarcodeDetector({ formats: ['qr_code'] });
+      const bitmap = await createImageBitmap(canvas);
+      const results = await detector.detect(bitmap);
+      out += '\nBarcodeDetector nativo: ' + (results.length ? ('"' + results[0].rawValue + '"') : 'no detectó nada');
+    } catch(e){ out += '\nBarcodeDetector error: ' + e.message; }
+  } else {
+    out += '\n(BarcodeDetector no disponible en este navegador)';
+  }
+  return out;
+}
+
+async function test(){
+  const cases = [
+    'EVT-A1B2C3D4', 'PROV-0007', 'https://evento.example/c/9f8e7d6c5b4a', 'DNI:30123456|EVT-99',
+    'https://evento.example/checkin?code=9f8e7d6c5b4a3210fedc&src=platform&v=1&extra=abcdefghij'
+  ];
+  const results = [];
+  for (const p of cases) results.push(await runCase(p));
+  document.getElementById('log').textContent = results.join('\n\n' + '-'.repeat(40) + '\n\n');
+}
+test();
+</script>

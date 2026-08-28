@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ITERA — Brand System & Design Guidelines</title>
+  
+  <!-- Typography: Satoshi + JetBrains Mono -->
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+  <style>
+    :root {
+      --blue: #315CFF;
+      --blue-electric: #0055FF;
+      --blue-soft: #7C97FF;
+      --blue-glow: rgba(49, 92, 255, 0.45);
+
+      --void: #05070B;
+      --surface-dark: #0B0D10;
+      --surface-card: #10141D;
+      --surface-card-hover: #151B27;
+
+      --light: #F2F4F7;
+      --text-white: #FFFFFF;
+      --text-main: #EDF0F6;
+      --text-muted: rgba(237, 240, 246, 0.65);
+      --text-faint: rgba(237, 240, 246, 0.38);
+      --gray-token: #69717E;
+
+      --edge: rgba(140, 162, 225, 0.12);
+      --edge-strong: rgba(140, 162, 225, 0.28);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--void);
+      color: var(--text-main);
+      font-family: 'Satoshi', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4 { color: var(--text-white); font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; }
+    p { color: var(--text-muted); }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Wordmark oficial con "E" de 3 barras (barra central azul) */
+    .wm {
+      display: inline-flex;
+      align-items: center;
+      font-family: 'Satoshi', system-ui, sans-serif;
+      font-weight: 900;
+      color: var(--text-white);
+    }
+    .bar-e {
+      display: inline-block;
+      width: 0.6em;
+      height: 0.74em;
+      vertical-align: -0.04em;
+      background:
+        linear-gradient(currentColor 0 0) top    / 100% 21% no-repeat,
+        linear-gradient(var(--blue)   0 0) center / 100% 21% no-repeat,
+        linear-gradient(currentColor 0 0) bottom / 100% 21% no-repeat;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--blue-soft);
+      margin-bottom: 1rem;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 16px;
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, var(--blue-soft));
+    }
+
+    .wrap { max-width: 1160px; margin: 0 auto; padding: 3rem 1.75rem 6rem; }
+    .deck-section {
+      padding: 4.5rem 0;
+      position: relative;
+    }
+    .deck-section:not(:first-child)::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--edge-strong) 15%, var(--edge-strong) 85%, transparent);
+    }
+
+    /* Ambient layers */
+    .ambient-glow {
+      position: absolute;
+      pointer-events: none;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.35;
+      z-index: 0;
+    }
+
+    /* Cover section */
+    .cover {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 5rem 1rem 4rem;
+    }
+    .brand-mark-display {
+      width: 140px;
+      height: 140px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 35px rgba(49, 92, 255, 0.5));
+      margin-bottom: 2rem;
+    }
+    .cover-title {
+      font-size: clamp(2.8rem, 6vw, 4.2rem);
+      font-weight: 900;
+      letter-spacing: 0.32em;
+      padding-left: 0.32em;
+      margin-bottom: 1rem;
+      background: linear-gradient(120deg, #FFFFFF 20%, #B8CCFF 60%, var(--blue-soft) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .cover-tagline {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--blue-soft);
+      margin-bottom: 1.5rem;
+    }
+    .cover-desc {
+      max-width: 600px;
+      font-size: 1.05rem;
+      line-height: 1.65;
+    }
+
+    /* Layout split */
+    .deck-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 3.5rem;
+      align-items: start;
+    }
+    @media (max-width: 900px) { .deck-grid-2 { grid-template-columns: 1fr; gap: 2rem; } }
+
+    /* Logo lockups showcase */
+    .logo-showcase-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 600px) { .logo-showcase-grid { grid-template-columns: 1fr; } }
+
+    .logo-card {
+      border-radius: var(--radius-md);
+      padding: 2.5rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border: 1px solid var(--edge);
+      min-height: 220px;
+    }
+    .logo-card.dark { background: var(--surface-dark); }
+    .logo-card.light { background: #FFFFFF; border-color: #E2E8F0; }
+    .logo-card.monochrome { background: #000000; }
+
+    .logo-card-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      margin-top: 1.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .dark .logo-card-label { color: var(--text-faint); }
+    .light .logo-card-label { color: #64748B; }
+
+    /* Color Swatches */
+    .swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+    }
+    @media (max-width: 768px) { .swatch-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .swatch-card {
+      background: var(--surface-card);
+      border: 1px solid var(--edge);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .swatch-color { height: 95px; width: 100%; }
+    .swatch-info { padding: 1rem; }
+    .swatch-name { font-size: 0.92rem; font-weight: 700; color: var(--text-white); margin-bottom: 0.2rem; }
+    .swatch-hex { font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; color: var(--blue-soft); }
+    .swatch-use { font-size: 0.75rem; color: var(--text-faint); margin-top: 0.4rem; }
+
+    /* Philosophy / Evolution Cycle */
+    .evolution-chain {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-top: 1.5rem;
+      background: var(--surface-card);
+      padding: 1.5rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--edge);
+    }
+    .chain-node {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-white);
+      background: rgba(49, 92, 255, 0.1);
+      border: 1px solid rgba(49, 92, 255, 0.25);
+      padding: 0.4rem 0.8rem;
+      border-radius: var(--radius-sm);
+    }
+    .chain-node.highlight {
+      background: var(--blue);
+      color: #FFF;
+      box-shadow: 0 0 14px rgba(49, 92, 255, 0.5);
+    }
+    .chain-sep { color: var(--blue-soft); font-weight: 700; }
+
+    /* Rules Table */
+    .rules-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.75rem;
+      margin-top: 1.5rem;
+    }
+    @media (max-width: 700px) { .rules-grid { grid-template-columns: 1fr; } }
+    .rule-box {
+      background: var(--surface-card);
+      border-radius: var(--radius-md);
+      padding: 1.75rem;
+      border: 1px solid var(--edge);
+    }
+    .rule-box.do { border-left: 3px solid #4ADE80; }
+    .rule-box.dont { border-left: 3px solid #FF708A; }
+    .rule-box h4 { font-size: 1.05rem; margin-bottom: 0.75rem; }
+    .rule-box ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .rule-box li { font-size: 0.86rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+    <!-- Cover -->
+    <section class="cover">
+      <div class="ambient-glow" style="width: 600px; height: 400px; left: 50%; top: -100px; transform: translateX(-50%); background: radial-gradient(circle, rgba(49, 92, 255, 0.4) 0%, transparent 70%);"></div>
+      
+      <img src="assets/itera-isotype.png" alt="ITERA Isotipo Oficial" class="brand-mark-display">
+      <div class="cover-tagline">BRAND SYSTEM & DESIGN GUIDELINES</div>
+      <h1 class="cover-title">I&nbsp;T&nbsp;<span class="bar-e"></span>&nbsp;R&nbsp;A</h1>
+      <p class="cover-desc">
+        "Transformamos la forma en que trabajan las empresas."<br>
+        Documento maestro de identidad visual, arquitectura de marca y directrices de diseño.
+      </p>
+    </section>
+
+    <!-- 01. Concepto y Filosofía -->
+    <section class="deck-section">
+      <div class="deck-grid-2">
+        <div>
+          <span class="eyebrow">01 / IDENTIDAD & FILOSOFÍA</span>
+          <h2>El Ciclo de la Iteración Continua</h2>
+        </div>
+        <div>
+          <p style="margin-bottom: 1.25rem;">
+            Iterar significa mejorar continuamente. <strong>ITERA</strong> no es una fábrica de software ni una agencia tradicional; es un socio de transformación empresarial para organizaciones en crecimiento.
+          </p>
+          <p style="margin-bottom: 1.5rem;">
+            <em>"Nunca automatizamos un proceso que primero no hemos cuestionado."</em> La tecnología no es el punto de partida; el punto de partida es entender el negocio y eliminar el desperdicio operativo.
+          </p>
+
+          <div class="evolution-chain">
+            <span class="chain-node">ENTENDER</span>
+            <span class="chain-sep">→</span>
+            <span class="chain-node">CUESTIONAR</span>
+            <span class="chain-sep">→</span>
+            <span class="chain-node">ELIMINAR</span>
+            <span class="chain-sep">→</span>
+            <span class="chain-node">SIMPLIFICAR</span>
+            <span class="chain-sep">→</span>
+            <span class="chain-node">ACELERAR</span>
+            <span class="chain-sep">→</span>
+            <span class="chain-node highlight">EVOLUCIONAR</span>
+            <span class="chain-sep">→</span>
+            <span class="chain-node">MEDIR</span>
+            <span class="chain-sep">→</span>
+            <span class="chain-node">APRENDER</span>
+            <span class="chain-sep">↺</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02. Logo & Isotipo Oficial -->
+    <section class="deck-section">
+      <div class="deck-grid-2">
+        <div>
+          <span class="eyebrow">02 / SÍMBOLO & LOGOTIPO</span>
+          <h2>El Isotipo Oficial de Transformación</h2>
+          <p style="margin-top: 1rem;">
+            El isotipo está construido mediante dos bucles curvos geométricos continuos que representan el ciclo ininterrumpido de evolución y orden operativo.
+          </p>
+          <p style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--blue-soft);">
+            Regla de oro: No alterar la geometría, no deformar proporciones, no agregar elementos externos.
+          </p>
+        </div>
+
+        <div class="logo-showcase-grid">
+          <!-- Fondo Oscuro -->
+          <div class="logo-card dark">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+              <img src="assets/itera-isotype.png" alt="ITERA Isotipo" style="width: 42px; height: 42px; filter: drop-shadow(0 0 16px rgba(49,92,255,0.5));">
+              <span class="wm" style="font-size: 1.85rem; letter-spacing: 0.24em;">I&nbsp;T&nbsp;<span class="bar-e"></span>&nbsp;R&nbsp;A</span>
+            </div>
+            <span class="logo-card-label">Versión Oficial / Fondo Oscuro</span>
+          </div>
+
+          <!-- Isotipo Standalone -->
+          <div class="logo-card dark">
+            <img src="assets/itera-isotype.png" alt="ITERA Isotipo" style="width: 64px; height: 64px; filter: drop-shadow(0 0 20px rgba(49,92,255,0.6));">
+            <span class="logo-card-label">Isotipo Independiente</span>
+          </div>
+
+          <!-- Fondo Claro -->
+          <div class="logo-card light">
+            <img src="assets/itera-logo-full.png" alt="ITERA Logo Fondo Claro" style="max-width: 220px; filter: invert(0);">
+            <span class="logo-card-label">Versión Fondo Claro</span>
+          </div>
+
+          <!-- Monocromo -->
+          <div class="logo-card monochrome">
+            <img src="assets/itera-isotype.png" alt="ITERA Isotipo Monocromo" style="width: 64px; height: 64px; filter: grayscale(1) brightness(1.5);">
+            <span class="logo-card-label">Modo Monocromático</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03. Paleta Cromática -->
+    <section class="deck-section">
+      <div class="deck-grid-2">
+        <div>
+          <span class="eyebrow">03 / COLOR SYSTEM</span>
+          <h2>Electric Blue & Void Surfaces</h2>
+          <p style="margin-top: 1rem;">
+            El azul eléctrico representa la chispa de transformación y estado activo. Se complementa con una base de negros profundos y blancos quirúrgicos.
+          </p>
+        </div>
+
+        <div class="swatch-grid">
+          <div class="swatch-card">
+            <div class="swatch-color" style="background: #315CFF;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Electric Blue</div>
+              <div class="swatch-hex">#315CFF</div>
+              <div class="swatch-use">Acentos, acciones, transformación</div>
+            </div>
+          </div>
+
+          <div class="swatch-card">
+            <div class="swatch-color" style="background: #05070B;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Void Background</div>
+              <div class="swatch-hex">#05070B</div>
+              <div class="swatch-use">Fondo maestro y contraste</div>
+            </div>
+          </div>
+
+          <div class="swatch-card">
+            <div class="swatch-color" style="background: #0B0D10;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Surface Dark</div>
+              <div class="swatch-hex">#0B0D10</div>
+              <div class="swatch-use">Contenedores y secciones</div>
+            </div>
+          </div>
+
+          <div class="swatch-card">
+            <div class="swatch-color" style="background: #F2F4F7;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name" style="color:#FFF;">Light Accent</div>
+              <div class="swatch-hex">#F2F4F7</div>
+              <div class="swatch-use">Tarjetas claras y contraste</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04. Tipografía -->
+    <section class="deck-section">
+      <div class="deck-grid-2">
+        <div>
+          <span class="eyebrow">04 / TIPOGRAFÍA</span>
+          <h2>Satoshi + JetBrains Mono</h2>
+        </div>
+        <div>
+          <div style="background: var(--surface-card); padding: 2rem; border-radius: var(--radius-md); border: 1px solid var(--edge);">
+            <div style="font-size: 2.2rem; font-weight: 900; margin-bottom: 0.5rem; letter-spacing: -0.03em;">Satoshi Display & Text</div>
+            <p style="font-size: 0.95rem; margin-bottom: 1.5rem;">
+              Geométrica, moderna y de legibilidad superior en entornos digitales de alta densidad ejecutiva.
+            </p>
+            <div class="mono" style="font-size: 0.85rem; color: var(--blue-soft); padding: 1rem; background: rgba(5,7,11,0.6); border-radius: var(--radius-sm); border: 1px solid var(--edge);">
+              JetBrains Mono → Utilizada para datos numéricos, métricas de impacto, etiquetas de proceso y tokens.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05. Reglas de Marca -->
+    <section class="deck-section">
+      <div class="deck-grid-2">
+        <div>
+          <span class="eyebrow">05 / REGLAS DE APLICACIÓN</span>
+          <h2>Do's & Don'ts</h2>
+        </div>
+        <div class="rules-grid">
+          <div class="rule-box do">
+            <h4 style="color: #4ADE80;">✓ Prácticas Obligatorias</h4>
+            <ul>
+              <li>• Posicionar a ITERA como socio de transformación antes que proveedor de código.</li>
+              <li>• Usar el isotipo en proporción exacta sin distorsiones angulares.</li>
+              <li>• Destacar siempre el valor cuantificable antes / después.</li>
+              <li>• Mantener abundante espacio negativo y composiciones limpias.</li>
+            </ul>
+          </div>
+          <div class="rule-box dont">
+            <h4 style="color: #FF708A;">✗ Prohibiciones Estrictas</h4>
+            <ul>
+              <li>• No utilizar metáforas de engranajes, circuitos o neón cyberpunk.</li>
+              <li>• No usar clichés de "soluciones integrales disruptivas 360".</li>
+              <li>• No inventar resultados de clientes sin indicar "ejemplo ilustrativo".</li>
+              <li>• No sobrecargar la interfaz con animaciones agresivas o partículas.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+</body>
+</html>

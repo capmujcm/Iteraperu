@@ -1,0 +1,2285 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>itera — Plataforma de Eventos · Prototipo</title>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    /* ---- itera brand (plataforma) ---- */
+    --blue:#315CFF; --blue-electric:#0055FF; --blue-soft:#7C97FF;
+    --void:#05070B; --surface-dark:#0B0D10; --surface-card:#10141D; --surface-card-2:#151B27;
+    --edge:rgba(140,162,225,.12); --edge-strong:rgba(140,162,225,.28);
+    --text-white:#FFFFFF; --text-main:#EDF0F6; --text-muted:rgba(237,240,246,.65); --text-faint:rgba(237,240,246,.38);
+
+    /* ---- producto (claro, legible a pleno sol) ---- */
+    --bg:#F1F4F9; --surface:#FFFFFF; --surface-2:#F7F9FC; --line:#E3E8F0;
+    --ink:#0B0D10; --ink-soft:#59606E; --ink-mut:#8A91A0;
+    --accent:#315CFF; --accent-soft:#E7ECFF;
+
+    /* ---- color del evento cliente (white-label) ---- */
+    --event:#FF5A1F; --event-soft:#FFEADF; --event-deep:#B5179E;
+
+    --good:#0F9B6C; --good-soft:#E1F6EE;
+    --warn:#B87814; --warn-soft:#FBF1DD;
+    --bad:#D14545; --bad-soft:#FBE9E9;
+    --gold:#E0A100; --gold-soft:#FFF4D6;
+    --r:14px;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--void);color:var(--text-main);
+    font-family:'Satoshi',system-ui,-apple-system,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.025em;line-height:1.15;color:var(--ink);}
+  p{margin:0;}
+  button,input,select,textarea{font-family:inherit;}
+  .mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+  .hide{display:none !important;}
+  .muted{color:var(--ink-soft);}
+  .tiny{font-size:.76rem;line-height:1.5;}
+  .center{text-align:center;}
+
+  /* ============ wordmark itera (barra-E oficial) ============ */
+  .wm{display:inline-flex;align-items:center;font-weight:900;color:var(--text-white);letter-spacing:.24em;}
+  .bar-e{display:inline-block;width:.6em;height:.74em;vertical-align:-.04em;
+    background:linear-gradient(currentColor 0 0) top/100% 21% no-repeat,
+               linear-gradient(var(--blue) 0 0) center/100% 21% no-repeat,
+               linear-gradient(currentColor 0 0) bottom/100% 21% no-repeat;}
+  .iso{width:26px;height:26px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(49,92,255,.55));}
+
+  /* ============ chrome de plataforma (itera) ============ */
+  .platbar{position:sticky;top:0;z-index:60;background:rgba(5,7,11,.92);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--edge);}
+  .platbar-in{display:flex;align-items:center;gap:.7rem;padding:.6rem 1rem;max-width:1400px;margin:0 auto;flex-wrap:wrap;}
+  .plat-brand{display:flex;align-items:center;gap:.6rem;}
+  .plat-brand .wm{font-size:1rem;}
+  .plat-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--blue-soft);border:1px solid var(--edge-strong);padding:.2rem .45rem;border-radius:5px;}
+  .plat-sep{width:1px;height:22px;background:var(--edge-strong);}
+  .roles{display:flex;gap:.2rem;background:var(--surface-card);border:1px solid var(--edge);border-radius:11px;padding:.22rem;flex-wrap:wrap;}
+  .roles button{border:0;background:none;color:var(--text-faint);font-weight:700;font-size:.78rem;
+    padding:.42rem .75rem;border-radius:8px;cursor:pointer;transition:color .15s,background .15s;}
+  .roles button:hover{color:var(--text-main);}
+  .roles button.active{background:var(--blue);color:#fff;box-shadow:0 0 14px rgba(49,92,255,.45);}
+  .grow{flex:1;}
+  .pbtn{border:1px solid var(--edge-strong);background:var(--surface-card);color:var(--text-main);
+    font-weight:600;font-size:.76rem;padding:.45rem .7rem;border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:.35rem;}
+  .pbtn:hover{border-color:var(--blue-soft);color:#fff;}
+  .pbtn.hot{background:var(--blue);border-color:var(--blue);color:#fff;}
+  .dayswitch{display:inline-flex;border:1px solid var(--edge-strong);border-radius:9px;overflow:hidden;}
+  .dayswitch button{border:0;background:var(--surface-card);color:var(--text-faint);font-weight:700;font-size:.74rem;padding:.45rem .65rem;cursor:pointer;}
+  .dayswitch button.active{background:var(--blue);color:#fff;}
+
+  /* ============ marco de navegador (es web, no app) ============ */
+  .stage{padding:1.5rem 1rem 3rem;display:flex;justify-content:center;}
+  .browser{width:100%;max-width:var(--vw,440px);background:var(--surface-card);border:1px solid var(--edge-strong);
+    border-radius:16px;overflow:hidden;box-shadow:0 40px 90px -30px rgba(0,0,0,.8);transition:max-width .3s ease;}
+  .browser.wide{--vw:1320px;}
+  .bchrome{display:flex;align-items:center;gap:.6rem;padding:.55rem .8rem;background:var(--surface-card-2);border-bottom:1px solid var(--edge);}
+  .bdots{display:flex;gap:.3rem;}
+  .bdots i{width:9px;height:9px;border-radius:50%;background:#39404F;display:block;}
+  .burl{flex:1;background:var(--void);border:1px solid var(--edge);border-radius:7px;
+    font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-faint);padding:.3rem .6rem;
+    display:flex;align-items:center;gap:.4rem;overflow:hidden;white-space:nowrap;}
+  .burl b{color:var(--blue-soft);font-weight:500;}
+  .burl .lock{color:var(--good);}
+  .bviewport{background:var(--bg);color:var(--ink);height:760px;overflow-y:auto;overflow-x:hidden;position:relative;
+    display:flex;flex-direction:column;}
+  .browser.wide .bviewport{height:860px;}
+  @media (max-width:560px){ .stage{padding:0;} .browser{border-radius:0;border-left:0;border-right:0;}
+    .bviewport{height:calc(100vh - 132px);} }
+
+  /* ============ nav inferior del producto (web mobile) ============ */
+  .vbody{flex:1;overflow-y:auto;}
+  .vnav{flex:none;display:flex;border-top:1px solid var(--line);background:var(--surface);}
+  .vnav button{flex:1;border:0;background:none;padding:.5rem .15rem .65rem;cursor:pointer;color:var(--ink-mut);
+    display:flex;flex-direction:column;align-items:center;gap:.12rem;font-size:.6rem;font-weight:700;}
+  .vnav button .i{font-size:1.1rem;line-height:1;}
+  .vnav button.active{color:var(--accent);}
+
+  .screen{display:none;padding:1.1rem 1.1rem 1.6rem;}
+  .screen.active{display:block;animation:fade .22s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+  .screen.flush{padding:0;}
+  .schead{display:flex;align-items:center;gap:.55rem;margin-bottom:.9rem;}
+  .schead .back{border:1px solid var(--line);background:#fff;width:32px;height:32px;border-radius:9px;cursor:pointer;font-size:1rem;flex:none;color:var(--ink);}
+  .schead h2{font-size:1.15rem;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--event);font-weight:600;}
+  .eyebrow.blue{color:var(--accent);}
+
+  /* ============ componentes producto ============ */
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1rem;}
+  .card+.card{margin-top:.7rem;}
+  .soft{background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:.8rem;}
+  .stack{display:flex;flex-direction:column;gap:.7rem;}
+  .row{display:flex;gap:.5rem;}
+  .row.wrap{flex-wrap:wrap;}
+  .between{display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+  .kv{display:flex;justify-content:space-between;gap:.5rem;padding:.32rem 0;border-bottom:1px solid var(--line);font-size:.8rem;}
+  .kv:last-child{border-bottom:0;}
+  .kv span:first-child{color:var(--ink-soft);}
+  .kv span:last-child{font-weight:600;text-align:right;}
+
+  label{display:block;font-size:.74rem;font-weight:700;color:var(--ink-soft);margin-bottom:.28rem;}
+  input[type=text],input[type=email],input[type=tel],input[type=number],input[type=search],select,textarea{
+    width:100%;padding:.62rem .75rem;border:1px solid var(--line);border-radius:9px;font-size:.9rem;color:var(--ink);background:#fff;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+  .field{margin-bottom:.75rem;}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;border:1px solid transparent;
+    padding:.7rem 1.05rem;border-radius:11px;font-weight:700;font-size:.88rem;cursor:pointer;color:var(--ink);
+    transition:transform .12s,box-shadow .15s,background .15s;}
+  .btn:active{transform:scale(.975);}
+  .btn-accent{background:var(--accent);color:#fff;box-shadow:0 10px 22px -12px rgba(49,92,255,.75);}
+  .btn-event{background:var(--event);color:#fff;box-shadow:0 10px 22px -12px rgba(255,90,31,.8);}
+  .btn-dark{background:var(--ink);color:#fff;}
+  .btn-line{background:#fff;border-color:var(--line);}
+  .btn-line:hover{border-color:var(--ink);}
+  .btn-good{background:var(--good);color:#fff;}
+  .btn-wa{background:#25D366;color:#0a3d22;}
+  .btn-ghost{background:none;color:var(--accent);}
+  .btn-block{width:100%;}
+  .btn-sm{padding:.45rem .75rem;font-size:.78rem;border-radius:8px;}
+  .btn[disabled]{opacity:.42;cursor:not-allowed;box-shadow:none;}
+
+  .pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;font-weight:700;padding:.24rem .55rem;border-radius:999px;white-space:nowrap;}
+  .p-good{background:var(--good-soft);color:var(--good);}
+  .p-warn{background:var(--warn-soft);color:var(--warn);}
+  .p-bad{background:var(--bad-soft);color:var(--bad);}
+  .p-blue{background:var(--accent-soft);color:var(--accent);}
+  .p-neutral{background:#EBEEF4;color:var(--ink-soft);}
+  .p-event{background:var(--event-soft);color:#C0431A;}
+  .p-gold{background:var(--gold-soft);color:#8A6400;}
+
+  .note{border-radius:11px;padding:.75rem .9rem;font-size:.78rem;line-height:1.55;}
+  .n-info{background:var(--accent-soft);color:#1A3399;}
+  .n-warn{background:var(--warn-soft);color:#7A4E12;}
+  .n-good{background:var(--good-soft);color:#0A5E42;}
+  .flash{border-radius:11px;padding:.9rem;text-align:center;font-weight:700;font-size:.9rem;}
+  .flash.good{background:var(--good-soft);color:var(--good);}
+  .flash.bad{background:var(--bad-soft);color:var(--bad);}
+  .flash.warn{background:var(--warn-soft);color:var(--warn);}
+
+  .list{display:flex;flex-direction:column;gap:.45rem;}
+  .item{border:1px solid var(--line);border-radius:11px;padding:.65rem .75rem;display:flex;align-items:center;gap:.6rem;background:#fff;}
+  .item .logo{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:1.2rem;flex:none;}
+  .item .gr{flex:1;min-width:0;}
+  .item .gr b{display:block;font-size:.86rem;line-height:1.3;}
+  .item .gr span{font-size:.72rem;color:var(--ink-soft);}
+
+  table{width:100%;border-collapse:collapse;font-size:.82rem;}
+  th{text-align:left;font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);
+    padding:.45rem .55rem;border-bottom:1px solid var(--line);white-space:nowrap;}
+  td{padding:.5rem .55rem;border-bottom:1px solid var(--line);}
+  tr:last-child td{border-bottom:0;}
+  .tw{overflow-x:auto;}
+  .num{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;text-align:right;}
+</style>
+</head>
+<body>
+
+<header class="platbar">
+  <div class="platbar-in">
+    <div class="plat-brand">
+      <img src="../assets/itera-isotype.png" alt="" class="iso" onerror="this.style.display='none'">
+      <span class="wm">I&nbsp;T&nbsp;<span class="bar-e"></span>&nbsp;R&nbsp;A</span>
+      <span class="plat-tag">Eventos</span>
+    </div>
+    <div class="plat-sep"></div>
+    <div class="roles" id="roles">
+      <button data-role="asistente" class="active">Asistente</button>
+      <button data-role="empresa">Empresa</button>
+      <button data-role="organizador">Organizador</button>
+      <button data-role="ayuda">Punto de ayuda</button>
+    </div>
+    <div class="grow"></div>
+    <div class="dayswitch" id="dayswitch" title="Día simulado del evento">
+      <button data-day="1" class="active">Día 1</button>
+      <button data-day="2">Día 2</button>
+    </div>
+    <button class="pbtn hot" id="btnProyeccion">▶ Modo proyección</button>
+    <button class="pbtn" id="btnIndex">☰ 44 pantallas</button>
+    <button class="pbtn" id="btnReset" title="Reiniciar datos de la demo">⟳</button>
+  </div>
+</header>
+
+<style>
+  /* ============ ticket + QR ============ */
+  .ticket{background:linear-gradient(158deg,#12141B,#241B3E);color:#fff;border-radius:16px;padding:1.3rem;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:.7rem;position:relative;overflow:hidden;}
+  .ticket::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(340px 190px at 50% -22%,rgba(255,90,31,.42),transparent 70%);}
+  .ticket>*{position:relative;}
+  .ticket .qrbox{background:#fff;padding:9px;border-radius:10px;}
+  .ticket .qrbox canvas{display:block;width:178px;height:178px;image-rendering:pixelated;}
+  .ticket .tname{font-size:1.08rem;font-weight:800;color:#fff;}
+  .ticket .tcode{font-family:'JetBrains Mono',monospace;font-size:1rem;letter-spacing:.13em;color:#FFC9A8;}
+  .ticket .ttag{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;
+    background:rgba(255,255,255,.13);padding:.26rem .65rem;border-radius:999px;color:#fff;}
+  .ticket .tsub{font-size:.7rem;color:rgba(255,255,255,.55);}
+
+  /* ============ insignias ============ */
+  .medal{width:100%;aspect-ratio:1;border-radius:17px;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:.2rem;color:#fff;text-align:center;padding:.5rem;position:relative;overflow:hidden;}
+  .medal::after{content:"";position:absolute;inset:0;
+    background:radial-gradient(70px 52px at 50% -5%,rgba(255,255,255,.32),transparent 70%);}
+  .medal .em{font-size:1.85rem;position:relative;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3));}
+  .medal .mn{font-size:.62rem;font-weight:800;line-height:1.14;position:relative;padding:0 .1rem;}
+  .medal.locked{background:var(--surface-2)!important;color:var(--ink-mut);border:1px dashed #CFD5E0;}
+  .medal.locked .em{filter:grayscale(1);opacity:.42;}
+  .medal.locked::after{display:none;}
+  .bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem;}
+
+  .counter{background:linear-gradient(135deg,var(--gold),#FF8A1F);color:#3A2400;border-radius:14px;padding:.9rem 1rem;
+    display:flex;align-items:center;justify-content:space-between;gap:.6rem;}
+  .counter .big{font-size:1.85rem;font-weight:900;font-family:'JetBrains Mono',monospace;line-height:1;}
+  .counter .lab{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.8;}
+
+  .chips{display:flex;gap:.35rem;overflow-x:auto;padding-bottom:.35rem;margin-bottom:.6rem;}
+  .chips::-webkit-scrollbar{height:0;}
+  .chip{border:1px solid var(--line);background:#fff;color:var(--ink-soft);font-size:.74rem;font-weight:700;
+    padding:.35rem .7rem;border-radius:999px;cursor:pointer;white-space:nowrap;flex:none;}
+  .chip.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .minprice{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--event);}
+
+  .cam{position:relative;border-radius:14px;overflow:hidden;background:#0B0C10;aspect-ratio:1;display:grid;place-items:center;}
+  .cam video{width:100%;height:100%;object-fit:cover;}
+  .cam .reticle{position:absolute;inset:16%;border:3px solid rgba(255,255,255,.75);border-radius:16px;
+    box-shadow:0 0 0 999px rgba(0,0,0,.34);}
+  .cam .off{color:rgba(255,255,255,.6);font-size:.8rem;text-align:center;padding:1rem;}
+
+  .consent{display:flex;gap:.6rem;align-items:flex-start;padding:.7rem;border:1px solid var(--line);border-radius:11px;background:#fff;}
+  .consent+.consent{margin-top:.5rem;}
+  .consent input{width:19px;height:19px;margin-top:.1rem;flex:none;accent-color:var(--accent);}
+  .consent .ct{font-size:.8rem;line-height:1.45;}
+  .consent .ct b{display:block;margin-bottom:.08rem;}
+  .req{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;}
+
+  .stepper{display:flex;gap:.25rem;margin-bottom:.85rem;}
+  .stepper i{flex:1;height:3px;border-radius:999px;background:var(--line);}
+  .stepper i.on{background:var(--event);}
+
+  .wa{background:#E7FFDB;border:1px solid #C6EFB4;border-radius:12px 12px 12px 3px;padding:.7rem .8rem;font-size:.8rem;
+    color:#0F2E17;line-height:1.5;}
+  .wa .whead{display:flex;align-items:center;gap:.35rem;font-size:.66rem;font-weight:800;color:#128C4A;margin-bottom:.3rem;}
+  .wa a{color:#0B6BCB;word-break:break-all;}
+
+  /* ============ escritorio organizador ============ */
+  .desk{display:grid;grid-template-columns:214px 1fr;gap:1rem;padding:1rem;align-items:start;}
+  .side{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:.55rem;position:sticky;top:.5rem;}
+  .side .sg{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mut);margin:.75rem .55rem .25rem;}
+  .side button{width:100%;text-align:left;border:0;background:none;color:var(--ink-soft);font-weight:600;font-size:.81rem;
+    padding:.45rem .55rem;border-radius:8px;cursor:pointer;display:flex;gap:.45rem;align-items:center;}
+  .side button:hover{background:var(--surface-2);color:var(--ink);}
+  .side button.active{background:var(--accent-soft);color:var(--accent);font-weight:700;}
+  .dmain{min-width:0;}
+  .dsc{display:none;}
+  .dsc.active{display:block;animation:fade .22s ease;}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.85rem;}
+  .kpi .v{font-size:1.5rem;font-weight:800;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;line-height:1.1;}
+  .kpi .l{font-size:.72rem;color:var(--ink-soft);margin-top:.12rem;}
+  .kpi .d{font-size:.66rem;color:var(--good);margin-top:.22rem;font-weight:700;}
+  .pg{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:.8rem;}
+  @media (max-width:1080px){ .desk{grid-template-columns:1fr;} .side{position:static;display:flex;flex-wrap:wrap;gap:.25rem;}
+    .side .sg{width:100%;} .side button{width:auto;} .kpis{grid-template-columns:1fr 1fr;} .pg{grid-template-columns:1fr;} }
+
+  .barrow{display:grid;grid-template-columns:8.2rem 1fr 3.4rem;align-items:center;gap:.5rem;font-size:.77rem;margin-bottom:.38rem;}
+  .barrow>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .btrack{background:#E9EDF4;border-radius:999px;height:9px;overflow:hidden;}
+  .bfill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),#7C97FF);}
+
+  .frow{margin-bottom:.42rem;}
+  .frow .fl{display:flex;justify-content:space-between;font-size:.76rem;margin-bottom:.15rem;}
+  .fbar{height:24px;border-radius:7px;background:linear-gradient(90deg,var(--event),#FF9A5B);display:flex;align-items:center;
+    padding-left:.55rem;color:#fff;font-weight:800;font-size:.74rem;}
+  .fdrop{color:var(--bad);font-weight:700;font-size:.68rem;}
+
+  svg.chart{width:100%;height:auto;display:block;overflow:visible;}
+  .legend{display:flex;gap:.9rem;flex-wrap:wrap;font-size:.72rem;margin-top:.4rem;color:var(--ink-soft);}
+  .legend i{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:.3rem;vertical-align:middle;}
+  .maplabel{font-size:7.5px;fill:var(--ink-soft);font-family:'Satoshi',sans-serif;font-weight:700;}
+
+  /* ============ índice ============ */
+  .dback{position:fixed;inset:0;background:rgba(3,4,8,.6);z-index:80;display:none;}
+  .dback.open{display:block;}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,93vw);background:var(--surface-dark);z-index:81;
+    transform:translateX(100%);transition:transform .25s ease;overflow-y:auto;padding:1.1rem;border-left:1px solid var(--edge-strong);}
+  .drawer.open{transform:translateX(0);}
+  .drawer h3{color:var(--text-white);font-size:1rem;}
+  .drawer .grp{margin-top:1rem;}
+  .drawer .grp h4{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--blue-soft);margin-bottom:.4rem;}
+  .drawer ol{list-style:none;margin:0;padding:0;}
+  .drawer li{display:flex;gap:.5rem;align-items:baseline;font-size:.82rem;padding:.34rem .45rem;border-radius:7px;
+    cursor:pointer;color:var(--text-muted);}
+  .drawer li:hover{background:var(--surface-card);color:var(--text-white);}
+  .drawer li .n{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-faint);min-width:1.5rem;}
+
+  /* ============ overlay insignia ============ */
+  .ub{position:fixed;inset:0;background:rgba(4,5,10,.78);z-index:120;display:none;align-items:center;justify-content:center;padding:1.2rem;}
+  .ub.open{display:flex;}
+  .ucard{background:var(--surface);border-radius:20px;padding:1.6rem 1.4rem;max-width:330px;width:100%;text-align:center;
+    animation:pop .38s cubic-bezier(.2,1.35,.4,1);}
+  @keyframes pop{from{transform:scale(.75);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .ucard .medal{width:122px;height:122px;margin:.3rem auto .8rem;aspect-ratio:auto;}
+  .ucard .medal .em{font-size:2.7rem;}
+  .plus{display:inline-flex;align-items:center;gap:.35rem;background:var(--gold-soft);color:#8A6400;font-weight:800;
+    padding:.35rem .8rem;border-radius:999px;margin:.6rem 0;font-size:.85rem;}
+
+  /* ============ MODO PROYECCIÓN ============ */
+  .proj{position:fixed;inset:0;z-index:200;background:var(--void);color:#fff;display:none;flex-direction:column;}
+  .proj.open{display:flex;}
+  .proj::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(900px 520px at 50% -12%,rgba(49,92,255,.30),transparent 72%);}
+  .ptop{display:flex;align-items:center;gap:.8rem;padding:1.1rem 1.6rem;position:relative;z-index:2;}
+  .ptop .wm{font-size:.95rem;}
+  .pevent{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--blue-soft);}
+  .pstage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.3rem;
+    padding:1rem 1.5rem;position:relative;z-index:2;text-align:center;}
+  .pprize{font-family:'JetBrains Mono',monospace;letter-spacing:.24em;text-transform:uppercase;
+    font-size:clamp(.7rem,1.4vw,.95rem);color:var(--blue-soft);}
+  .pwindow{width:min(1000px,94%);background:rgba(255,255,255,.045);border:1px solid var(--edge-strong);
+    border-radius:22px;padding:clamp(1.6rem,4vw,3rem);backdrop-filter:blur(6px);}
+  .pname{font-size:clamp(2.2rem,8.5vw,6rem);font-weight:900;letter-spacing:-.03em;line-height:1.05;
+    color:#fff;min-height:1.1em;word-break:break-word;}
+  .pname.win{background:linear-gradient(96deg,#FFFFFF 10%,#B8CCFF 50%,var(--blue-soft) 95%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+  .psub{font-size:clamp(.8rem,1.6vw,1.05rem);color:var(--text-muted);margin-top:.7rem;}
+  .pctl{display:flex;gap:.7rem;flex-wrap:wrap;justify-content:center;align-items:center;}
+  .pctl input{background:rgba(255,255,255,.07);border:1px solid var(--edge-strong);color:#fff;border-radius:11px;
+    padding:.75rem .95rem;min-width:15rem;font-size:.92rem;}
+  .pctl input::placeholder{color:var(--text-faint);}
+  .pspin{background:var(--blue);color:#fff;border:0;padding:.95rem 2.1rem;border-radius:12px;font-weight:800;
+    font-size:1.02rem;cursor:pointer;box-shadow:0 0 34px rgba(49,92,255,.55);transition:transform .15s;}
+  .pspin:hover{transform:translateY(-2px);}
+  .pspin[disabled]{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;}
+  .pghost{background:transparent;color:var(--text-muted);border:1px solid var(--edge-strong);padding:.75rem 1.1rem;
+    border-radius:11px;font-weight:700;font-size:.85rem;cursor:pointer;}
+  .pghost:hover{color:#fff;border-color:var(--blue-soft);}
+  .pwin{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;padding:0 1.5rem 1.4rem;position:relative;z-index:2;}
+  .wchip{background:rgba(255,255,255,.06);border:1px solid var(--edge);border-radius:999px;padding:.35rem .85rem;
+    font-size:.78rem;color:var(--text-muted);}
+  .wchip b{color:#FFD479;}
+  .pfoot{text-align:center;font-size:.68rem;color:var(--text-faint);padding-bottom:1rem;position:relative;z-index:2;}
+
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:210;}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+</style>
+
+<div class="dback" id="dback"></div>
+<aside class="drawer" id="drawer">
+  <div class="between"><h3>Índice de pantallas</h3><button class="pbtn" id="closeDrawer">✕</button></div>
+  <p style="font-size:.76rem;color:var(--text-faint);margin-top:.3rem;">44 pantallas. Clic para abrir. Las métricas grandes son <b style="color:var(--blue-soft);">ejemplo ilustrativo</b>.</p>
+  <div id="indexBody"></div>
+</aside>
+
+<div class="stage" id="stage">
+
+<!-- ================= ASISTENTE ================= -->
+<div class="browser" id="app-asistente">
+  <div class="bchrome">
+    <div class="bdots"><i></i><i></i><i></i></div>
+    <div class="burl"><span class="lock">🔒</span> itera.pe<b>/e/sabores-y-sellos</b></div>
+  </div>
+  <div class="bviewport">
+    <div class="vbody" id="asBody">
+
+      <!-- 1 landing -->
+      <section class="screen active" data-sc="as-landing">
+        <div class="ticket" style="background:linear-gradient(158deg,#FF5A1F,#B5179E);">
+          <span class="ttag">6 y 7 de setiembre · Parque de la Amistad</span>
+          <h2 style="font-size:1.45rem;color:#fff;">Feria Gastronómica<br>Sabores &amp; Sellos</h2>
+          <p style="font-size:.85rem;color:rgba(255,255,255,.9);">Come, bebe, descubre negocios y colecciona insignias. Cada insignia es un ticket para el sorteo final.</p>
+        </div>
+        <div class="stack" style="margin-top:.9rem;">
+          <button class="btn btn-event btn-block" data-go="as-registro">Registrarme gratis</button>
+          <button class="btn btn-line btn-block" data-go="as-recuperar">Ya me registré</button>
+        </div>
+        <div class="card" style="margin-top:.9rem;">
+          <h4 style="font-size:.9rem;margin-bottom:.5rem;">Cómo funciona</h4>
+          <div class="kv"><span>1 · Te registras</span><span>Recibes tu ticket + QR</span></div>
+          <div class="kv"><span>2 · Ingresas</span><span>Muestras tu QR en la puerta</span></div>
+          <div class="kv"><span>3 · Consumes</span><span>Cumples el mínimo del puesto</span></div>
+          <div class="kv"><span>4 · Escaneas su QR</span><span>+1 insignia</span></div>
+          <div class="kv"><span>5 · Sorteo</span><span>1 insignia = 1 ticket</span></div>
+        </div>
+        <div class="soft tiny muted" style="margin-top:.7rem;">
+          <b>Sin descargar nada.</b> Funciona desde el navegador de tu celular y <b>sin contraseña</b>: tu sesión queda guardada en este dispositivo.
+        </div>
+      </section>
+
+      <!-- 2 registro -->
+      <section class="screen" data-sc="as-registro">
+        <div class="schead"><button class="back" data-go="as-landing">‹</button><h2>Crear mi registro</h2></div>
+        <div class="stepper"><i class="on"></i><i></i><i></i></div>
+        <p class="eyebrow">Paso 1 de 3 · Datos</p>
+        <p class="tiny muted" style="margin:.25rem 0 .9rem;">Solo pedimos lo necesario para operar el evento y el sorteo. Nada más.</p>
+        <form id="formReg">
+          <div class="field"><label>DNI / documento</label><input type="text" id="rg-dni" inputmode="numeric" required placeholder="Sin puntos ni espacios"></div>
+          <div class="g2">
+            <div class="field"><label>Nombres</label><input type="text" id="rg-nom" required></div>
+            <div class="field"><label>Apellidos</label><input type="text" id="rg-ape" required></div>
+          </div>
+          <div class="field"><label>Celular (WhatsApp)</label><input type="tel" id="rg-cel" required placeholder="9xx xxx xxx"></div>
+          <div class="field"><label>Correo electrónico</label><input type="email" id="rg-email" required></div>
+          <div class="note n-info tiny"><b>Aviso previo.</b> Finalidad: acreditación, ticket de ingreso, dinámica de insignias y sorteo. Responsable: la empresa organizadora. Encargado del tratamiento: itera.</div>
+          <button class="btn btn-event btn-block" type="submit" style="margin-top:.9rem;">Continuar</button>
+        </form>
+      </section>
+
+      <!-- 3 términos y privacidad -->
+      <section class="screen" data-sc="as-terminos">
+        <div class="schead"><button class="back" data-go="as-registro">‹</button><h2>Términos y privacidad</h2></div>
+        <div class="stepper"><i class="on"></i><i class="on"></i><i></i></div>
+        <p class="eyebrow">Paso 2 de 3 · Información</p>
+        <div class="card" style="margin-top:.7rem;">
+          <h4 style="font-size:.92rem;">Términos y condiciones</h4>
+          <p class="tiny muted" style="margin-top:.35rem;">Participación voluntaria y gratuita. El ticket es personal e intransferible. Las insignias se obtienen escaneando el QR de cada empresa una vez cumplida su condición de consumo. Cada insignia otorga 1 ticket para el sorteo. La organización puede anular insignias obtenidas de forma fraudulenta. El sorteo se rige por las reglas de elegibilidad publicadas por la organización.</p>
+        </div>
+        <div class="card">
+          <h4 style="font-size:.92rem;">Política de privacidad</h4>
+          <div class="kv"><span>Qué datos</span><span>DNI, nombres, celular, correo</span></div>
+          <div class="kv"><span>Qué se registra</span><span>Ingreso y escaneos (fecha, hora, empresa)</span></div>
+          <div class="kv"><span>Para qué</span><span>Acreditación, insignias y sorteo</span></div>
+          <div class="kv"><span>Responsable</span><span>Empresa organizadora</span></div>
+          <div class="kv"><span>Encargado</span><span>itera (plataforma)</span></div>
+          <div class="kv"><span>Conservación</span><span>12 meses post-evento</span></div>
+          <div class="kv"><span>Tus derechos</span><span>Acceso, rectificación, cancelación, oposición</span></div>
+        </div>
+        <div class="soft tiny"><b>Las empresas participantes reciben información agregada.</b> Tus datos identificables no se comparten con ellas salvo que lo autorices expresamente en el siguiente paso.</div>
+        <button class="btn btn-event btn-block" data-go="as-consent" style="margin-top:.9rem;">Continuar</button>
+      </section>
+
+      <!-- 4 consentimientos -->
+      <section class="screen" data-sc="as-consent">
+        <div class="schead"><button class="back" data-go="as-terminos">‹</button><h2>Consentimientos</h2></div>
+        <div class="stepper"><i class="on"></i><i class="on"></i><i class="on"></i></div>
+        <p class="eyebrow">Paso 3 de 3</p>
+        <p class="tiny muted" style="margin:.25rem 0 .8rem;">Separados a propósito. Los opcionales no condicionan tu participación ni el sorteo.</p>
+        <label class="consent"><input type="checkbox" id="cs-terminos">
+          <span class="ct"><b>Acepto los términos y condiciones <span class="req" style="color:var(--bad);">· Obligatorio</span></b>Necesario para participar en el evento.</span></label>
+        <label class="consent"><input type="checkbox" id="cs-privacidad">
+          <span class="ct"><b>He leído la política de privacidad <span class="req" style="color:var(--bad);">· Obligatorio</span></b>Tratamiento para acreditación, ingreso, insignias y sorteo.</span></label>
+        <label class="consent"><input type="checkbox" id="cs-marketing">
+          <span class="ct"><b>Quiero recibir avisos del evento por WhatsApp <span class="req" style="color:var(--good);">· Opcional</span></b>Horarios, novedades y aviso del sorteo. Puedes retirarlo cuando quieras.</span></label>
+        <label class="consent"><input type="checkbox" id="cs-compartir">
+          <span class="ct"><b>Autorizo compartir mi contacto con las empresas cuya insignia obtenga <span class="req" style="color:var(--good);">· Opcional</span></b>Solo esas empresas. Sin esto, ellas solo ven datos agregados.</span></label>
+        <button class="btn btn-event btn-block" id="btnFinishReg" style="margin-top:.9rem;" disabled>Crear mi ticket</button>
+        <p class="tiny muted center" style="margin-top:.5rem;">Debes aceptar los dos obligatorios.</p>
+      </section>
+
+      <!-- 5 registro exitoso -->
+      <section class="screen" data-sc="as-exito">
+        <div class="center" style="padding:.8rem 0;">
+          <div style="font-size:2.6rem;">🎟️</div>
+          <h2 style="font-size:1.25rem;margin-top:.3rem;">¡Listo! Ya estás dentro</h2>
+          <p class="tiny muted" style="margin-top:.3rem;">Guarda este código. Es lo único que necesitas.</p>
+        </div>
+        <div id="exitoTicket"></div>
+        <div class="note n-good tiny" style="margin-top:.8rem;"><b>No necesitas contraseña.</b> Tu sesión quedó guardada en este navegador. Si abres el evento en otro equipo, recuperas el acceso con un enlace por WhatsApp.</div>
+        <div class="stack" style="margin-top:.8rem;">
+          <button class="btn btn-event btn-block" data-go="as-ticket">Ver mi ticket</button>
+          <button class="btn btn-line btn-block" data-go="as-ayuda">¿Cómo gano insignias?</button>
+        </div>
+      </section>
+
+      <!-- 6 mi ticket -->
+      <section class="screen" data-sc="as-ticket">
+        <div class="schead"><h2>Mi ticket</h2></div>
+        <div id="ticketBox"></div>
+        <div class="card" style="margin-top:.7rem;">
+          <div class="kv"><span>Estado de ingreso</span><span id="ticketEstado"></span></div>
+          <div class="kv"><span>Validado</span><span class="mono" id="ticketValAt">—</span></div>
+          <div class="kv"><span>Evento</span><span>Sabores &amp; Sellos · 2 días</span></div>
+          <div class="kv"><span>Sesión</span><span class="mono" id="ticketDev">—</span></div>
+        </div>
+        <div class="row wrap" style="margin-top:.7rem;">
+          <button class="btn btn-line" data-go="as-qr" style="flex:1;">Ver QR grande</button>
+          <button class="btn btn-line" id="btnSimVal" style="flex:1;">Simular validación</button>
+        </div>
+        <p class="tiny muted center" style="margin-top:.6rem;">En la puerta escanean este QR. Si no carga, te buscan por DNI.</p>
+      </section>
+
+      <!-- 7 QR personal -->
+      <section class="screen flush" data-sc="as-qr">
+        <div style="background:#0B0D10;color:#fff;min-height:700px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.9rem;padding:1.4rem;position:relative;">
+          <button class="btn btn-line btn-sm" data-go="as-ticket" style="position:absolute;top:1rem;left:1rem;">‹ Volver</button>
+          <p class="eyebrow" style="color:#FFC9A8;">Sube el brillo al máximo</p>
+          <div style="background:#fff;padding:14px;border-radius:14px;"><canvas id="qrBig" style="width:246px;height:246px;image-rendering:pixelated;display:block;"></canvas></div>
+          <div class="mono" id="qrBigCode" style="font-size:1.25rem;letter-spacing:.14em;"></div>
+          <div class="tiny" style="opacity:.55;" id="qrBigName"></div>
+        </div>
+      </section>
+
+      <!-- 8 ingreso validado -->
+      <section class="screen" data-sc="as-ingreso-ok">
+        <div class="center" style="padding:1.8rem 0;">
+          <div style="font-size:3.2rem;">✅</div>
+          <h2 style="margin-top:.4rem;">Ingreso validado</h2>
+          <p class="tiny muted" style="margin-top:.3rem;">Bienvenido a Sabores &amp; Sellos.</p>
+          <div class="mono tiny" id="ingOkTime" style="margin-top:.5rem;color:var(--ink-soft);"></div>
+        </div>
+        <div class="note n-good">Ya puedes coleccionar insignias. Consume en un puesto, cumple su mínimo y escanea su QR.</div>
+        <button class="btn btn-event btn-block" data-go="as-escanear" style="margin-top:.9rem;">Empezar a escanear</button>
+      </section>
+
+      <!-- 9 escanear -->
+      <section class="screen" data-sc="as-escanear">
+        <div class="schead"><h2>Escanear QR del puesto</h2></div>
+        <div id="scanGate" style="margin-bottom:.7rem;"></div>
+        <div class="cam" id="camScan"><div class="off">Cámara apagada.<br><button class="btn btn-line btn-sm" id="btnCamScan" style="margin-top:.5rem;">Activar cámara</button></div></div>
+        <p class="tiny muted" style="margin:.7rem 0 .4rem;"><b>Demo:</b> simula el escaneo eligiendo el puesto. Verás el mínimo de consumo de cada uno.</p>
+        <div class="chips" id="scanChips"></div>
+        <div class="list" id="scanSimList"></div>
+      </section>
+
+      <!-- 10 resultado del escaneo -->
+      <section class="screen" data-sc="as-escaneo-result">
+        <div class="schead"><button class="back" data-go="as-escanear">‹</button><h2>Resultado</h2></div>
+        <div id="scanResultBox"></div>
+      </section>
+
+      <!-- 11 insignia desbloqueada -->
+      <section class="screen" data-sc="as-insignia">
+        <div id="insigniaScreenBox"></div>
+      </section>
+
+      <!-- 12 mis insignias -->
+      <section class="screen" data-sc="as-insignias">
+        <div class="schead"><h2>Mis insignias</h2></div>
+        <div class="counter" style="margin-bottom:.8rem;">
+          <div><div class="lab">Tickets para el sorteo</div><div class="big" id="ticketsCount">0</div></div>
+          <div class="center"><div class="lab">Colección</div><div class="mono" id="collProgress" style="font-size:1.05rem;font-weight:700;">0 / 0</div></div>
+        </div>
+        <div id="nextHint"></div>
+        <div class="bgrid" id="badgeGrid" style="margin-top:.7rem;"></div>
+        <p class="tiny muted center" style="margin-top:.8rem;">Toca una insignia obtenida para ver su detalle.</p>
+      </section>
+
+      <!-- 13 detalle de insignia -->
+      <section class="screen" data-sc="as-insignia-detalle">
+        <div class="schead"><button class="back" data-go="as-insignias">‹</button><h2>Detalle</h2></div>
+        <div id="insDetalleBox"></div>
+      </section>
+
+      <!-- 14 empresas participantes -->
+      <section class="screen" data-sc="as-empresas">
+        <div class="schead"><h2>Puestos del evento</h2></div>
+        <input type="search" id="empSearch" placeholder="Buscar puesto" style="margin-bottom:.6rem;">
+        <div class="chips" id="empChips"></div>
+        <div class="list" id="empList"></div>
+      </section>
+
+      <!-- 15 perfil de empresa -->
+      <section class="screen" data-sc="as-empresa-perfil">
+        <div class="schead"><button class="back" data-go="as-empresas">‹</button><h2>Perfil del puesto</h2></div>
+        <div id="empPerfilBox"></div>
+      </section>
+
+      <!-- 16 mi perfil -->
+      <section class="screen" data-sc="as-perfil">
+        <div class="schead"><h2>Mi perfil</h2></div>
+        <div id="perfilBox"></div>
+        <div class="stack" style="margin-top:.8rem;">
+          <button class="btn btn-line btn-block" data-go="as-completar">Completar mi registro</button>
+          <button class="btn btn-line btn-block" data-go="as-privacidad">Privacidad y preferencias</button>
+          <button class="btn btn-line btn-block" data-go="as-recuperar">Abrir en otro dispositivo</button>
+          <button class="btn btn-ghost btn-block" data-go="as-ayuda">Ayuda</button>
+        </div>
+      </section>
+
+      <!-- 17 completar registro -->
+      <section class="screen" data-sc="as-completar">
+        <div class="schead"><button class="back" data-go="as-perfil">‹</button><h2>Completar mi registro</h2></div>
+        <p class="tiny muted" style="margin-bottom:.8rem;">Si entraste con registro rápido en la puerta, completa aquí tus datos.</p>
+        <form id="formCompletar">
+          <div class="field"><label>Nombres</label><input type="text" id="cp-nom"></div>
+          <div class="field"><label>Apellidos</label><input type="text" id="cp-ape"></div>
+          <div class="field"><label>Celular (WhatsApp)</label><input type="tel" id="cp-cel"></div>
+          <div class="field"><label>Correo</label><input type="email" id="cp-email"></div>
+          <button class="btn btn-event btn-block" type="submit">Guardar</button>
+        </form>
+      </section>
+
+      <!-- 18 recuperar acceso -->
+      <section class="screen" data-sc="as-recuperar">
+        <div class="schead"><button class="back" data-go="as-landing">‹</button><h2>Abrir en otro dispositivo</h2></div>
+        <div class="note n-info tiny" style="margin-bottom:.8rem;"><b>No hay contraseñas en la plataforma.</b> Te enviamos un enlace de un solo uso; lo tocas y quedas dentro en ese equipo.</div>
+        <div class="card">
+          <div class="field"><label>Tu DNI</label><input type="text" id="rec-dni" inputmode="numeric" placeholder="Ej. 30111222"></div>
+          <div class="row wrap">
+            <button class="btn btn-wa" id="btnRecWa" style="flex:1;">Enviar por WhatsApp</button>
+            <button class="btn btn-line" id="btnRecMail" style="flex:1;">Por correo</button>
+          </div>
+        </div>
+        <div id="recResult" style="margin-top:.8rem;"></div>
+      </section>
+
+      <!-- 19 ayuda -->
+      <section class="screen" data-sc="as-ayuda">
+        <div class="schead"><h2>Ayuda</h2></div>
+        <div class="stack">
+          <div class="soft"><b style="font-size:.87rem;">¿Cómo gano una insignia?</b><p class="tiny muted" style="margin-top:.2rem;">Consume en el puesto hasta cumplir su mínimo (cada puesto pone el suyo, lo ves en su ficha). El puesto te muestra su QR, tú lo escaneas. +1 insignia y +1 ticket de sorteo.</p></div>
+          <div class="soft"><b style="font-size:.87rem;">Solo 1 insignia por puesto</b><p class="tiny muted" style="margin-top:.2rem;">Volver a escanear el mismo QR no suma tickets. Conviene recorrer puestos distintos.</p></div>
+          <div class="soft"><b style="font-size:.87rem;">No puedo mostrar mi QR</b><p class="tiny muted" style="margin-top:.2rem;">Acércate a un Punto de Ayuda: te ubican por DNI.</p></div>
+          <div class="soft"><b style="font-size:.87rem;">Cambié de celular</b><p class="tiny muted" style="margin-top:.2rem;">Usa "Abrir en otro dispositivo" y recibes un enlace por WhatsApp.</p></div>
+          <button class="btn btn-line btn-block">Ubicar el Punto de Ayuda más cercano</button>
+        </div>
+      </section>
+
+      <!-- privacidad y preferencias -->
+      <section class="screen" data-sc="as-privacidad">
+        <div class="schead"><button class="back" data-go="as-perfil">‹</button><h2>Privacidad</h2></div>
+        <div class="card">
+          <h4 style="font-size:.92rem;margin-bottom:.5rem;">Mis consentimientos</h4>
+          <label class="consent"><input type="checkbox" id="pref-marketing"><span class="ct"><b>Avisos del evento por WhatsApp</b>Horarios, novedades y sorteo.</span></label>
+          <label class="consent"><input type="checkbox" id="pref-compartir"><span class="ct"><b>Compartir mi contacto con puestos cuya insignia obtenga</b>Solo esos puestos.</span></label>
+          <button class="btn btn-accent btn-sm" id="btnSavePrefs" style="margin-top:.6rem;">Guardar preferencias</button>
+        </div>
+        <div class="card">
+          <h4 style="font-size:.92rem;margin-bottom:.4rem;">Ejercer mis derechos</h4>
+          <p class="tiny muted" style="margin-bottom:.5rem;">Ley N° 29733 · Acceso, rectificación, cancelación y oposición.</p>
+          <div class="row wrap">
+            <button class="btn btn-line btn-sm dr-req" data-t="Acceso">Acceso</button>
+            <button class="btn btn-line btn-sm dr-req" data-t="Rectificación">Rectificación</button>
+            <button class="btn btn-line btn-sm dr-req" data-t="Cancelación">Cancelación</button>
+            <button class="btn btn-line btn-sm dr-req" data-t="Oposición">Oposición</button>
+          </div>
+          <div id="drResult" style="margin-top:.6rem;"></div>
+        </div>
+        <div class="card">
+          <h4 style="font-size:.92rem;margin-bottom:.3rem;">Qué ve cada quién</h4>
+          <div class="kv"><span>Puestos del evento</span><span>Solo datos agregados</span></div>
+          <div class="kv"><span>Organizador</span><span>Operación, mínimo necesario</span></div>
+          <div class="kv"><span>itera</span><span>Encargado, sin uso propio</span></div>
+        </div>
+      </section>
+
+      <!-- más -->
+      <section class="screen" data-sc="as-mas">
+        <div class="schead"><h2>Más</h2></div>
+        <div class="list">
+          <div class="item" data-go="as-perfil" style="cursor:pointer;"><div class="logo" style="background:var(--accent-soft);">👤</div><div class="gr"><b>Mi perfil</b><span>Datos y cuenta</span></div><span>›</span></div>
+          <div class="item" data-go="as-privacidad" style="cursor:pointer;"><div class="logo" style="background:#E7ECFF;">🔒</div><div class="gr"><b>Privacidad</b><span>Consentimientos y derechos</span></div><span>›</span></div>
+          <div class="item" data-go="as-completar" style="cursor:pointer;"><div class="logo" style="background:var(--gold-soft);">✏️</div><div class="gr"><b>Completar registro</b><span>Añadir datos faltantes</span></div><span>›</span></div>
+          <div class="item" data-go="as-recuperar" style="cursor:pointer;"><div class="logo" style="background:#E7FFDB;">📲</div><div class="gr"><b>Abrir en otro dispositivo</b><span>Enlace por WhatsApp</span></div><span>›</span></div>
+          <div class="item" data-go="as-ayuda" style="cursor:pointer;"><div class="logo" style="background:var(--good-soft);">❓</div><div class="gr"><b>Ayuda</b><span>Cómo funciona la dinámica</span></div><span>›</span></div>
+        </div>
+      </section>
+
+    </div>
+    <nav class="vnav" id="asTabs">
+      <button data-go="as-landing" class="active"><span class="i">🏠</span>Inicio</button>
+      <button data-go="as-ticket"><span class="i">🎟️</span>Ticket</button>
+      <button data-go="as-escanear"><span class="i">📷</span>Escanear</button>
+      <button data-go="as-insignias"><span class="i">🏅</span>Insignias</button>
+      <button data-go="as-empresas"><span class="i">🏬</span>Puestos</button>
+      <button data-go="as-mas"><span class="i">⋯</span>Más</button>
+    </nav>
+  </div>
+</div>
+
+<!-- ================= EMPRESA PARTICIPANTE ================= -->
+<div class="browser hide" id="app-empresa">
+  <div class="bchrome">
+    <div class="bdots"><i></i><i></i><i></i></div>
+    <div class="burl"><span class="lock">🔒</span> itera.pe<b>/negocios/sabores-y-sellos</b></div>
+  </div>
+  <div class="bviewport">
+    <div class="vbody" id="empBody">
+
+      <!-- 20 login -->
+      <section class="screen active" data-sc="emp-login">
+        <div class="center" style="padding:1.2rem 0 .4rem;">
+          <div style="font-size:2.2rem;">🏬</div>
+          <h2 style="margin-top:.3rem;font-size:1.2rem;">Portal de negocios</h2>
+          <p class="tiny muted">Feria Sabores &amp; Sellos</p>
+        </div>
+        <div class="card">
+          <div class="field"><label>Correo del negocio</label><input type="email" id="el-email" value="hola@sazondelanona.pe"></div>
+          <button class="btn btn-accent btn-block" data-go="emp-dashboard">Enviarme el enlace de acceso</button>
+          <p class="tiny muted center" style="margin-top:.5rem;">Sin contraseñas. Te llega un enlace de un solo uso al correo del negocio.</p>
+        </div>
+        <button class="btn btn-ghost btn-block" data-go="emp-registro" style="margin-top:.5rem;">Registrar mi negocio</button>
+      </section>
+
+      <!-- 21 registro de empresa -->
+      <section class="screen" data-sc="emp-registro">
+        <div class="schead"><button class="back" data-go="emp-login">‹</button><h2>Registrar negocio</h2></div>
+        <form id="formEmpReg" class="stack">
+          <div><label>Razón social</label><input type="text" value="Sazón de la Nona S.A.C."></div>
+          <div><label>Nombre comercial</label><input type="text" value="Sazón de la Nona"></div>
+          <div class="g2">
+            <div><label>RUC</label><input type="text" inputmode="numeric" value="20512345678"></div>
+            <div><label>Rubro</label><select id="reg-rubro"></select></div>
+          </div>
+          <div><label>Responsable</label><input type="text" value="Rosa Quispe"></div>
+          <div class="g2"><div><label>Teléfono</label><input type="tel" value="01 455 1122"></div>
+            <div><label>WhatsApp</label><input type="tel" value="987 654 321"></div></div>
+          <div><label>Correo</label><input type="email" value="hola@sazondelanona.pe"></div>
+          <div><label>Descripción</label><textarea rows="2">Cocina peruana casera. Tallarines verdes y lomo saltado.</textarea></div>
+          <div class="g2"><div><label>Web</label><input type="text" value="https://sazondelanona.pe"></div>
+            <div><label>Instagram</label><input type="text" value="@sazondelanona"></div></div>
+          <button class="btn btn-accent btn-block" type="submit">Continuar a ubicación</button>
+        </form>
+      </section>
+
+      <!-- 22 perfil empresarial -->
+      <section class="screen" data-sc="emp-perfil">
+        <div class="schead"><h2>Perfil del negocio</h2></div>
+        <div class="card center">
+          <div class="medal" style="width:92px;height:92px;margin:0 auto .5rem;aspect-ratio:auto;background:linear-gradient(135deg,#FF5A1F,#B5179E);"><span class="em">🍝</span></div>
+          <h3 style="font-size:1.05rem;">Sazón de la Nona</h3>
+          <div class="row wrap" style="justify-content:center;margin-top:.4rem;">
+            <span class="pill p-neutral">Restaurantes</span><span class="pill p-event">Mínimo S/ 50</span><span class="pill p-good">Ubicación verificada</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="kv"><span>Razón social</span><span>Sazón de la Nona S.A.C.</span></div>
+          <div class="kv"><span>RUC</span><span class="mono">20512345678</span></div>
+          <div class="kv"><span>Responsable</span><span>Rosa Quispe</span></div>
+          <div class="kv"><span>WhatsApp</span><span class="mono">987 654 321</span></div>
+          <div class="kv"><span>Web</span><span>sazondelanona.pe</span></div>
+          <div class="kv"><span>Instagram</span><span>@sazondelanona</span></div>
+          <div class="kv"><span>Stand</span><span class="mono">A-12 · zona Restaurantes</span></div>
+        </div>
+        <div class="row wrap" style="margin-top:.7rem;">
+          <button class="btn btn-line btn-sm" data-go="emp-registro">Editar datos</button>
+          <button class="btn btn-line btn-sm" data-go="emp-ubicacion">Ubicación</button>
+          <button class="btn btn-line btn-sm" data-go="emp-logo">Logo</button>
+        </div>
+        <div class="note n-info tiny" style="margin-top:.7rem;">Este perfil es el que ve el asistente al obtener tu insignia. Es tu tráfico: nombre, ubicación, redes y contacto.</div>
+      </section>
+
+      <!-- 23 ubicación -->
+      <section class="screen" data-sc="emp-ubicacion">
+        <div class="schead"><button class="back" data-go="emp-perfil">‹</button><h2>Ubicación en el recinto</h2></div>
+        <p class="tiny muted" style="margin-bottom:.6rem;">Coloca el pin en tu stand. La organización valida que coincida con el espacio asignado.</p>
+        <svg viewBox="0 0 300 200" id="empPinMap" style="width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;cursor:crosshair;">
+          <rect x="6" y="6" width="288" height="188" rx="10" fill="none" stroke="#CBD3E0" stroke-dasharray="4 4"/>
+          <rect x="18" y="150" width="42" height="15" rx="3" fill="#C3CBDA"/><text x="39" y="161" text-anchor="middle" class="maplabel" style="fill:#fff;">INGRESO</text>
+          <rect x="18" y="20" width="120" height="52" rx="6" fill="#EEF2F8"/><text x="78" y="48" text-anchor="middle" class="maplabel">ZONA RESTAURANTES</text>
+          <rect x="160" y="20" width="122" height="52" rx="6" fill="#EEF2F8"/><text x="221" y="48" text-anchor="middle" class="maplabel">ZONA BEBIDAS</text>
+          <rect x="160" y="92" width="122" height="52" rx="6" fill="#EEF2F8"/><text x="221" y="120" text-anchor="middle" class="maplabel">ZONA TIENDAS</text>
+          <circle id="empPin" cx="78" cy="46" r="7" fill="#FF5A1F" stroke="#fff" stroke-width="2.5"/>
+        </svg>
+        <div class="between" style="margin-top:.5rem;"><span class="tiny mono" id="empPinCoords">x: 78 · y: 46</span><span class="pill p-good" id="empPinStatus">Coincide con stand A-12</span></div>
+        <button class="btn btn-accent btn-block" data-go="emp-dinamica" style="margin-top:.7rem;">Guardar y configurar dinámica</button>
+      </section>
+
+      <!-- 24 logo -->
+      <section class="screen" data-sc="emp-logo">
+        <div class="schead"><button class="back" data-go="emp-perfil">‹</button><h2>Logo del negocio</h2></div>
+        <div class="card center">
+          <div class="medal" id="logoPreview" style="width:112px;height:112px;margin:0 auto .7rem;aspect-ratio:auto;background:linear-gradient(135deg,#FF5A1F,#B5179E);"><span class="em">🍝</span></div>
+          <p class="tiny muted">Así se verá tu insignia en la colección del asistente.</p>
+          <div class="row wrap" style="justify-content:center;margin-top:.6rem;">
+            <button class="btn btn-line btn-sm">Subir PNG / SVG</button>
+            <button class="btn btn-line btn-sm" id="btnLogoEmoji">Cambiar emoji</button>
+            <button class="btn btn-line btn-sm" id="btnLogoColor">Cambiar color</button>
+          </div>
+        </div>
+        <button class="btn btn-accent btn-block" data-go="emp-dinamica" style="margin-top:.7rem;">Continuar</button>
+      </section>
+
+      <!-- 25 configuración de dinámica -->
+      <section class="screen" data-sc="emp-dinamica">
+        <div class="schead"><h2>Mi condición de insignia</h2></div>
+        <div class="note n-info tiny" style="margin-bottom:.7rem;"><b>Tú defines el mínimo.</b> La organización fija un rango por rubro para que la dinámica sea pareja entre puestos.</div>
+        <div class="card">
+          <div class="field"><label>Rubro del negocio</label><select id="dinRubro"></select></div>
+          <div id="rubroRangeInfo" class="soft tiny" style="margin-bottom:.7rem;"></div>
+          <div class="field"><label>Mi consumo / compra mínima (S/)</label><input type="number" id="dinMonto" min="1" step="5"></div>
+          <div id="dinWarn"></div>
+          <div class="field"><label>Tipo de condición</label>
+            <select id="dinTipo">
+              <option value="compra_min">Compra / consumo mínimo</option>
+              <option value="producto">Compra de un producto específico</option>
+              <option value="visita">Visita y registro en el stand</option>
+            </select>
+          </div>
+          <button class="btn btn-accent btn-sm" id="btnSaveDin">Guardar condición</button>
+        </div>
+        <div class="card">
+          <h4 style="font-size:.9rem;margin-bottom:.5rem;">Vista previa — así lo ve el asistente</h4>
+          <div class="item" id="dinPreview"></div>
+        </div>
+        <div class="card">
+          <h4 style="font-size:.9rem;margin-bottom:.4rem;">Reglas antifraude del evento</h4>
+          <div class="kv"><span>1 insignia por persona por puesto</span><span class="pill p-good">Activo</span></div>
+          <div class="kv"><span>QR con token rotativo</span><span class="pill p-good">Activo</span></div>
+          <div class="kv"><span>Registro de hora, usuario y dispositivo</span><span class="pill p-good">Activo</span></div>
+          <div class="kv"><span>Reintentos del mismo QR</span><span class="pill p-neutral">No suman</span></div>
+        </div>
+      </section>
+
+      <!-- 26 mi QR -->
+      <section class="screen" data-sc="emp-qr">
+        <div class="schead"><h2>Mi QR</h2></div>
+        <div class="ticket">
+          <span class="ttag">Muéstralo solo si se cumplió la condición</span>
+          <div class="qrbox"><canvas id="empQrCanvas"></canvas></div>
+          <div class="tname" id="empQrName">Sazón de la Nona</div>
+          <div class="tcode" id="empQrCond" style="font-size:.82rem;letter-spacing:.03em;">Consumo mínimo S/ 50</div>
+          <div class="tsub mono" id="empQrToken">—</div>
+        </div>
+        <div class="g2" style="margin-top:.7rem;">
+          <div class="soft center"><div class="mono" style="font-size:1.3rem;font-weight:700;" id="empQrScans">0</div><div class="tiny muted">Escaneos</div></div>
+          <div class="soft center"><div class="mono" style="font-size:1.3rem;font-weight:700;" id="empQrIns">0</div><div class="tiny muted">Insignias</div></div>
+        </div>
+        <div class="card" style="margin-top:.7rem;">
+          <div class="kv"><span>Estado del QR</span><span class="pill p-good">Activo</span></div>
+          <div class="kv"><span>Token rota cada</span><span>60 segundos</span></div>
+        </div>
+        <div class="row wrap" style="margin-top:.7rem;">
+          <button class="btn btn-line btn-sm" id="btnRotateQr" style="flex:1;">Rotar token ahora</button>
+          <button class="btn btn-line btn-sm" style="flex:1;">Imprimir para el stand</button>
+        </div>
+      </section>
+
+      <!-- 27 dashboard -->
+      <section class="screen" data-sc="emp-dashboard">
+        <div class="schead"><h2>Mi negocio</h2></div>
+        <span class="pill p-neutral" style="margin-bottom:.6rem;">Ejemplo ilustrativo</span>
+        <div class="g2" style="margin-top:.4rem;">
+          <div class="kpi"><div class="v" id="ed-personas">0</div><div class="l">Personas que interactuaron</div></div>
+          <div class="kpi"><div class="v" id="ed-ins">0</div><div class="l">Insignias generadas</div></div>
+          <div class="kpi"><div class="v" id="ed-scans">0</div><div class="l">Escaneos</div></div>
+          <div class="kpi"><div class="v" id="ed-rank">—</div><div class="l">Puesto en el ranking</div></div>
+        </div>
+        <div class="card" style="margin-top:.7rem;">
+          <h4 style="font-size:.9rem;margin-bottom:.5rem;">Día 1 vs Día 2 — insignias</h4>
+          <div id="edDayChart"></div>
+        </div>
+        <div class="card">
+          <h4 style="font-size:.9rem;margin-bottom:.5rem;">Comparación con el promedio del evento</h4>
+          <div id="edCompare"></div>
+        </div>
+        <div class="note n-info tiny">Solo ves datos <b>agregados</b>. Los datos personales de quienes escanearon tu QR no se comparten, salvo autorización expresa de cada persona.</div>
+      </section>
+
+      <!-- 28 estadísticas -->
+      <section class="screen" data-sc="emp-estadisticas">
+        <div class="schead"><h2>Estadísticas</h2></div>
+        <div class="card"><h4 style="font-size:.9rem;margin-bottom:.5rem;">Insignias por hora</h4><div id="edHourChart"></div>
+          <div class="legend"><span><i style="background:var(--accent);"></i>Día 1</span><span><i style="background:var(--event);"></i>Día 2</span></div></div>
+        <div class="card"><h4 style="font-size:.9rem;margin-bottom:.5rem;">Mis mejores horas</h4><div id="edPeak"></div></div>
+        <div class="card"><h4 style="font-size:.9rem;margin-bottom:.5rem;">Contactos habilitados</h4>
+          <div class="kv"><span>Personas con tu insignia</span><span class="mono" id="edCtTot">—</span></div>
+          <div class="kv"><span>Autorizaron compartir contacto</span><span class="mono" id="edCtOk">—</span></div>
+          <p class="tiny muted" style="margin-top:.4rem;">Solo estas personas te habilitaron a contactarlas. El resto permanece anónimo para tu negocio.</p>
+        </div>
+      </section>
+
+      <!-- 29 interacciones -->
+      <section class="screen" data-sc="emp-interacciones">
+        <div class="schead"><h2>Interacciones</h2></div>
+        <div class="note n-info tiny" style="margin-bottom:.6rem;">Vista agregada y anonimizada. No se listan personas identificables.</div>
+        <div class="card tw"><table><thead><tr><th>Hora</th><th>Día</th><th>Evento</th><th>Resultado</th></tr></thead><tbody id="empIntTable"></tbody></table></div>
+      </section>
+
+    </div>
+    <nav class="vnav" id="empTabs">
+      <button data-go="emp-dashboard" class="active"><span class="i">📊</span>Panel</button>
+      <button data-go="emp-perfil"><span class="i">🏬</span>Perfil</button>
+      <button data-go="emp-qr"><span class="i">🔳</span>Mi QR</button>
+      <button data-go="emp-interacciones"><span class="i">🔁</span>Interac.</button>
+      <button data-go="emp-estadisticas"><span class="i">📈</span>Stats</button>
+      <button data-go="emp-dinamica"><span class="i">⚙️</span>Condición</button>
+    </nav>
+  </div>
+</div>
+
+<!-- ================= PUNTO DE AYUDA ================= -->
+<div class="browser hide" id="app-ayuda" style="--vw:560px;">
+  <div class="bchrome">
+    <div class="bdots"><i></i><i></i><i></i></div>
+    <div class="burl"><span class="lock">🔒</span> itera.pe<b>/staff/sabores-y-sellos</b> · Punto de Ayuda</div>
+  </div>
+  <div class="bviewport">
+    <div class="vbody" id="ayudaBody">
+
+      <section class="screen active" data-sc="ay-home">
+        <div class="schead"><h2>Punto de Ayuda</h2></div>
+        <p class="tiny muted" style="margin-bottom:.8rem;">Interfaz de staff. Una acción por pantalla, todo en menos de 20 segundos.</p>
+        <div class="stack">
+          <button class="btn btn-event btn-block" data-go="ay-rapido">➕ Registro rápido (no se registró antes)</button>
+          <button class="btn btn-line btn-block" data-go="ay-validar">✅ Validar ingreso</button>
+          <button class="btn btn-line btn-block" data-go="ay-buscar">🔎 Buscar persona por DNI</button>
+          <button class="btn btn-line btn-block" data-go="ay-revincular">📲 Perdió el acceso / cambió de celular</button>
+          <button class="btn btn-line btn-block" data-go="ay-qr">🖼️ Problema con el QR</button>
+          <button class="btn btn-line btn-block" data-go="ay-completar">✏️ Completar registro</button>
+        </div>
+        <div class="soft tiny muted" style="margin-top:.8rem;"><b>Regla operativa:</b> nunca se bloquea el ingreso por un registro incompleto. Se crea el mínimo, se deja entrar, y la persona completa después.</div>
+      </section>
+
+      <section class="screen" data-sc="ay-rapido">
+        <div class="schead"><button class="back" data-go="ay-home">‹</button><h2>Registro rápido</h2></div>
+        <p class="tiny muted" style="margin-bottom:.7rem;">Solo DNI y nombre. La persona completa el resto después desde su celular.</p>
+        <form id="formRapido" class="stack">
+          <div><label>DNI</label><input type="text" id="rp-dni" inputmode="numeric" required></div>
+          <div><label>Nombre</label><input type="text" id="rp-nom" required></div>
+          <div><label>Celular (opcional, para enviarle el enlace)</label><input type="tel" id="rp-cel"></div>
+          <label class="consent"><input type="checkbox" id="rp-cons">
+            <span class="ct"><b>La persona aceptó términos y política de privacidad</b>Staff confirma haber mostrado y leído el aviso. Queda registrado con hora y usuario de staff.</span></label>
+          <button class="btn btn-event btn-block" type="submit">Crear acceso y emitir ticket</button>
+        </form>
+        <div id="rapidoResult" style="margin-top:.8rem;"></div>
+      </section>
+
+      <section class="screen" data-sc="ay-validar">
+        <div class="schead"><button class="back" data-go="ay-home">‹</button><h2>Validar ingreso</h2></div>
+        <input type="search" id="ay-val-q" placeholder="DNI o código del ticket" style="font-size:1rem;padding:.8rem;margin-bottom:.6rem;">
+        <div id="ayValResult"></div>
+      </section>
+
+      <section class="screen" data-sc="ay-buscar">
+        <div class="schead"><button class="back" data-go="ay-home">‹</button><h2>Buscar persona</h2></div>
+        <input type="search" id="ay-q" placeholder="DNI, nombre o código" style="margin-bottom:.6rem;">
+        <div class="list" id="ayBuscarList"></div>
+      </section>
+
+      <section class="screen" data-sc="ay-revincular">
+        <div class="schead"><button class="back" data-go="ay-home">‹</button><h2>Re-vincular dispositivo</h2></div>
+        <div class="note n-warn tiny" style="margin-bottom:.7rem;"><b>Verifica el DNI físico antes de continuar.</b> Esta acción da acceso a las insignias de la persona, que valen tickets del sorteo. Queda registrada con tu usuario de staff.</div>
+        <input type="search" id="ay-rev-q" placeholder="DNI de la persona" style="margin-bottom:.6rem;">
+        <div id="ayRevResult"></div>
+      </section>
+
+      <section class="screen" data-sc="ay-qr">
+        <div class="schead"><button class="back" data-go="ay-home">‹</button><h2>Problema con el QR</h2></div>
+        <div class="stack">
+          <div class="soft tiny"><b>No escanea:</b> sube el brillo del celular, limpia el lente, quita el protector de pantalla.</div>
+          <div class="soft tiny"><b>Código no reconocido:</b> valida por DNI y reemite el ticket desde Buscar persona.</div>
+          <div class="soft tiny"><b>Sin batería:</b> valida por DNI. El ticket no depende del celular.</div>
+          <button class="btn btn-line btn-block" data-go="ay-validar">Ir a validar por DNI</button>
+        </div>
+      </section>
+
+      <section class="screen" data-sc="ay-completar">
+        <div class="schead"><button class="back" data-go="ay-home">‹</button><h2>Completar registro</h2></div>
+        <input type="search" id="ay-cp-q" placeholder="Buscar por DNI" style="margin-bottom:.6rem;">
+        <div id="ayCpResult"></div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================= ORGANIZADOR ================= -->
+<div class="browser wide hide" id="app-organizador">
+  <div class="bchrome">
+    <div class="bdots"><i></i><i></i><i></i></div>
+    <div class="burl"><span class="lock">🔒</span> itera.pe<b>/consola/sabores-y-sellos</b> · Organizador</div>
+  </div>
+  <div class="bviewport">
+    <div class="desk">
+      <nav class="side" id="orgNav">
+        <div class="sg">Operación</div>
+        <button data-go="org-dashboard" class="active">📊 Dashboard general</button>
+        <button data-go="org-indicadores">📇 Indicadores del evento</button>
+        <button data-go="org-dia">📆 Indicadores por día</button>
+        <button data-go="org-hora">⏱️ Por hora y zona</button>
+        <div class="sg">Entidades</div>
+        <button data-go="org-personas">👥 Personas</button>
+        <button data-go="org-empresas">🏬 Empresas</button>
+        <button data-go="org-rubros">🏷️ Rubros y mínimos</button>
+        <button data-go="org-ranking">🏆 Ranking</button>
+        <div class="sg">Dinámica</div>
+        <button data-go="org-interacciones">🔁 Interacciones</button>
+        <button data-go="org-insignias">🏅 Insignias</button>
+        <button data-go="org-tickets">🎟️ Tickets</button>
+        <button data-go="org-sorteo">🎲 Sorteo</button>
+        <div class="sg">Gestión</div>
+        <button data-go="org-reportes">📄 Reportes</button>
+        <button data-go="org-config">⚙️ Configuración</button>
+        <button data-go="org-privacidad">🔒 Privacidad y datos</button>
+        <button data-go="org-login">🚪 Login</button>
+      </nav>
+      <div class="dmain" id="orgMain">
+
+        <!-- 30 login -->
+        <section class="dsc" data-sc="org-login">
+          <div class="card" style="max-width:370px;margin:2rem auto;">
+            <div class="center" style="margin-bottom:.9rem;"><div style="font-size:2rem;">🔒</div>
+              <h2 style="font-size:1.1rem;margin-top:.2rem;">Consola del organizador</h2>
+              <p class="tiny muted">Acceso con doble factor</p></div>
+            <div class="field"><label>Correo corporativo</label><input type="email" value="control@saboresysellos.pe"></div>
+            <div class="field"><label>Código 2FA (app autenticadora)</label><input type="text" inputmode="numeric" value="••• •••"></div>
+            <button class="btn btn-accent btn-block" data-go="org-dashboard">Ingresar</button>
+            <p class="tiny muted center" style="margin-top:.5rem;">Acceso por rol · principio de mínimo necesario · toda consulta a datos personales queda en auditoría.</p>
+          </div>
+        </section>
+
+        <!-- 31 dashboard general -->
+        <section class="dsc active" data-sc="org-dashboard">
+          <div class="between" style="margin-bottom:.8rem;">
+            <div><p class="eyebrow blue">Sabores &amp; Sellos · 2 días</p><h2 style="font-size:1.35rem;">Dashboard general</h2></div>
+            <span class="pill p-neutral">Ejemplo ilustrativo</span>
+          </div>
+          <div class="kpis" id="orgKpis"></div>
+          <div class="pg">
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.6rem;">Funnel del evento</h4><div id="orgFunnel"></div>
+              <p class="tiny muted" style="margin-top:.5rem;">Dónde se pierde participación entre el enlace y la insignia.</p></div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.6rem;">Ingresos por hora</h4><div id="orgHero"></div>
+              <div class="legend"><span><i style="background:var(--accent);"></i>Día 1</span><span><i style="background:var(--event);"></i>Día 2</span></div></div>
+          </div>
+          <div class="pg">
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.6rem;">Top puestos por insignias</h4><div id="orgTopEmp"></div></div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.6rem;">Distribución de insignias por persona</h4><div id="orgDist"></div>
+              <p class="tiny muted" style="margin-top:.5rem;">% de asistentes que obtuvieron al menos N insignias.</p></div>
+          </div>
+          <div class="card" style="margin-top:.8rem;">
+            <div class="between"><h4 style="font-size:.95rem;">Canal propio de WhatsApp</h4><span class="pill p-good">Activo</span></div>
+            <div class="pg" style="margin-top:.5rem;">
+              <div><div class="kv"><span>Personas con consentimiento de avisos</span><span class="mono" id="waOptin">—</span></div>
+                <div class="kv"><span>% del total registrado</span><span class="mono" id="waPct">—</span></div>
+                <div class="kv"><span>Autorizaron compartir contacto con puestos</span><span class="mono" id="waShare">—</span></div></div>
+              <div class="soft tiny muted">Como el registro ya pide el celular, el organizador queda con un canal propio para empujar tráfico durante el evento y para reactivar en la siguiente edición — solo sobre quienes lo consintieron expresamente.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 32 indicadores del evento -->
+        <section class="dsc" data-sc="org-indicadores">
+          <h2 style="font-size:1.3rem;">Indicadores del evento</h2>
+          <div class="pg">
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Registro</h4><div id="indReg"></div></div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Ingreso</h4><div id="indIng"></div></div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Interacción</h4><div id="indInt"></div></div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Dinámica</h4><div id="indDin"></div></div>
+          </div>
+        </section>
+
+        <!-- 33 indicadores por día -->
+        <section class="dsc" data-sc="org-dia">
+          <h2 style="font-size:1.3rem;">Indicadores por día</h2>
+          <div class="card tw" style="margin-top:.7rem;"><table id="tblDia">
+            <thead><tr><th>Indicador</th><th class="num">Día 1</th><th class="num">Día 2</th><th class="num">Total</th><th class="num">Var.</th></tr></thead>
+            <tbody></tbody></table></div>
+          <div class="pg">
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Escaneos por hora</h4><div id="diaScans"></div>
+              <div class="legend"><span><i style="background:var(--accent);"></i>Día 1</span><span><i style="background:var(--event);"></i>Día 2</span></div></div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Insignias por hora</h4><div id="diaIns"></div>
+              <div class="legend"><span><i style="background:var(--accent);"></i>Día 1</span><span><i style="background:var(--event);"></i>Día 2</span></div></div>
+          </div>
+        </section>
+
+        <!-- 34 por hora y zona -->
+        <section class="dsc" data-sc="org-hora">
+          <h2 style="font-size:1.3rem;">Actividad por hora y zona</h2>
+          <div class="card" style="margin-top:.7rem;"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Escaneos por hora — ambos días</h4><div id="horaChart"></div>
+            <div class="legend"><span><i style="background:var(--accent);"></i>Día 1</span><span><i style="background:var(--event);"></i>Día 2</span></div></div>
+          <div class="pg">
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Mapa del recinto — calor de interacción</h4><div id="venueHeat"></div>
+              <p class="tiny muted" style="margin-top:.4rem;">Tamaño y color del punto = insignias generadas en ese stand.</p></div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Horas pico</h4><div id="peakList"></div>
+              <div class="note n-info tiny" style="margin-top:.6rem;">Las dos crestas (almuerzo y noche) sirven para programar activaciones y reforzar staff en puerta.</div></div>
+          </div>
+        </section>
+
+        <!-- 35 personas -->
+        <section class="dsc" data-sc="org-personas">
+          <div class="between"><h2 style="font-size:1.3rem;">Personas</h2><span class="pill p-blue">Acceso mínimo necesario</span></div>
+          <div class="note n-info tiny" style="margin:.5rem 0 .8rem;">Vista operativa con datos reducidos. La exportación de datos personales es restringida y trazable; cada consulta queda en el registro de auditoría.</div>
+          <div class="kpis" id="perKpis"></div>
+          <div class="card tw" style="margin-top:.8rem;">
+            <table><thead><tr><th>Persona</th><th>Origen</th><th>Perfil</th><th>Ingreso</th><th class="num">Insignias</th><th class="num">Tickets</th><th>Avisos WA</th></tr></thead>
+            <tbody id="perTable"></tbody></table>
+          </div>
+        </section>
+
+        <!-- 36 empresas -->
+        <section class="dsc" data-sc="org-empresas">
+          <h2 style="font-size:1.3rem;">Empresas participantes</h2>
+          <div class="card tw" style="margin-top:.7rem;">
+            <table><thead><tr><th>Puesto</th><th>Rubro</th><th class="num">Mínimo</th><th>Stand</th><th class="num">Escaneos</th><th class="num">Insignias</th><th class="num">Conversión</th><th>Estado</th></tr></thead>
+            <tbody id="orgEmpTable"></tbody></table>
+          </div>
+          <p class="tiny muted" style="margin-top:.5rem;">Conversión = insignias / escaneos. Una conversión baja suele indicar reintentos del mismo QR o un mínimo demasiado alto para el rubro.</p>
+        </section>
+
+        <!-- rubros y mínimos -->
+        <section class="dsc" data-sc="org-rubros">
+          <h2 style="font-size:1.3rem;">Rubros y montos mínimos</h2>
+          <p class="tiny muted" style="margin:.3rem 0 .8rem;">El organizador define el rango permitido por rubro; cada negocio elige su monto dentro de ese rango. Así la dinámica queda pareja entre un café y una tienda de ropa.</p>
+          <div class="card tw">
+            <table><thead><tr><th>Rubro</th><th class="num">Mín. permitido</th><th class="num">Máx. permitido</th><th class="num">Sugerido</th><th class="num">Puestos</th><th class="num">Promedio fijado</th><th class="num">Insignias</th></tr></thead>
+            <tbody id="rubroTable"></tbody></table>
+          </div>
+          <div class="pg">
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Insignias por rubro</h4><div id="rubroIns"></div></div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Monto mínimo vs. insignias generadas</h4><div id="rubroScatter"></div>
+              <p class="tiny muted" style="margin-top:.4rem;">Cada punto es un puesto. Sirve para ver si un mínimo alto está frenando la participación.</p></div>
+          </div>
+        </section>
+
+        <!-- 37 ranking -->
+        <section class="dsc" data-sc="org-ranking">
+          <h2 style="font-size:1.3rem;">Ranking de empresas</h2>
+          <p class="tiny muted" style="margin:.3rem 0 .7rem;">Puestos más interactuados, por insignias generadas.</p>
+          <div class="card tw">
+            <table><thead><tr><th>#</th><th>Puesto</th><th>Rubro</th><th class="num">Insignias</th><th class="num">Usuarios únicos</th><th class="num">Escaneos</th><th class="num">% participación</th></tr></thead>
+            <tbody id="rankTable"></tbody></table>
+          </div>
+          <div class="pg">
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Menor interacción — requieren apoyo</h4><div id="rankLow"></div>
+              <div class="note n-warn tiny" style="margin-top:.6rem;">Accionable: reubicar, bajar el mínimo dentro del rango de su rubro, o incluirlos en una activación dirigida.</div></div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Participación por rubro</h4><div id="rankCat"></div></div>
+          </div>
+        </section>
+
+        <!-- 38 interacciones -->
+        <section class="dsc" data-sc="org-interacciones">
+          <h2 style="font-size:1.3rem;">Interacciones</h2>
+          <div class="kpis" id="intKpis" style="margin-top:.7rem;"></div>
+          <div class="pg">
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Escaneos por rubro</h4><div id="intCat"></div></div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Escaneos por hora</h4><div id="intHora"></div>
+              <div class="legend"><span><i style="background:var(--accent);"></i>Día 1</span><span><i style="background:var(--event);"></i>Día 2</span></div></div>
+          </div>
+          <div class="card tw" style="margin-top:.8rem;">
+            <div class="between" style="margin-bottom:.5rem;"><h4 style="font-size:.95rem;">Interacciones de la demo (en vivo)</h4><span class="pill p-good">Datos reales de esta sesión</span></div>
+            <table><thead><tr><th>Hora</th><th>Puesto</th><th>Día</th><th>Resultado</th><th>Dispositivo</th></tr></thead><tbody id="intLive"></tbody></table>
+          </div>
+        </section>
+
+        <!-- 39 insignias -->
+        <section class="dsc" data-sc="org-insignias">
+          <h2 style="font-size:1.3rem;">Insignias</h2>
+          <div class="kpis" id="insKpis" style="margin-top:.7rem;"></div>
+          <div class="pg">
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Insignias por puesto</h4><div id="insByEmp"></div></div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Insignias por hora</h4><div id="insByHour"></div>
+              <div class="legend"><span><i style="background:var(--accent);"></i>Día 1</span><span><i style="background:var(--event);"></i>Día 2</span></div></div>
+          </div>
+        </section>
+
+        <!-- 40 tickets -->
+        <section class="dsc" data-sc="org-tickets">
+          <h2 style="font-size:1.3rem;">Tickets del sorteo</h2>
+          <div class="kpis" id="tkKpis" style="margin-top:.7rem;"></div>
+          <div class="pg">
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Distribución de tickets por persona</h4><div id="tkDist"></div></div>
+            <div class="card tw"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Mayor participación (demo)</h4>
+              <table><thead><tr><th>Persona</th><th class="num">Insignias</th><th class="num">Tickets</th><th>Elegible</th></tr></thead><tbody id="tkTop"></tbody></table></div>
+          </div>
+        </section>
+
+        <!-- 41 sorteo -->
+        <section class="dsc" data-sc="org-sorteo">
+          <div class="between"><h2 style="font-size:1.3rem;">Sorteo</h2>
+            <button class="btn btn-accent btn-sm" id="btnAbrirProy">▶ Abrir modo proyección</button></div>
+          <div class="kpis" id="soKpis" style="margin-top:.7rem;"></div>
+          <div class="card" style="margin-top:.8rem;">
+            <h4 style="font-size:.95rem;margin-bottom:.6rem;">Reglas de elegibilidad</h4>
+            <div class="row wrap" style="align-items:flex-end;">
+              <div style="flex:1;min-width:12rem;"><label>Regla</label>
+                <select id="soRegla">
+                  <option value="1">≥ 1 insignia</option>
+                  <option value="2">≥ 2 insignias</option>
+                  <option value="3">≥ 3 insignias</option>
+                  <option value="ingreso">Ingreso validado + ≥ 1 insignia</option>
+                  <option value="rubros">≥ 3 insignias de rubros distintos</option>
+                </select></div>
+              <div style="flex:1;min-width:12rem;"><label>Premio</label><input type="text" id="soPremio" placeholder="Ej. Cena para dos"></div>
+              <button class="btn btn-line" id="btnSortear">Sortear aquí</button>
+            </div>
+            <div id="soResult" style="margin-top:.8rem;"></div>
+          </div>
+          <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Ganadores</h4><div id="soWinners" class="list"></div></div>
+          <div class="note n-info tiny" style="margin-top:.7rem;">El sorteo es <b>ponderado por insignias</b>: quien tiene 10 insignias tiene 10 veces más probabilidad que quien tiene 1. El modo proyección es la pantalla para el público.</div>
+        </section>
+
+        <!-- 42 reportes -->
+        <section class="dsc" data-sc="org-reportes">
+          <h2 style="font-size:1.3rem;">Reportes</h2>
+          <div class="pg">
+            <div class="card"><h4 style="font-size:.95rem;">Reporte general del evento</h4><p class="tiny muted" style="margin:.3rem 0 .7rem;">KPIs, funnel, ranking, día y hora.</p><button class="btn btn-line btn-sm" data-report="general">Generar CSV</button></div>
+            <div class="card"><h4 style="font-size:.95rem;">Reporte por empresa</h4><p class="tiny muted" style="margin:.3rem 0 .7rem;">Interacción agregada por expositor. Entregable comercial post-evento.</p><button class="btn btn-line btn-sm" data-report="empresa">Generar CSV</button></div>
+            <div class="card"><h4 style="font-size:.95rem;">Padrón del sorteo</h4><p class="tiny muted" style="margin:.3rem 0 .7rem;">Elegibles y tickets. Acceso restringido y auditado.</p><button class="btn btn-line btn-sm" data-report="sorteo">Generar CSV</button></div>
+            <div class="card"><h4 style="font-size:.95rem;">Registro de consentimientos</h4><p class="tiny muted" style="margin:.3rem 0 .7rem;">Evidencia de consentimiento, versión y fecha.</p><button class="btn btn-line btn-sm" data-report="consent">Generar CSV</button></div>
+          </div>
+          <div class="card"><div class="between"><h4 style="font-size:.95rem;">Salida</h4><button class="btn btn-line btn-sm" id="btnCopyReport">Copiar</button></div>
+            <textarea id="reportOut" rows="8" readonly class="mono" style="font-size:.7rem;margin-top:.5rem;"></textarea></div>
+        </section>
+
+        <!-- 43 configuración -->
+        <section class="dsc" data-sc="org-config">
+          <h2 style="font-size:1.3rem;">Configuración</h2>
+          <div class="pg">
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Evento</h4>
+              <div class="field"><label>Nombre</label><input type="text" value="Feria Gastronómica Sabores &amp; Sellos"></div>
+              <div class="g2"><div class="field"><label>Día 1</label><input type="text" value="Sábado 6 de setiembre"></div>
+                <div class="field"><label>Día 2</label><input type="text" value="Domingo 7 de setiembre"></div></div>
+              <div class="field"><label>Color de marca del evento</label><input type="text" value="#FF5A1F"></div>
+              <p class="tiny muted">itera opera la plataforma; el evento conserva su identidad visual.</p>
+            </div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Reglas antifraude</h4>
+              <label class="consent"><input type="checkbox" checked><span class="ct"><b>1 insignia por puesto por persona</b></span></label>
+              <label class="consent"><input type="checkbox" checked><span class="ct"><b>Exigir ingreso validado para escanear</b></span></label>
+              <label class="consent"><input type="checkbox" checked><span class="ct"><b>QR con token rotativo (60s)</b></span></label>
+              <label class="consent"><input type="checkbox" checked><span class="ct"><b>Registrar dispositivo y sesión en cada escaneo</b></span></label>
+              <div class="field" style="margin-top:.6rem;"><label>Ventana anti-repetición del mismo QR (segundos)</label><input type="number" value="30"></div>
+            </div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Acceso de asistentes</h4>
+              <div class="kv"><span>Método</span><span>Sin contraseña · sesión por dispositivo</span></div>
+              <div class="kv"><span>Recuperación</span><span>Enlace de un solo uso</span></div>
+              <div class="kv"><span>Canal de recuperación</span><span>WhatsApp y correo</span></div>
+              <div class="kv"><span>Vigencia del enlace</span><span>15 minutos</span></div>
+              <div class="kv"><span>Re-vinculación en Punto de Ayuda</span><span class="pill p-good">Habilitada</span></div>
+              <p class="tiny muted" style="margin-top:.4rem;">No se almacenan contraseñas, por lo que no hay superficie de fuga de credenciales.</p>
+            </div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Roles y permisos</h4>
+              <div class="kv"><span>Staff de puerta</span><span>Validar ingreso</span></div>
+              <div class="kv"><span>Punto de Ayuda</span><span>Registro rápido, re-vincular</span></div>
+              <div class="kv"><span>Analista</span><span>Solo agregados</span></div>
+              <div class="kv"><span>Administrador</span><span>Todo + exportación auditada</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 44 privacidad y datos -->
+        <section class="dsc" data-sc="org-privacidad">
+          <h2 style="font-size:1.3rem;">Privacidad y gestión de datos</h2>
+          <div class="pg">
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Principios aplicados</h4>
+              <div class="kv"><span>Privacidad desde el diseño y por defecto</span><span class="pill p-good">✓</span></div>
+              <div class="kv"><span>Minimización de datos</span><span class="pill p-good">✓</span></div>
+              <div class="kv"><span>Finalidad específica e informada</span><span class="pill p-good">✓</span></div>
+              <div class="kv"><span>Consentimientos separados</span><span class="pill p-good">✓</span></div>
+              <div class="kv"><span>Dashboards agregados por defecto</span><span class="pill p-good">✓</span></div>
+              <div class="kv"><span>Conservación limitada (12 meses)</span><span class="pill p-good">✓</span></div>
+              <div class="kv"><span>Sin contraseñas almacenadas</span><span class="pill p-good">✓</span></div>
+            </div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Documentos vigentes</h4>
+              <div class="list">
+                <div class="item"><div class="gr"><b>Términos y condiciones</b><span>v1.0 · publicado</span></div><button class="btn btn-line btn-sm">Ver</button></div>
+                <div class="item"><div class="gr"><b>Política de privacidad</b><span>v1.0 · publicado</span></div><button class="btn btn-line btn-sm">Ver</button></div>
+                <div class="item"><div class="gr"><b>Aviso de privacidad</b><span>v1.0 · en el formulario</span></div><button class="btn btn-line btn-sm">Ver</button></div>
+                <div class="item"><div class="gr"><b>Contrato de encargo (itera)</b><span>v1.0 · firmado</span></div><button class="btn btn-line btn-sm">Ver</button></div>
+              </div>
+            </div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Consentimientos (agregado)</h4><div id="privConsent"></div></div>
+            <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Solicitudes de derechos</h4>
+              <div class="tw"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Estado</th></tr></thead><tbody id="privDR"></tbody></table></div>
+              <p class="tiny muted" style="margin-top:.4rem;">Plazo objetivo de atención: 10 días hábiles.</p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /stage -->
+
+<p style="text-align:center;color:var(--text-faint);font-size:.72rem;max-width:860px;margin:0 auto;padding:0 1.5rem 2.5rem;line-height:1.65;">
+  <b style="color:var(--text-muted);">itera · Plataforma de Eventos — prototipo interactivo.</b>
+  Las métricas grandes de los paneles son <b style="color:var(--blue-soft);">ejemplo ilustrativo</b>; el flujo del asistente (registro → ticket → ingreso → escaneo → insignia → sorteo) es funcional y se guarda en este navegador.
+  Motor QR propio, sin servidor. Privacidad desde el diseño, referencia Ley N° 29733 (Perú).
+</p>
+
+<!-- overlay insignia -->
+<div class="ub" id="ub">
+  <div class="ucard">
+    <p class="eyebrow">¡Insignia desbloqueada!</p>
+    <div class="medal" id="ubMedal"><span class="em">🍝</span></div>
+    <h3 id="ubTitle" style="font-size:1.15rem;">—</h3>
+    <div class="plus">🎟️ +1 ticket para el sorteo</div>
+    <p class="tiny muted" id="ubMsg">¡Sigue explorando el evento!</p>
+    <button class="btn btn-event btn-block" id="ubClose" style="margin-top:.9rem;">Continuar</button>
+  </div>
+</div>
+
+<!-- MODO PROYECCIÓN -->
+<div class="proj" id="proj">
+  <div class="ptop">
+    <img src="../assets/itera-isotype.png" alt="" class="iso" onerror="this.style.display='none'">
+    <span class="wm">I&nbsp;T&nbsp;<span class="bar-e"></span>&nbsp;R&nbsp;A</span>
+    <div class="grow"></div>
+    <span class="pevent">Sabores &amp; Sellos · Sorteo final</span>
+  </div>
+  <div class="pstage">
+    <div class="pprize" id="pPrize">Listos para sortear</div>
+    <div class="pwindow">
+      <div class="pname" id="pName">—</div>
+      <div class="psub" id="pSub">Tickets en juego: <b class="mono" id="pTickets">0</b> · Participantes elegibles: <b class="mono" id="pElig">0</b></div>
+    </div>
+    <div class="pctl">
+      <input type="text" id="pPrizeInput" placeholder="Nombre del premio">
+      <button class="pspin" id="pSpin">🎲 GIRAR</button>
+      <button class="pghost" id="pFull">Pantalla completa</button>
+      <button class="pghost" id="pClose">Salir</button>
+    </div>
+  </div>
+  <div class="pwin" id="pWinners"></div>
+  <p class="pfoot">Sorteo ponderado: cada insignia obtenida es un ticket. Operado con <b style="color:var(--blue-soft);">itera</b>.</p>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+/* ===================================================================
+   Motor QR propio — versiones 1-5, EC nivel L. Verificado con
+   decodificador independiente (ver qr-test.html).
+   =================================================================== */
+const QR=(function(){
+  const EXP=new Array(512),LOG=new Array(256);
+  (function(){let x=1;for(let i=0;i<255;i++){EXP[i]=x;LOG[x]=i;x<<=1;if(x&0x100)x^=0x11D;}for(let i=255;i<512;i++)EXP[i]=EXP[i-255];})();
+  function gmul(a,b){if(a===0||b===0)return 0;return EXP[LOG[a]+LOG[b]];}
+  function rsGen(n){let p=[1];for(let i=0;i<n;i++){const r=EXP[i];const nx=new Array(p.length+1).fill(0);nx[0]=p[0];
+    for(let k=1;k<p.length;k++)nx[k]=p[k]^gmul(r,p[k-1]);nx[p.length]=gmul(r,p[p.length-1]);p=nx;}return p;}
+  function rsEnc(d,ec){const g=rsGen(ec);const b=d.concat(new Array(ec).fill(0));
+    for(let i=0;i<d.length;i++){const c=b[i];if(c===0)continue;for(let j=0;j<g.length;j++)b[i+j]^=gmul(g[j],c);}return b.slice(d.length);}
+  const V={1:{total:26,ec:7,size:21},2:{total:44,ec:10,size:25},3:{total:70,ec:15,size:29},4:{total:100,ec:20,size:33},5:{total:134,ec:26,size:37}};
+  const AL={2:[6,18],3:[6,22],4:[6,26],5:[6,30]};
+  const MAXB=V[5].total-V[5].ec-2;
+  function bestV(n){if(n>MAXB)throw new Error('payload muy largo');for(const v of[1,2,3,4,5]){if(n<=(V[v].total-V[v].ec)-2)return v;}return 5;}
+  function bits(bytes,cap){let s='0100'+bytes.length.toString(2).padStart(8,'0');for(const b of bytes)s+=b.toString(2).padStart(8,'0');
+    const tot=cap*8;s+='0'.repeat(Math.max(0,Math.min(4,tot-s.length)));while(s.length%8!==0)s+='0';
+    const pad=['11101100','00010001'];let i=0;while(s.length<tot){s+=pad[i%2];i++;}
+    const cw=[];for(let k=0;k<s.length;k+=8)cw.push(parseInt(s.slice(k,k+8),2));return cw;}
+  function fmtBits(ec,mask){let d=(ec<<3)|mask;let g=d<<10;for(let i=14;i>=10;i--){if(g&(1<<i))g^=(0x537<<(i-10));}
+    return (((d<<10)|g)^0x5412).toString(2).padStart(15,'0').split('').map(c=>c==='1');}
+  function build(ver,dcw,ecLevel){
+    const size=V[ver].size;
+    const m=Array.from({length:size},()=>new Array(size).fill(null));
+    const res=Array.from({length:size},()=>new Array(size).fill(false));
+    const put=(r,c,v)=>{if(r>=0&&r<size&&c>=0&&c<size){m[r][c]=v;res[r][c]=true;}};
+    const rsv=(r,c)=>{if(r>=0&&r<size&&c>=0&&c<size)res[r][c]=true;};
+    function finder(r0,c0){for(let r=-1;r<=7;r++)for(let c=-1;c<=7;c++){const rr=r0+r,cc=c0+c;
+      if(rr<0||cc<0||rr>=size||cc>=size)continue;let on=false;
+      if(r>=0&&r<=6&&c>=0&&c<=6)on=(r===0||r===6||c===0||c===6||(r>=2&&r<=4&&c>=2&&c<=4));put(rr,cc,on);}}
+    finder(0,0);finder(0,size-7);finder(size-7,0);
+    const al=AL[ver];
+    if(al){const co=[];for(const a of al)for(const b of al)co.push([a,b]);
+      const z=[[-1,7,-1,7],[-1,7,size-8,size],[size-8,size,-1,7]];
+      const ov=(r0,c0)=>{const r1=r0-2,r2=r0+2,c1=c0-2,c2=c0+2;return z.some(([a,b,c,d])=>r1<=b&&r2>=a&&c1<=d&&c2>=c);};
+      for(const[r0,c0]of co){if(ov(r0,c0))continue;
+        for(let r=-2;r<=2;r++)for(let c=-2;c<=2;c++)put(r0+r,c0+c,Math.max(Math.abs(r),Math.abs(c))!==1);}}
+    for(let i=8;i<size-8;i++){if(m[6][i]===null)put(6,i,i%2===0);if(m[i][6]===null)put(i,6,i%2===0);}
+    put(size-8,8,true);
+    for(let i=0;i<9;i++){rsv(8,i);rsv(i,8);}
+    for(let i=0;i<8;i++){rsv(8,size-1-i);rsv(size-1-i,8);}
+    const bs=[];for(const cw of dcw)for(let b=7;b>=0;b--)bs.push((cw>>b)&1);
+    let bi=0,dir=-1,col=size-1;
+    while(col>0){if(col===6)col--;
+      for(let i=0;i<size;i++){const row=dir===-1?size-1-i:i;
+        for(const c of[col,col-1]){if(res[row][c])continue;const b=bi<bs.length?bs[bi]:0;bi++;m[row][c]=!!b;}}
+      dir=-dir;col-=2;}
+    for(let r=0;r<size;r++)for(let c=0;c<size;c++){if(!res[r][c]&&((r+c)%2===0))m[r][c]=!m[r][c];}
+    const fb=fmtBits(ecLevel,0);
+    const fA=[[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
+    for(let i=0;i<15;i++){const[r,c]=fA[i];m[r][c]=fb[i];}
+    const fB=[[size-1,8],[size-2,8],[size-3,8],[size-4,8],[size-5,8],[size-6,8],[size-7,8],
+              [8,size-8],[8,size-7],[8,size-6],[8,size-5],[8,size-4],[8,size-3],[8,size-2],[8,size-1]];
+    for(let i=0;i<15;i++){const[r,c]=fB[i];m[r][c]=fb[i];}
+    put(size-8,8,true);
+    return m;
+  }
+  function encode(text){
+    const by=Array.from(new TextEncoder().encode(text));
+    const ver=bestV(by.length),inf=V[ver],cap=inf.total-inf.ec;
+    const d=bits(by,cap),ec=rsEnc(d,inf.ec);
+    return {matrix:build(ver,d.concat(ec),1),size:inf.size};
+  }
+  return {encode};
+})();
+function drawQR(text,canvas,scale){
+  if(!canvas)return;
+  try{
+    const {matrix,size}=QR.encode(text);const q=4;
+    canvas.width=(size+q*2)*scale;canvas.height=(size+q*2)*scale;
+    const x=canvas.getContext('2d');
+    x.fillStyle='#fff';x.fillRect(0,0,canvas.width,canvas.height);x.fillStyle='#111';
+    for(let r=0;r<size;r++)for(let c=0;c<size;c++)if(matrix[r][c])x.fillRect((c+q)*scale,(r+q)*scale,scale,scale);
+  }catch(e){console.warn('QR',e);}
+}
+
+/* ===================================================================
+   Datos
+   =================================================================== */
+const DB='itera_evt_v2';
+const el=id=>document.getElementById(id);
+const uid=()=>Math.random().toString(36).slice(2,10);
+const mkcode=p=>p+'-'+Math.random().toString(36).slice(2,8).toUpperCase();
+function deviceId(){let d;try{d=localStorage.getItem('itera_dev');}catch(e){}
+  if(!d){d='DEV-'+Math.random().toString(36).slice(2,7).toUpperCase();try{localStorage.setItem('itera_dev',d);}catch(e){}}return d;}
+
+/* rubros: el ORGANIZADOR define el rango, la EMPRESA elige su monto dentro del rango */
+const RUBROS=[
+  {id:'r1',nombre:'Restaurantes',      emoji:'🍽️',min:40,max:80, sug:50},
+  {id:'r2',nombre:'Comida rápida',     emoji:'🍔',min:15,max:40, sug:25},
+  {id:'r3',nombre:'Bebidas y cócteles',emoji:'🍹',min:25,max:45, sug:30},
+  {id:'r4',nombre:'Café y postres',    emoji:'☕',min:15,max:35, sug:20},
+  {id:'r5',nombre:'Ropa y textil',     emoji:'🧥',min:60,max:120,sug:80},
+  {id:'r6',nombre:'Bisutería',         emoji:'💍',min:30,max:60, sug:40},
+  {id:'r7',nombre:'Artesanía',         emoji:'🏺',min:40,max:90, sug:50},
+  {id:'r8',nombre:'Otros',             emoji:'🛍️',min:20,max:100,sug:30}
+];
+const rubro=id=>RUBROS.find(r=>r.id===id)||RUBROS[7];
+
+function empresasSeed(){
+  const raw=[
+    ['Sazón de la Nona','r1','🍝','#FF5A1F',50,55,40,.95,'Cocina peruana casera. Tallarines verdes y lomo saltado.'],
+    ['Cevichería El Muelle','r1','🐟','#0EA5E9',55,100,58,.86,'Ceviche del día, leche de tigre y chicharrón de pescado.'],
+    ['Parrilla del Sur','r1','🥩','#9A3412',60,120,32,.62,'Cortes a la brasa y anticuchos de corazón.'],
+    ['Bar Cítrico','r3','🍹','#10B981',30,195,38,.92,'Coctelería de autor con insumos amazónicos.'],
+    ['Cervecería Faro','r3','🍺','#CA8A04',30,245,55,.74,'Cerveza artesanal de barril, seis grifos rotativos.'],
+    ['Pisquería Quebranta','r3','🥃','#7C3AED',35,265,30,.5,'Pisco puro y chilcanos de la casa.'],
+    ['Anticuchos Doña Fina','r2','🍢','#B5179E',25,45,110,.9,'Anticuchos de corazón con papa dorada y choclo.'],
+    ['Burger Cumbre','r2','🍔','#F59E0B',30,100,102,.7,'Hamburguesas de res angus y papas rústicas.'],
+    ['Tacos La Frontera','r2','🌮','#EF4444',25,125,135,.6,'Tacos al pastor y quesadillas.'],
+    ['Café de Altura','r4','☕','#8B5E34',20,30,138,.66,'Café de origen de Villa Rica, tostado propio.'],
+    ['Dulcería Amelia','r4','🧁','#EC4899',20,75,140,.58,'Suspiro limeño, picarones y alfajores.'],
+    ['Heladería Polar','r4','🍦','#38BDF8',18,60,120,.54,'Helados artesanales de lúcuma y chirimoya.'],
+    ['Telar Andino','r5','🧶','#6C3BF4',80,190,110,.34,'Textiles de alpaca tejidos a mano en Puno.'],
+    ['Bisutería Luz','r6','💍','#F5A300',40,240,105,.44,'Joyería en plata y piedras semipreciosas.'],
+    ['Plata Viva','r6','📿','#64748B',45,270,135,.3,'Filigrana de plata de Catacaos.'],
+    ['Cerámica Sol','r7','🏺','#C2410C',50,205,138,.38,'Cerámica de Chulucanas pintada a mano.']
+  ];
+  return raw.map((r,i)=>{
+    const rb=rubro(r[1]);
+    return {
+      id:'e'+(i+1), nombre:r[0], razon:r[0]+' S.A.C.', rubroId:r[1], emoji:r[2], color:r[3],
+      montoMin:r[4], tipoCond:'compra_min',
+      ruc:'20'+(500000000+i*7919).toString().slice(0,9),
+      responsable:'—', tel:'01 '+(4000000+i*1117), whatsapp:'9'+(80000000+i*913),
+      email:'hola@'+r[0].toLowerCase().replace(/[^a-z]/g,'')+'.pe',
+      web:r[0].toLowerCase().replace(/[^a-z]/g,'')+'.pe',
+      ig:'@'+r[0].toLowerCase().replace(/[^a-z]/g,''),
+      descripcion:r[8],
+      stand:String.fromCharCode(65+Math.floor(i/6))+'-'+(10+(i%6)),
+      ubic:{x:r[5],y:r[6],verificada:true},
+      qrToken:mkcode('QR'),
+      intensidad:r[7],
+      scansSim:Math.round(140+r[7]*520), insigniasSim:Math.round(95+r[7]*430), usuariosSim:Math.round(90+r[7]*400),
+      scans:0, insignias:0
+    };
+  });
+}
+function condTexto(e){
+  if(e.tipoCond==='visita')return 'Visita y registro en el stand';
+  if(e.tipoCond==='producto')return 'Compra de un producto de la carta';
+  return 'Consumo mínimo S/ '+e.montoMin;
+}
+
+const SIM={
+  registrados:2450, ingresaron:2180, tasa:89.0, insignias:5840, empresas:87, escaneos:7120, activos:1920,
+  d1:{registrados:1600,ingresos:1400,escaneos:3900,insignias:3200,activos:1180},
+  d2:{registrados:850, ingresos:780, escaneos:3220,insignias:2640,activos:1010},
+  regCompletos:1980, regIncompletos:470, noIngresaron:270, usuariosUnicos:1960, conInsignia:1920,
+  promIns:3.0, promEmp:3.0,
+  horas:['11','12','13','14','15','16','17','18','19','20','21','22'],
+  ingHora:{d1:[60,180,240,190,150,120,110,140,90,50,30,20], d2:[40,120,170,150,120,110,90,80,60,40,20,10]},
+  scanHora:{d1:[120,320,470,540,430,360,340,410,520,600,480,310], d2:[90,260,400,470,380,320,300,360,430,510,400,270]},
+  insHora:{d1:[90,260,390,450,360,300,280,340,430,500,400,260], d2:[70,210,320,380,300,260,240,290,350,410,320,210]},
+  funnel:[{l:'Visitaron el enlace',v:5200},{l:'Se registraron',v:2450},{l:'Tickets generados',v:2450},
+          {l:'Ingresaron al evento',v:2180},{l:'Escanearon ≥1 QR',v:1960},{l:'Obtuvieron insignia',v:1920},{l:'Con 2 o más',v:1440}],
+  dist:[{k:'≥1',v:78},{k:'≥2',v:61},{k:'≥3',v:44},{k:'≥5',v:22},{k:'≥10',v:7}],
+  consent:{terminos:2450,privacidad:2450,marketing:1510,compartir:980}
+};
+
+function personasSeed(){
+  const b=[['Marta','Vidal','30111222'],['Julián','Peralta','29887766'],['Sofía','Ramos','31456789'],
+    ['Ezequiel','Castro','28776655'],['Lucía','Fernández','32001122'],['Nicolás','Bravo','27665544'],
+    ['Camila','Rojas','33445566'],['Diego','Salas','25998877'],['Renata','Ochoa','34112233'],['Iván','Meza','26554433']];
+  const nb=[4,1,6,0,3,5,2,0,8,1];
+  return b.map((p,i)=>({
+    id:'p'+(i+1), dni:p[2], nombre:p[0], apellido:p[1],
+    cel:'9'+(61000000+i*837261).toString().slice(0,8),
+    email:p[0].toLowerCase()+'@correo.pe', code:mkcode('TKT'),
+    origen: i<6?'web':(i<8?'rapido':'web'),
+    estado: i<7?'validado':'pendiente', validadoAt: i<7?Date.now()-(i+1)*3400000:null,
+    perfilCompleto: i!==6&&i!==7,
+    consents:{terminos:true,privacidad:true,marketing:i%3!==0,compartir:i%4===0},
+    device:'DEV-S'+i,
+    badges:(()=>{const a=[];for(let k=0;k<nb[i];k++)a.push({empresaId:'e'+(((i*3+k*5)%16)+1),ts:Date.now()-(k*1700000+i*90000),day:(k%2)+1,ticketNo:k+1});return a;})()
+  }));
+}
+
+function seed(){
+  return {
+    event:{name:'Feria Gastronómica Sabores & Sellos',slug:'sabores-y-sellos',dias:2,color:'#FF5A1F'},
+    demoDay:1, meId:null,
+    personas:personasSeed(), empresas:empresasSeed(), scans:[], winners:[],
+    dr:[{fecha:new Date(Date.now()-172800000).toLocaleDateString('es-PE'),tipo:'Acceso',estado:'Atendida'},
+        {fecha:new Date(Date.now()-86400000).toLocaleDateString('es-PE'),tipo:'Oposición (marketing)',estado:'En trámite'}]
+  };
+}
+let state=null;
+function load(){try{const r=localStorage.getItem(DB);state=r?JSON.parse(r):seed();}catch(e){state=seed();}
+  if(!state||!state.personas||!state.empresas)state=seed();}
+function save(){try{localStorage.setItem(DB,JSON.stringify(state));}catch(e){}}
+load();
+
+/* helpers */
+const fD=ts=>new Date(ts).toLocaleDateString('es-PE');
+const fT=ts=>new Date(ts).toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
+const n=x=>(x||0).toLocaleString('es-PE');
+const me=()=>state.personas.find(p=>p.id===state.meId)||null;
+const emp=id=>state.empresas.find(e=>e.id===id);
+const liveIns=()=>state.personas.reduce((s,p)=>s+p.badges.length,0);
+const liveScans=()=>state.scans.length;
+const empIns=e=>e.insigniasSim+(e.insignias||0);
+const empScans=e=>e.scansSim+(e.scans||0);
+</script>
+
+<script>
+/* =============== navegación entre apps y pantallas =============== */
+const APPS={asistente:'app-asistente',empresa:'app-empresa',organizador:'app-organizador',ayuda:'app-ayuda'};
+let role='asistente', streams={};
+function stopCams(){Object.values(streams).forEach(s=>{try{s.stream.getTracks().forEach(t=>t.stop());clearInterval(s.timer);}catch(e){}});streams={};}
+
+function showRole(r){
+  role=r;
+  Object.entries(APPS).forEach(([k,v])=>el(v).classList.toggle('hide',k!==r));
+  document.querySelectorAll('#roles button').forEach(b=>b.classList.toggle('active',b.dataset.role===r));
+  stopCams();
+  if(r==='organizador')showD('org-dashboard');
+}
+function hostOf(sc){
+  for(const id of ['asBody','empBody','ayudaBody']){
+    const b=el(id); if(b&&b.querySelector('[data-sc="'+sc+'"]'))return b;
+  }
+  return null;
+}
+function showScreen(sc){
+  const host=hostOf(sc); if(!host)return;
+  host.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.dataset.sc===sc));
+  host.scrollTop=0; stopCams();
+  document.querySelectorAll('.vnav button').forEach(b=>b.classList.toggle('active',b.dataset.go===sc));
+  render(sc);
+}
+function showD(sc){
+  const m=el('orgMain'); if(!m||!m.querySelector('[data-sc="'+sc+'"]'))return;
+  m.querySelectorAll('.dsc').forEach(s=>s.classList.toggle('active',s.dataset.sc===sc));
+  document.querySelectorAll('#orgNav button').forEach(b=>b.classList.toggle('active',b.dataset.go===sc));
+  el('orgMain').scrollTop=0;
+  const vp=el('app-organizador').querySelector('.bviewport'); if(vp)vp.scrollTop=0;
+  render(sc);
+}
+function go(sc){
+  if(sc.startsWith('as-')){ if(role!=='asistente')showRole('asistente'); showScreen(sc); }
+  else if(sc.startsWith('emp-')){ if(role!=='empresa')showRole('empresa'); showScreen(sc); }
+  else if(sc.startsWith('ay-')){ if(role!=='ayuda')showRole('ayuda'); showScreen(sc); }
+  else if(sc.startsWith('org-')){ if(role!=='organizador')showRole('organizador'); showD(sc); }
+}
+document.addEventListener('click',ev=>{
+  const t=ev.target.closest('[data-go]');
+  if(t&&!t.closest('.proj')){ ev.preventDefault(); go(t.dataset.go); }
+});
+document.querySelectorAll('#roles button').forEach(b=>b.addEventListener('click',()=>showRole(b.dataset.role)));
+document.querySelectorAll('#dayswitch button').forEach(b=>b.addEventListener('click',()=>{
+  state.demoDay=+b.dataset.day; save();
+  document.querySelectorAll('#dayswitch button').forEach(x=>x.classList.toggle('active',x===b));
+}));
+
+/* =============== índice de pantallas =============== */
+const INDEX=[
+  ['Asistente · web pública',[
+    [1,'Landing del evento','as-landing'],[2,'Registro','as-registro'],[3,'Términos y privacidad','as-terminos'],
+    [4,'Consentimientos','as-consent'],[5,'Registro exitoso','as-exito'],[6,'Mi ticket','as-ticket'],
+    [7,'QR personal','as-qr'],[8,'Ingreso validado','as-ingreso-ok'],[9,'Escanear QR','as-escanear'],
+    [10,'Resultado del escaneo','as-escaneo-result'],[11,'Insignia desbloqueada','as-insignia'],
+    [12,'Mis insignias','as-insignias'],[13,'Detalle de insignia','as-insignia-detalle'],
+    [14,'Puestos participantes','as-empresas'],[15,'Perfil del puesto','as-empresa-perfil'],
+    [16,'Mi perfil','as-perfil'],[17,'Completar registro','as-completar'],[18,'Recuperar acceso','as-recuperar'],
+    [19,'Ayuda','as-ayuda'],['·','Privacidad y preferencias','as-privacidad']
+  ]],
+  ['Empresa participante',[
+    [20,'Login sin contraseña','emp-login'],[21,'Registro de empresa','emp-registro'],[22,'Perfil empresarial','emp-perfil'],
+    [23,'Ubicación','emp-ubicacion'],[24,'Carga de logo','emp-logo'],[25,'Condición de insignia','emp-dinamica'],
+    [26,'Mi QR','emp-qr'],[27,'Dashboard','emp-dashboard'],[28,'Estadísticas','emp-estadisticas'],[29,'Interacciones','emp-interacciones']
+  ]],
+  ['Organizador · consola',[
+    [30,'Login','org-login'],[31,'Dashboard general','org-dashboard'],[32,'Indicadores del evento','org-indicadores'],
+    [33,'Indicadores por día','org-dia'],[34,'Por hora y zona','org-hora'],[35,'Personas','org-personas'],
+    [36,'Empresas','org-empresas'],['·','Rubros y montos mínimos','org-rubros'],[37,'Ranking','org-ranking'],
+    [38,'Interacciones','org-interacciones'],[39,'Insignias','org-insignias'],[40,'Tickets','org-tickets'],
+    [41,'Sorteo','org-sorteo'],[42,'Reportes','org-reportes'],[43,'Configuración','org-config'],
+    [44,'Privacidad y gestión de datos','org-privacidad']
+  ]],
+  ['Punto de Ayuda · staff',[
+    ['·','Inicio','ay-home'],['·','Registro rápido','ay-rapido'],['·','Validar ingreso','ay-validar'],
+    ['·','Buscar persona','ay-buscar'],['·','Re-vincular dispositivo','ay-revincular'],
+    ['·','Problema con el QR','ay-qr'],['·','Completar registro','ay-completar']
+  ]]
+];
+function buildIndex(){
+  const c=el('indexBody'); c.innerHTML='';
+  INDEX.forEach(([t,rows])=>{
+    const g=document.createElement('div'); g.className='grp'; g.innerHTML='<h4>'+t+'</h4>';
+    const ol=document.createElement('ol');
+    rows.forEach(([num,label,sc])=>{
+      const li=document.createElement('li');
+      li.innerHTML='<span class="n">'+num+'</span><span>'+label+'</span>';
+      li.addEventListener('click',()=>{go(sc);closeDrawer();});
+      ol.appendChild(li);
+    });
+    g.appendChild(ol); c.appendChild(g);
+  });
+}
+const openDrawer=()=>{el('drawer').classList.add('open');el('dback').classList.add('open');};
+const closeDrawer=()=>{el('drawer').classList.remove('open');el('dback').classList.remove('open');};
+el('btnIndex').addEventListener('click',openDrawer);
+el('closeDrawer').addEventListener('click',closeDrawer);
+el('dback').addEventListener('click',closeDrawer);
+el('btnReset').addEventListener('click',()=>{
+  if(!confirm('¿Reiniciar los datos de la demo?'))return;
+  try{localStorage.removeItem(DB);}catch(e){}
+  state=seed(); save(); showRole('asistente'); showScreen('as-landing');
+});
+
+/* =============== gráficos SVG =============== */
+function svgBars(host,data,opt){
+  opt=opt||{};
+  const w=opt.w||320,h=opt.h||130,pad=22,max=Math.max(1,...data.map(d=>d.value));
+  const gap=(w-pad*2)/data.length, bw=gap*0.55;
+  let s='';
+  data.forEach((d,i)=>{
+    const bh=(d.value/max)*(h-pad*2), x=pad+i*gap+(gap-bw)/2, y=h-pad-bh;
+    s+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(bh,1).toFixed(1)+'" rx="3" fill="'+(d.color||'var(--accent)')+'"/>';
+    s+='<text x="'+(pad+i*gap+gap/2).toFixed(1)+'" y="'+(y-4).toFixed(1)+'" text-anchor="middle" font-size="9" font-weight="700" fill="var(--ink)">'+n(d.value)+'</text>';
+    s+='<text x="'+(pad+i*gap+gap/2).toFixed(1)+'" y="'+(h-6)+'" text-anchor="middle" font-size="8" fill="var(--ink-mut)">'+d.label+'</text>';
+  });
+  host.innerHTML='<svg class="chart" viewBox="0 0 '+w+' '+h+'">'+s+'</svg>';
+}
+function svgLines(host,series,labels,opt){
+  opt=opt||{};
+  const w=opt.w||360,h=opt.h||150,pad=24;
+  const max=Math.max(1,...series.flatMap(s=>s.data));
+  const sx=(w-pad*2)/(labels.length-1);
+  let s='';
+  for(let g=0;g<=2;g++){const y=pad+((h-pad*2)/2)*g;
+    s+='<line x1="'+pad+'" y1="'+y.toFixed(1)+'" x2="'+(w-pad)+'" y2="'+y.toFixed(1)+'" stroke="var(--line)" stroke-width="1"/>';}
+  series.forEach(se=>{
+    let d='',a='';
+    se.data.forEach((v,i)=>{const x=pad+i*sx,y=h-pad-(v/max)*(h-pad*2);
+      d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)+' '; a+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)+' ';});
+    a+='L'+(w-pad)+' '+(h-pad)+' L'+pad+' '+(h-pad)+' Z';
+    s+='<path d="'+a+'" fill="'+se.color+'" opacity=".08"/>';
+    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>';
+  });
+  labels.forEach((l,i)=>{ if(i%2===0)
+    s+='<text x="'+(pad+i*sx).toFixed(1)+'" y="'+(h-6)+'" text-anchor="middle" font-size="8" fill="var(--ink-mut)">'+l+'</text>'; });
+  host.innerHTML='<svg class="chart" viewBox="0 0 '+w+' '+h+'">'+s+'</svg>';
+}
+function renderFunnel(host,st){
+  const max=st[0].v;
+  host.innerHTML=st.map((s,i)=>{
+    const pct=s.v/max*100, drop=i>0?(100-s.v/st[i-1].v*100):0;
+    return '<div class="frow"><div class="fl"><span>'+s.l+'</span><span class="mono">'+n(s.v)+
+      (i>0?' <span class="fdrop">-'+drop.toFixed(0)+'%</span>':'')+'</span></div>'+
+      '<div class="fbar" style="width:'+Math.max(pct,9)+'%;">'+pct.toFixed(0)+'%</div></div>';
+  }).join('');
+}
+function barList(host,rows,opt){
+  opt=opt||{};
+  const max=Math.max(1,...rows.map(r=>r.v));
+  host.innerHTML=rows.map(r=>'<div class="barrow"><span title="'+r.l+'">'+r.l+'</span>'+
+    '<div class="btrack"><div class="bfill" style="width:'+(r.v/max*100).toFixed(1)+'%;'+(r.color?'background:'+r.color+';':'')+'"></div></div>'+
+    '<span class="num">'+(opt.pct?r.v+'%':n(r.v))+'</span></div>').join('');
+}
+function kvList(host,rows){
+  host.innerHTML=rows.map(r=>'<div class="kv"><span>'+r[0]+'</span><span class="mono">'+
+    (typeof r[1]==='number'?n(r[1]):r[1])+'</span></div>').join('');
+}
+function kpiCards(host,rows){
+  host.innerHTML=rows.map(r=>'<div class="kpi"><div class="v">'+(typeof r[1]==='number'?n(r[1]):r[1])+'</div>'+
+    '<div class="l">'+r[0]+'</div>'+(r[2]?'<div class="d">'+r[2]+'</div>':'')+'</div>').join('');
+}
+function heat(t){
+  if(t<.5){const u=t/.5;return 'rgb('+Math.round(16+u*229)+','+Math.round(150+u*13)+','+Math.round(110-u*110)+')';}
+  const u=(t-.5)/.5;return 'rgb('+Math.round(245-u*36)+','+Math.round(163-u*118)+','+Math.round(u*45)+')';
+}
+
+/* =============== cámara (BarcodeDetector nativo) =============== */
+async function startCam(boxId,onCode){
+  const box=el(boxId); if(!box)return;
+  if(!('BarcodeDetector' in window)){
+    box.innerHTML='<div class="off">Este navegador no soporta escaneo nativo de QR.<br>Usa la simulación de abajo.</div>';return;}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    box.innerHTML='<video autoplay playsinline muted></video><div class="reticle"></div>';
+    const v=box.querySelector('video'); v.srcObject=stream;
+    const det=new BarcodeDetector({formats:['qr_code']});
+    const timer=setInterval(async()=>{try{const c=await det.detect(v);if(c.length)onCode(c[0].rawValue);}catch(e){}},350);
+    streams[boxId]={stream,timer};
+  }catch(e){ box.innerHTML='<div class="off">No se pudo abrir la cámara.<br>'+e.message+'</div>'; }
+}
+
+/* =============== confeti (solo en los dos momentos de celebración) =============== */
+function confetti(){
+  const c=el('confetti'); c.width=innerWidth; c.height=innerHeight;
+  const x=c.getContext('2d');
+  const cols=['#315CFF','#FF5A1F','#E0A100','#0F9B6C','#7C97FF','#B5179E'];
+  const N=matchMedia('(prefers-reduced-motion: reduce)').matches?0:150;
+  const ps=Array.from({length:N},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.3,
+    vy:2+Math.random()*3.2,vx:-1.5+Math.random()*3,s:4+Math.random()*6,
+    col:cols[Math.floor(Math.random()*cols.length)],r:Math.random()*Math.PI,vr:-.2+Math.random()*.4}));
+  let f=0;
+  (function tick(){
+    x.clearRect(0,0,c.width,c.height); f++; let alive=false;
+    ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=p.vr; if(p.y<c.height+20)alive=true;
+      x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.col;x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);x.restore();});
+    if(alive&&f<290)requestAnimationFrame(tick); else x.clearRect(0,0,c.width,c.height);
+  })();
+}
+</script>
+
+<script>
+/* =================== ASISTENTE =================== */
+function ticketEl(p){
+  const d=document.createElement('div'); d.className='ticket';
+  d.innerHTML='<span class="ttag">Ticket personal · Sabores &amp; Sellos</span>'+
+    '<div class="qrbox"><canvas></canvas></div>'+
+    '<div class="tname">'+p.nombre+' '+(p.apellido||'')+'</div>'+
+    '<div class="tcode">'+p.code+'</div>'+
+    '<div class="tsub">DNI '+p.dni+'</div>';
+  drawQR('ITERA|TKT|'+p.code+'|'+p.dni,d.querySelector('canvas'),4);
+  return d;
+}
+function renderTicket(){
+  const p=me(), box=el('ticketBox');
+  if(!p){ box.innerHTML='<div class="note n-warn tiny">Todavía no tienes registro. <b data-go="as-registro" style="color:var(--accent);cursor:pointer;">Regístrate aquí</b> para generar tu ticket.</div>';
+    el('ticketEstado').textContent='—'; el('ticketValAt').textContent='—'; el('ticketDev').textContent='—'; return; }
+  box.innerHTML=''; box.appendChild(ticketEl(p));
+  el('ticketEstado').innerHTML=p.estado==='validado'?'<span class="pill p-good">✓ Validado</span>':'<span class="pill p-warn">Pendiente</span>';
+  el('ticketValAt').textContent=p.validadoAt?fD(p.validadoAt)+' '+fT(p.validadoAt):'—';
+  el('ticketDev').textContent=deviceId();
+}
+function renderQrBig(){
+  const p=me(); if(!p)return;
+  drawQR('ITERA|TKT|'+p.code+'|'+p.dni,el('qrBig'),6);
+  el('qrBigCode').textContent=p.code;
+  el('qrBigName').textContent=p.nombre+' '+(p.apellido||'');
+}
+el('btnSimVal').addEventListener('click',()=>{
+  const p=me(); if(!p){go('as-registro');return;}
+  p.estado='validado'; p.validadoAt=Date.now(); save();
+  el('ingOkTime').textContent=fD(p.validadoAt)+' · '+fT(p.validadoAt);
+  go('as-ingreso-ok');
+});
+
+/* ---- registro ---- */
+let draft=null;
+el('formReg').addEventListener('submit',ev=>{
+  ev.preventDefault();
+  const dni=el('rg-dni').value.trim();
+  if(state.personas.some(x=>x.dni===dni)){
+    alert('Ese DNI ya está registrado. Usa "Ya me registré" para recuperar el acceso.'); return;}
+  draft={dni,nombre:el('rg-nom').value.trim(),apellido:el('rg-ape').value.trim(),
+    cel:el('rg-cel').value.trim(),email:el('rg-email').value.trim()};
+  go('as-terminos');
+});
+function checkConsents(){
+  const b=el('btnFinishReg'); if(b) b.disabled=!(el('cs-terminos').checked&&el('cs-privacidad').checked);
+}
+['cs-terminos','cs-privacidad'].forEach(id=>el(id).addEventListener('change',checkConsents));
+el('btnFinishReg').addEventListener('click',()=>{
+  if(!draft){go('as-registro');return;}
+  const p={id:uid(),...draft,code:mkcode('TKT'),origen:'web',estado:'pendiente',validadoAt:null,perfilCompleto:true,
+    consents:{terminos:true,privacidad:true,marketing:el('cs-marketing').checked,compartir:el('cs-compartir').checked},
+    device:deviceId(),badges:[]};
+  state.personas.push(p); state.meId=p.id; save();
+  el('exitoTicket').innerHTML=''; el('exitoTicket').appendChild(ticketEl(p));
+  go('as-exito');
+});
+el('formCompletar').addEventListener('submit',ev=>{
+  ev.preventDefault(); const p=me(); if(!p){go('as-registro');return;}
+  ['nom','ape','cel','email'].forEach(k=>{
+    const v=el('cp-'+k).value.trim(); if(!v)return;
+    if(k==='nom')p.nombre=v; if(k==='ape')p.apellido=v; if(k==='cel')p.cel=v; if(k==='email')p.email=v;});
+  p.perfilCompleto=true; save(); go('as-perfil');
+});
+
+/* ---- recuperar acceso: enlace de un solo uso, sin contraseñas ---- */
+function sendLink(canal){
+  const dni=el('rec-dni').value.trim(), box=el('recResult');
+  const p=state.personas.find(x=>x.dni===dni);
+  if(!p){ box.innerHTML='<div class="flash bad">No encontramos ese DNI. Acércate a un Punto de Ayuda con tu documento.</div>'; return; }
+  const dest = canal==='wa' ? ('WhatsApp ••• '+(p.cel||'').slice(-3)) : ((p.email||'tu correo').replace(/^(.{2}).*@/,'$1•••@'));
+  const token=mkcode('LNK');
+  box.innerHTML =
+    '<div class="wa"><div class="whead">'+(canal==='wa'?'💬 WhatsApp · Sabores &amp; Sellos':'✉️ Correo · Sabores &amp; Sellos')+'</div>'+
+    'Hola '+p.nombre+' 👋 Toca este enlace para abrir tu ticket en este equipo:<br>'+
+    '<a href="#">itera.pe/e/sabores-y-sellos/a/'+token+'</a><br>'+
+    '<span style="opacity:.7;font-size:.72rem;">Vence en 15 minutos · un solo uso</span></div>'+
+    '<p class="tiny muted" style="margin:.6rem 0;">Enviado a <b>'+dest+'</b>. En la demo, tocar el botón simula que abriste el enlace.</p>'+
+    '<button class="btn btn-accent btn-block" id="recOpen">Simular que abro el enlace</button>';
+  el('recOpen').addEventListener('click',()=>{
+    state.meId=p.id; p.device=deviceId(); save();
+    box.innerHTML='<div class="flash good">✓ Sesión restaurada en este dispositivo</div>';
+    setTimeout(()=>go('as-ticket'),700);
+  });
+}
+el('btnRecWa').addEventListener('click',()=>sendLink('wa'));
+el('btnRecMail').addEventListener('click',()=>sendLink('mail'));
+
+/* ---- escanear ---- */
+let scanFilter='all';
+function renderScan(){
+  const p=me(), gate=el('scanGate');
+  if(!p) gate.innerHTML='<div class="note n-warn tiny">Necesitas registrarte antes de coleccionar insignias.</div>';
+  else if(p.estado!=='validado') gate.innerHTML='<div class="note n-warn tiny">Tu ingreso aún no está validado. Puedes probar la dinámica igual, o validar desde <b>Mi ticket</b>.</div>';
+  else gate.innerHTML='<div class="note n-good tiny">Ingreso validado ✓ · Día '+state.demoDay+' · '+(p.badges.length)+' insignia(s) hasta ahora</div>';
+
+  const chips=el('scanChips');
+  const used=[...new Set(state.empresas.map(e=>e.rubroId))];
+  chips.innerHTML='<button class="chip'+(scanFilter==='all'?' on':'')+'" data-r="all">Todos</button>'+
+    used.map(r=>{const rb=rubro(r);return '<button class="chip'+(scanFilter===r?' on':'')+'" data-r="'+r+'">'+rb.emoji+' '+rb.nombre+'</button>';}).join('');
+  chips.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{scanFilter=c.dataset.r;renderScan();}));
+
+  const list=el('scanSimList'); list.innerHTML='';
+  state.empresas.filter(e=>scanFilter==='all'||e.rubroId===scanFilter).forEach(e=>{
+    const got=p&&p.badges.some(b=>b.empresaId===e.id);
+    const it=document.createElement('div'); it.className='item';
+    it.innerHTML='<div class="logo" style="background:'+e.color+'1f;color:'+e.color+';">'+e.emoji+'</div>'+
+      '<div class="gr"><b>'+e.nombre+'</b><span>'+rubro(e.rubroId).nombre+' · <span class="minprice">'+condTexto(e)+'</span></span></div>'+
+      (got?'<span class="pill p-good">🏅 Obtenida</span>':'<button class="btn btn-event btn-sm">Escanear</button>');
+    if(!got) it.querySelector('button').addEventListener('click',()=>processScan(e.id));
+    list.appendChild(it);
+  });
+}
+el('btnCamScan').addEventListener('click',()=>startCam('camScan',raw=>{
+  const e=state.empresas.find(x=>raw.indexOf(x.qrToken)>=0||raw.indexOf('|'+x.id+'|')>=0);
+  if(e)processScan(e.id);
+}));
+
+function processScan(empresaId){
+  const p=me(), e=emp(empresaId), rb=el('scanResultBox');
+  const log=(valid,reason)=>{ state.scans.push({id:uid(),personaId:p?p.id:null,empresaId,ts:Date.now(),
+    day:state.demoDay,valid,reason,device:deviceId()}); if(e)e.scans=(e.scans||0)+1; save(); };
+
+  if(!p){ log(false,'sin_registro');
+    rb.innerHTML='<div class="flash bad">Necesitas registrarte para obtener insignias.</div>'+
+      '<button class="btn btn-event btn-block" data-go="as-registro" style="margin-top:.7rem;">Registrarme</button>';
+    go('as-escaneo-result'); return; }
+
+  if(p.badges.some(b=>b.empresaId===empresaId)){
+    log(false,'duplicado');
+    rb.innerHTML='<div class="flash warn">Ya tienes la insignia de '+e.nombre+'</div>'+
+      '<div class="soft tiny muted" style="margin-top:.6rem;"><b>Regla antifraude:</b> 1 insignia por puesto. Volver a escanear el mismo QR no suma tickets.<br>'+
+      'Registrado: '+fT(Date.now())+' · dispositivo '+deviceId()+'</div>'+
+      '<button class="btn btn-event btn-block" data-go="as-escanear" style="margin-top:.7rem;">Buscar otro puesto</button>';
+    go('as-escaneo-result'); return; }
+
+  const ticketNo=liveIns()+1;
+  p.badges.push({empresaId,ts:Date.now(),day:state.demoDay,ticketNo});
+  e.insignias=(e.insignias||0)+1;
+  log(true,'ok'); save();
+
+  rb.innerHTML='<div class="flash good">+1 insignia · +1 ticket para el sorteo</div>'+
+    '<div class="card center" style="margin-top:.7rem;">'+
+    '<div class="medal" style="width:104px;height:104px;margin:0 auto .5rem;aspect-ratio:auto;background:linear-gradient(135deg,'+e.color+',#111);"><span class="em">'+e.emoji+'</span></div>'+
+    '<b>'+e.nombre+'</b><p class="tiny muted">'+rubro(e.rubroId).nombre+' · '+condTexto(e)+'</p>'+
+    '<div class="kv" style="margin-top:.5rem;"><span>Obtenida</span><span class="mono">'+fD(Date.now())+' '+fT(Date.now())+'</span></div>'+
+    '<div class="kv"><span>Día</span><span>Día '+state.demoDay+'</span></div>'+
+    '<div class="kv"><span>Ticket de sorteo</span><span class="mono">#'+ticketNo+'</span></div></div>'+
+    '<div class="row wrap" style="margin-top:.7rem;">'+
+    '<button class="btn btn-event" data-go="as-insignias" style="flex:1;">Ver colección</button>'+
+    '<button class="btn btn-line" data-go="as-escanear" style="flex:1;">Seguir explorando</button></div>';
+
+  el('insigniaScreenBox').innerHTML='<div class="center" style="padding:1.1rem 0;">'+
+    '<p class="eyebrow">¡Insignia desbloqueada!</p>'+
+    '<div class="medal" style="width:136px;height:136px;margin:.6rem auto;aspect-ratio:auto;background:linear-gradient(135deg,'+e.color+',#111);"><span class="em" style="font-size:2.5rem;">'+e.emoji+'</span></div>'+
+    '<h2 style="font-size:1.2rem;">'+e.nombre+'</h2>'+
+    '<div class="plus">🎟️ +1 ticket</div>'+
+    '<p class="tiny muted">Llevas '+p.badges.length+' insignia(s). ¡Sigue explorando!</p></div>';
+
+  showUnlock(e,p);
+  go('as-escaneo-result');
+}
+function showUnlock(e,p){
+  const m=el('ubMedal');
+  m.style.background='linear-gradient(135deg,'+e.color+',#111)';
+  m.querySelector('.em').textContent=e.emoji;
+  el('ubTitle').textContent=e.nombre;
+  el('ubMsg').textContent='Llevas '+p.badges.length+' insignia(s) · '+p.badges.length+' ticket(s) para el sorteo.';
+  el('ub').classList.add('open');
+  confetti();
+}
+el('ubClose').addEventListener('click',()=>el('ub').classList.remove('open'));
+el('ub').addEventListener('click',ev=>{ if(ev.target===el('ub'))el('ub').classList.remove('open'); });
+
+/* ---- colección ---- */
+function renderInsignias(){
+  const p=me(), total=state.empresas.length, got=p?p.badges.length:0;
+  el('ticketsCount').textContent=got;
+  el('collProgress').textContent=got+' / '+total;
+
+  const hint=el('nextHint');
+  if(!p||got===0) hint.innerHTML='<div class="note n-info tiny">Aún no tienes insignias. Consume en cualquier puesto y escanea su QR.</div>';
+  else {
+    const falta=state.empresas.filter(e=>!p.badges.some(b=>b.empresaId===e.id))
+      .sort((a,b)=>a.montoMin-b.montoMin)[0];
+    hint.innerHTML=falta?'<div class="note n-info tiny"><b>Siguiente más accesible:</b> '+falta.emoji+' '+falta.nombre+
+      ' — '+condTexto(falta)+'.</div>':'<div class="note n-good tiny">¡Completaste la colección! 🎉</div>';
+  }
+  const g=el('badgeGrid'); g.innerHTML='';
+  state.empresas.forEach(e=>{
+    const b=p&&p.badges.find(x=>x.empresaId===e.id);
+    const d=document.createElement('div');
+    if(b){
+      d.className='medal'; d.style.background='linear-gradient(135deg,'+e.color+',#111)'; d.style.cursor='pointer';
+      d.innerHTML='<span class="em">'+e.emoji+'</span><span class="mn">'+e.nombre+'</span>';
+      d.addEventListener('click',()=>renderInsDetalle(e.id));
+    } else {
+      d.className='medal locked';
+      d.innerHTML='<span class="em">'+e.emoji+'</span><span class="mn">'+e.nombre+'</span>';
+    }
+    g.appendChild(d);
+  });
+}
+function renderInsDetalle(id){
+  const p=me(), e=emp(id), b=p.badges.find(x=>x.empresaId===id); if(!b)return;
+  el('insDetalleBox').innerHTML=
+    '<div class="medal" style="width:150px;height:150px;margin:0 auto 1rem;aspect-ratio:auto;background:linear-gradient(135deg,'+e.color+',#111);"><span class="em" style="font-size:2.6rem;">'+e.emoji+'</span></div>'+
+    '<div class="card"><div class="between" style="margin-bottom:.4rem;"><b>'+e.nombre+'</b><span class="pill p-good">Obtenida</span></div>'+
+    '<div class="kv"><span>Rubro</span><span>'+rubro(e.rubroId).nombre+'</span></div>'+
+    '<div class="kv"><span>Condición cumplida</span><span>'+condTexto(e)+'</span></div>'+
+    '<div class="kv"><span>Fecha y hora</span><span class="mono">'+fD(b.ts)+' '+fT(b.ts)+'</span></div>'+
+    '<div class="kv"><span>Día</span><span>Día '+b.day+'</span></div>'+
+    '<div class="kv"><span>Ticket de sorteo</span><span class="mono">#'+b.ticketNo+'</span></div>'+
+    '<div class="kv"><span>Stand</span><span class="mono">'+e.stand+'</span></div></div>'+
+    '<button class="btn btn-line btn-block" id="btnVerEmp" style="margin-top:.7rem;">Ver perfil del negocio</button>';
+  el('btnVerEmp').addEventListener('click',()=>renderEmpPerfil(e.id));
+  go('as-insignia-detalle');
+}
+
+/* ---- puestos ---- */
+let empFilter='all';
+function renderEmpresasList(){
+  const q=(el('empSearch').value||'').toLowerCase(), p=me();
+  const chips=el('empChips');
+  const used=[...new Set(state.empresas.map(e=>e.rubroId))];
+  chips.innerHTML='<button class="chip'+(empFilter==='all'?' on':'')+'" data-r="all">Todos</button>'+
+    used.map(r=>{const rb=rubro(r);return '<button class="chip'+(empFilter===r?' on':'')+'" data-r="'+r+'">'+rb.emoji+' '+rb.nombre+'</button>';}).join('');
+  chips.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{empFilter=c.dataset.r;renderEmpresasList();}));
+
+  const list=el('empList'); list.innerHTML='';
+  const rows=state.empresas.filter(e=>(empFilter==='all'||e.rubroId===empFilter)&&
+    (e.nombre.toLowerCase().indexOf(q)>=0||rubro(e.rubroId).nombre.toLowerCase().indexOf(q)>=0));
+  if(!rows.length){ list.innerHTML='<p class="tiny muted center" style="padding:1rem;">Sin resultados.</p>'; return; }
+  rows.forEach(e=>{
+    const got=p&&p.badges.some(b=>b.empresaId===e.id);
+    const it=document.createElement('div'); it.className='item'; it.style.cursor='pointer';
+    it.innerHTML='<div class="logo" style="background:'+e.color+'1f;color:'+e.color+';">'+e.emoji+'</div>'+
+      '<div class="gr"><b>'+e.nombre+'</b><span>'+e.stand+' · <span class="minprice">'+condTexto(e)+'</span></span></div>'+
+      (got?'<span class="pill p-good">🏅</span>':'<span style="color:var(--ink-mut);">›</span>');
+    it.addEventListener('click',()=>renderEmpPerfil(e.id));
+    list.appendChild(it);
+  });
+}
+el('empSearch').addEventListener('input',renderEmpresasList);
+function renderEmpPerfil(id){
+  const e=emp(id), p=me(), got=p&&p.badges.some(b=>b.empresaId===id), share=p&&p.consents.compartir&&got;
+  el('empPerfilBox').innerHTML=
+    '<div class="card center"><div class="medal" style="width:100px;height:100px;margin:0 auto .5rem;aspect-ratio:auto;background:linear-gradient(135deg,'+e.color+',#111);"><span class="em">'+e.emoji+'</span></div>'+
+    '<h2 style="font-size:1.15rem;">'+e.nombre+'</h2>'+
+    '<div class="row wrap" style="justify-content:center;margin-top:.4rem;">'+
+    '<span class="pill p-neutral">'+rubro(e.rubroId).emoji+' '+rubro(e.rubroId).nombre+'</span>'+
+    (got?'<span class="pill p-good">🏅 Insignia obtenida</span>':'<span class="pill p-event">'+condTexto(e)+'</span>')+'</div></div>'+
+    '<div class="card"><p class="tiny">'+e.descripcion+'</p>'+
+    '<div class="kv" style="margin-top:.5rem;"><span>Stand</span><span class="mono">'+e.stand+'</span></div>'+
+    '<div class="kv"><span>Para la insignia</span><span>'+condTexto(e)+'</span></div>'+
+    '<div class="kv"><span>Teléfono</span><span class="mono">'+e.tel+'</span></div></div>'+
+    '<div class="card"><h4 style="font-size:.9rem;margin-bottom:.5rem;">Contacto</h4>'+
+    '<div class="row wrap"><span class="btn btn-line btn-sm">🌐 '+e.web+'</span>'+
+    '<span class="btn btn-line btn-sm">📷 '+e.ig+'</span>'+
+    '<span class="btn btn-wa btn-sm">💬 WhatsApp</span></div>'+
+    (share?'<div class="note n-good tiny" style="margin-top:.6rem;">Autorizaste compartir tu contacto con este negocio porque obtuviste su insignia. Puedes revocarlo en Privacidad.</div>'
+          :'<div class="note n-info tiny" style="margin-top:.6rem;">Este negocio <b>no recibe tus datos personales</b>. Solo ve métricas agregadas.</div>')+'</div>'+
+    (got?'':'<button class="btn btn-event btn-block" data-go="as-escanear" style="margin-top:.7rem;">Ya cumplí la condición · escanear</button>');
+  go('as-empresa-perfil');
+}
+
+/* ---- perfil y privacidad ---- */
+function renderPerfil(){
+  const p=me(), box=el('perfilBox');
+  if(!p){ box.innerHTML='<div class="note n-warn tiny">Sin registro. <b data-go="as-registro" style="color:var(--accent);cursor:pointer;">Registrarme</b></div>'; return; }
+  box.innerHTML='<div class="card"><div class="between" style="margin-bottom:.4rem;"><b>'+p.nombre+' '+(p.apellido||'')+'</b>'+
+    (p.perfilCompleto?'<span class="pill p-good">Perfil completo</span>':'<span class="pill p-warn">Incompleto</span>')+'</div>'+
+    '<div class="kv"><span>DNI</span><span class="mono">'+p.dni+'</span></div>'+
+    '<div class="kv"><span>Celular</span><span class="mono">'+(p.cel||'—')+'</span></div>'+
+    '<div class="kv"><span>Correo</span><span>'+(p.email||'—')+'</span></div>'+
+    '<div class="kv"><span>Ticket</span><span class="mono">'+p.code+'</span></div>'+
+    '<div class="kv"><span>Origen</span><span>'+(p.origen==='rapido'?'Registro rápido en puerta':'Web')+'</span></div>'+
+    '<div class="kv"><span>Insignias / tickets</span><span class="mono">'+p.badges.length+' / '+p.badges.length+'</span></div>'+
+    '<div class="kv"><span>Acceso</span><span>Sin contraseña · '+deviceId()+'</span></div></div>';
+}
+function renderPrefs(){
+  const p=me(); if(!p)return;
+  el('pref-marketing').checked=!!p.consents.marketing;
+  el('pref-compartir').checked=!!p.consents.compartir;
+}
+el('btnSavePrefs').addEventListener('click',()=>{
+  const p=me(); if(!p)return;
+  p.consents.marketing=el('pref-marketing').checked;
+  p.consents.compartir=el('pref-compartir').checked; save();
+  const b=el('btnSavePrefs'); b.textContent='Guardado ✓';
+  setTimeout(()=>b.textContent='Guardar preferencias',1400);
+});
+document.querySelectorAll('.dr-req').forEach(b=>b.addEventListener('click',()=>{
+  state.dr.unshift({fecha:fD(Date.now()),tipo:b.dataset.t,estado:'Recibida'}); save();
+  el('drResult').innerHTML='<div class="note n-good tiny">Solicitud de <b>'+b.dataset.t+
+    '</b> registrada. La organización responde en máximo 10 días hábiles al correo registrado.</div>';
+}));
+</script>
+
+<script>
+/* =================== EMPRESA PARTICIPANTE =================== */
+/* La empresa demo es la primera del catálogo */
+const MY=()=>state.empresas[0];
+
+function fillRubroSelects(){
+  const opts=RUBROS.map(r=>'<option value="'+r.id+'">'+r.emoji+' '+r.nombre+'</option>').join('');
+  ['dinRubro','reg-rubro'].forEach(id=>{ const s=el(id); if(s){s.innerHTML=opts;} });
+}
+function renderDinamica(){
+  const e=MY();
+  const s=el('dinRubro'); if(s) s.value=e.rubroId;
+  el('dinTipo').value=e.tipoCond;
+  el('dinMonto').value=e.montoMin;
+  updateRubroInfo();
+}
+function updateRubroInfo(){
+  const rb=rubro(el('dinRubro').value);
+  const monto=parseInt(el('dinMonto').value,10)||0;
+  el('rubroRangeInfo').innerHTML=
+    '<b>'+rb.emoji+' '+rb.nombre+'</b> — rango permitido por la organización: '+
+    '<b class="mono">S/ '+rb.min+'</b> a <b class="mono">S/ '+rb.max+'</b>. Sugerido: <b class="mono">S/ '+rb.sug+'</b>.';
+  const w=el('dinWarn');
+  if(monto<rb.min) w.innerHTML='<div class="note n-warn tiny" style="margin-bottom:.7rem;">S/ '+monto+' está <b>por debajo</b> del mínimo de tu rubro (S/ '+rb.min+'). Requiere aprobación del organizador.</div>';
+  else if(monto>rb.max) w.innerHTML='<div class="note n-warn tiny" style="margin-bottom:.7rem;">S/ '+monto+' está <b>por encima</b> del máximo de tu rubro (S/ '+rb.max+'). Un monto alto reduce mucho tus insignias.</div>';
+  else w.innerHTML='<div class="note n-good tiny" style="margin-bottom:.7rem;">S/ '+monto+' está dentro del rango de tu rubro. ✓</div>';
+  updateDinPreview();
+}
+function updateDinPreview(){
+  const e=MY(), rb=rubro(el('dinRubro').value);
+  const tipo=el('dinTipo').value, monto=parseInt(el('dinMonto').value,10)||0;
+  const txt = tipo==='visita'?'Visita y registro en el stand'
+            : tipo==='producto'?'Compra de un producto de la carta'
+            : 'Consumo mínimo S/ '+monto;
+  el('dinPreview').innerHTML='<div class="logo" style="background:'+e.color+'1f;color:'+e.color+';">'+e.emoji+'</div>'+
+    '<div class="gr"><b>'+e.nombre+'</b><span>'+rb.nombre+' · <span class="minprice">'+txt+'</span></span></div>'+
+    '<button class="btn btn-event btn-sm">Escanear</button>';
+}
+['dinRubro','dinMonto','dinTipo'].forEach(id=>{
+  const n2=el(id); if(n2) n2.addEventListener('input',updateRubroInfo);
+});
+el('btnSaveDin').addEventListener('click',()=>{
+  const e=MY(), rb=rubro(el('dinRubro').value);
+  e.rubroId=rb.id; e.tipoCond=el('dinTipo').value;
+  e.montoMin=Math.max(1,parseInt(el('dinMonto').value,10)||rb.sug);
+  save(); updateRubroInfo();
+  const b=el('btnSaveDin'); b.textContent='Guardado ✓';
+  setTimeout(()=>b.textContent='Guardar condición',1400);
+});
+
+function renderEmpQr(){
+  const e=MY();
+  drawQR('ITERA|EMP|'+e.id+'|'+e.qrToken,el('empQrCanvas'),4);
+  el('empQrName').textContent=e.nombre;
+  el('empQrCond').textContent=condTexto(e);
+  el('empQrToken').textContent='token '+e.qrToken;
+  el('empQrScans').textContent=n(empScans(e));
+  el('empQrIns').textContent=n(empIns(e));
+}
+el('btnRotateQr').addEventListener('click',()=>{
+  MY().qrToken=mkcode('QR'); save(); renderEmpQr();
+  const b=el('btnRotateQr'); b.textContent='Token rotado ✓';
+  setTimeout(()=>b.textContent='Rotar token ahora',1400);
+});
+
+function renderEmpDash(){
+  const e=MY();
+  const ranked=state.empresas.slice().sort((a,b)=>empIns(b)-empIns(a));
+  const pos=ranked.findIndex(x=>x.id===e.id)+1;
+  el('ed-personas').textContent=n(e.usuariosSim);
+  el('ed-ins').textContent=n(empIns(e));
+  el('ed-scans').textContent=n(empScans(e));
+  el('ed-rank').textContent='#'+pos+' / '+state.empresas.length;
+  svgBars(el('edDayChart'),[
+    {label:'Día 1',value:Math.round(empIns(e)*.55),color:'var(--accent)'},
+    {label:'Día 2',value:Math.round(empIns(e)*.45),color:'var(--event)'}],{h:120});
+  const prom=Math.round(state.empresas.reduce((s,x)=>s+empIns(x),0)/state.empresas.length);
+  barList(el('edCompare'),[
+    {l:'Mi negocio',v:empIns(e),color:'linear-gradient(90deg,var(--event),#FF9A5B)'},
+    {l:'Promedio evento',v:prom}]);
+}
+function renderEmpStats(){
+  const e=MY();
+  svgLines(el('edHourChart'),[
+    {color:'var(--accent)',data:SIM.insHora.d1.map(v=>Math.round(v*e.intensidad*.055))},
+    {color:'var(--event)', data:SIM.insHora.d2.map(v=>Math.round(v*e.intensidad*.055))}],SIM.horas,{h:150});
+  const pk=SIM.insHora.d1.map((v,i)=>({l:SIM.horas[i]+':00–'+(+SIM.horas[i]+1)+':00',v:Math.round((v+SIM.insHora.d2[i])*e.intensidad*.055)}))
+    .sort((a,b)=>b.v-a.v).slice(0,4);
+  barList(el('edPeak'),pk);
+  const tot=e.usuariosSim, ok=Math.round(tot*0.40);
+  el('edCtTot').textContent=n(tot);
+  el('edCtOk').textContent=n(ok)+' ('+Math.round(ok/tot*100)+'%)';
+}
+function renderEmpInt(){
+  const tb=el('empIntTable'); tb.innerHTML='';
+  for(let i=0;i<12;i++){
+    const dup=i%5===0;
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td class="mono">'+(11+(i%10))+':'+((i*17)%60).toString().padStart(2,'0')+'</td>'+
+      '<td>Día '+((i%2)+1)+'</td><td>'+(dup?'Escaneo repetido':'Escaneo válido')+'</td>'+
+      '<td>'+(dup?'<span class="pill p-warn">Sin ticket</span>':'<span class="pill p-good">Insignia +1</span>')+'</td>';
+    tb.appendChild(tr);
+  }
+}
+/* pin de ubicación */
+(function(){
+  const map=el('empPinMap'); if(!map)return;
+  map.addEventListener('click',ev=>{
+    const r=map.getBoundingClientRect();
+    const x=Math.round((ev.clientX-r.left)/r.width*300), y=Math.round((ev.clientY-r.top)/r.height*200);
+    el('empPin').setAttribute('cx',x); el('empPin').setAttribute('cy',y);
+    el('empPinCoords').textContent='x: '+x+' · y: '+y;
+    const dentro = x>18&&x<282&&y>18&&y<190;
+    const enZona = (x>=18&&x<=138&&y>=20&&y<=72);
+    const st=el('empPinStatus');
+    if(!dentro){ st.className='pill p-bad'; st.textContent='Fuera del recinto'; }
+    else if(enZona){ st.className='pill p-good'; st.textContent='Coincide con stand A-12'; }
+    else { st.className='pill p-warn'; st.textContent='Fuera de tu zona asignada'; }
+  });
+})();
+const EMOJIS=['🍝','🍕','🥘','🍲','🌯','🥗','🍜','🧆'];
+let emojiIdx=0;
+el('btnLogoEmoji').addEventListener('click',()=>{
+  emojiIdx=(emojiIdx+1)%EMOJIS.length;
+  MY().emoji=EMOJIS[emojiIdx]; save();
+  el('logoPreview').querySelector('.em').textContent=EMOJIS[emojiIdx];
+});
+const COLORS=['#FF5A1F','#315CFF','#0F9B6C','#B5179E','#E0A100','#0EA5E9'];
+let colorIdx=0;
+el('btnLogoColor').addEventListener('click',()=>{
+  colorIdx=(colorIdx+1)%COLORS.length;
+  MY().color=COLORS[colorIdx]; save();
+  el('logoPreview').style.background='linear-gradient(135deg,'+COLORS[colorIdx]+',#111)';
+});
+el('formEmpReg').addEventListener('submit',ev=>{ ev.preventDefault(); go('emp-ubicacion'); });
+
+/* =================== PUNTO DE AYUDA =================== */
+el('formRapido').addEventListener('submit',ev=>{
+  ev.preventDefault();
+  if(!el('rp-cons').checked){ alert('Debe confirmarse el consentimiento obligatorio antes de crear el registro.'); return; }
+  const dni=el('rp-dni').value.trim();
+  let p=state.personas.find(x=>x.dni===dni), existed=!!p;
+  if(!p){
+    p={id:uid(),dni,nombre:el('rp-nom').value.trim(),apellido:'',cel:el('rp-cel').value.trim(),email:'',
+      code:mkcode('TKT'),origen:'rapido',estado:'pendiente',validadoAt:null,perfilCompleto:false,
+      consents:{terminos:true,privacidad:true,marketing:false,compartir:false},
+      device:null,badges:[]};
+    state.personas.push(p);
+  }
+  save();
+  const box=el('rapidoResult');
+  box.innerHTML=(existed
+    ? '<div class="note n-warn tiny">Ya existía un registro con ese DNI. Se recupera su ticket, no se duplica.</div>'
+    : '<div class="note n-good tiny"><b>Registro creado.</b> Sin contraseña: la persona abre el enlace en su celular y queda con la sesión guardada.</div>')+
+    '<div class="wa" style="margin-top:.6rem;"><div class="whead">💬 Enviado a '+(p.cel?'••• '+p.cel.slice(-3):'su celular')+'</div>'+
+    'Hola '+p.nombre+' 👋 Este es tu ticket para Sabores &amp; Sellos:<br><a href="#">itera.pe/e/sabores-y-sellos/a/'+mkcode('LNK')+'</a></div>'+
+    '<div class="row wrap" style="margin-top:.6rem;"><button class="btn btn-good btn-sm" id="rpVal" style="flex:1;">Dar ingreso ahora</button>'+
+    '<button class="btn btn-line btn-sm" id="rpPrint" style="flex:1;">Imprimir ticket</button></div>';
+  const t=document.createElement('div'); t.style.marginTop='.7rem'; t.appendChild(ticketEl(p)); box.appendChild(t);
+  el('rpVal').addEventListener('click',()=>{
+    p.estado='validado'; p.validadoAt=Date.now(); save();
+    el('rpVal').textContent='✓ Ingreso dado'; el('rpVal').disabled=true;
+  });
+  el('rpPrint').addEventListener('click',()=>window.print());
+  ev.target.reset();
+});
+
+function ayList(q){
+  q=(q||'').trim().toLowerCase();
+  if(!q)return [];
+  return state.personas.filter(p=>p.dni.indexOf(q)>=0||
+    (p.nombre+' '+(p.apellido||'')).toLowerCase().indexOf(q)>=0||
+    p.code.toLowerCase().indexOf(q)>=0).slice(0,8);
+}
+el('ay-q').addEventListener('input',function(){
+  const list=el('ayBuscarList'); list.innerHTML='';
+  const rows=ayList(this.value);
+  if(!rows.length){ if(this.value.trim())list.innerHTML='<p class="tiny muted center" style="padding:.8rem;">Sin coincidencias.</p>'; return; }
+  rows.forEach(p=>{
+    const it=document.createElement('div'); it.className='item';
+    it.innerHTML='<div class="gr"><b>'+p.nombre+' '+(p.apellido||'')+'</b>'+
+      '<span>DNI '+p.dni+' · '+p.code+' · '+(p.origen==='rapido'?'registro rápido':'web')+' · '+p.badges.length+' insignias</span></div>'+
+      '<div class="row">'+(p.estado==='validado'?'<span class="pill p-good">Ingresó</span>':'<button class="btn btn-good btn-sm" data-a="v">Validar</button>')+
+      '<button class="btn btn-line btn-sm" data-a="t">Ticket</button></div>';
+    const bv=it.querySelector('[data-a="v"]');
+    if(bv) bv.addEventListener('click',()=>{ p.estado='validado'; p.validadoAt=Date.now(); save();
+      bv.outerHTML='<span class="pill p-good">Ingresó</span>'; });
+    it.querySelector('[data-a="t"]').addEventListener('click',()=>{
+      const w=document.createElement('div'); w.style.cssText='margin-top:.6rem;width:100%;'; w.appendChild(ticketEl(p));
+      it.style.flexWrap='wrap'; it.appendChild(w);
+    });
+    list.appendChild(it);
+  });
+});
+el('ay-val-q').addEventListener('input',function(){
+  const q=this.value.trim().toLowerCase(), box=el('ayValResult');
+  const p=state.personas.find(x=>x.dni===q||x.code.toLowerCase()===q);
+  if(!p){ box.innerHTML=q?'<div class="flash bad">Sin coincidencias. Verifica el DNI o usa Registro rápido.</div>':''; return; }
+  if(p.estado==='validado'){
+    box.innerHTML='<div class="flash warn">'+p.nombre+' '+(p.apellido||'')+' ya registró ingreso el '+fD(p.validadoAt)+' a las '+fT(p.validadoAt)+'.</div>';
+    return;
+  }
+  box.innerHTML='<div class="item"><div class="gr"><b>'+p.nombre+' '+(p.apellido||'')+'</b>'+
+    '<span>DNI '+p.dni+' · '+p.code+'</span></div><button class="btn btn-good">Dar ingreso</button></div>';
+  box.querySelector('button').addEventListener('click',()=>{
+    p.estado='validado'; p.validadoAt=Date.now(); save();
+    box.innerHTML='<div class="flash good">✓ Ingreso validado: '+p.nombre+' '+(p.apellido||'')+'</div>';
+    setTimeout(()=>{ el('ay-val-q').value=''; box.innerHTML=''; el('ay-val-q').focus(); },1600);
+  });
+});
+el('ay-rev-q').addEventListener('input',function(){
+  const q=this.value.trim(), box=el('ayRevResult');
+  const p=state.personas.find(x=>x.dni===q);
+  if(!p){ box.innerHTML=q?'<p class="tiny muted">Sin coincidencias.</p>':''; return; }
+  box.innerHTML='<div class="card"><div class="between"><b>'+p.nombre+' '+(p.apellido||'')+'</b>'+
+    '<span class="pill p-gold">'+p.badges.length+' insignias</span></div>'+
+    '<div class="kv"><span>DNI</span><span class="mono">'+p.dni+'</span></div>'+
+    '<div class="kv"><span>Ticket</span><span class="mono">'+p.code+'</span></div>'+
+    '<div class="kv"><span>Dispositivo actual</span><span class="mono">'+(p.device||'ninguno')+'</span></div>'+
+    '<label class="consent" style="margin-top:.6rem;"><input type="checkbox" id="revChk">'+
+    '<span class="ct"><b>Verifiqué el documento físico</b>Queda registrado con mi usuario de staff y la hora.</span></label>'+
+    '<button class="btn btn-event btn-block" id="revGo" style="margin-top:.6rem;" disabled>Enviar enlace de acceso</button></div>';
+  el('revChk').addEventListener('change',function(){ el('revGo').disabled=!this.checked; });
+  el('revGo').addEventListener('click',()=>{
+    save();
+    box.innerHTML='<div class="flash good">✓ Enlace enviado a ••• '+(p.cel||'000').slice(-3)+'</div>'+
+      '<div class="wa" style="margin-top:.6rem;"><div class="whead">💬 WhatsApp</div>Toca para recuperar tu ticket:<br>'+
+      '<a href="#">itera.pe/e/sabores-y-sellos/a/'+mkcode('LNK')+'</a><br>'+
+      '<span style="opacity:.7;font-size:.72rem;">Vence en 15 min · un solo uso · re-vinculación autorizada por staff</span></div>';
+  });
+});
+el('ay-cp-q').addEventListener('input',function(){
+  const q=this.value.trim(), box=el('ayCpResult');
+  const p=q?state.personas.find(x=>x.dni.indexOf(q)>=0):null;
+  if(!p){ box.innerHTML=q?'<p class="tiny muted">Sin coincidencias.</p>':''; return; }
+  box.innerHTML='<div class="card"><div class="between" style="margin-bottom:.5rem;"><b>'+p.nombre+' '+(p.apellido||'')+'</b>'+
+    (p.perfilCompleto?'<span class="pill p-good">Completo</span>':'<span class="pill p-warn">Incompleto</span>')+'</div>'+
+    '<div class="field"><label>Apellidos</label><input type="text" id="cpa" value="'+(p.apellido||'')+'"></div>'+
+    '<div class="field"><label>Celular</label><input type="tel" id="cpc" value="'+(p.cel||'')+'"></div>'+
+    '<div class="field"><label>Correo</label><input type="email" id="cpe" value="'+(p.email||'')+'"></div>'+
+    '<button class="btn btn-event btn-block" id="cpsave">Guardar</button></div>';
+  el('cpsave').addEventListener('click',()=>{
+    p.apellido=el('cpa').value.trim(); p.cel=el('cpc').value.trim(); p.email=el('cpe').value.trim();
+    p.perfilCompleto=!!(p.apellido&&p.cel); save();
+    box.innerHTML='<div class="flash good">✓ Perfil actualizado</div>';
+  });
+});
+</script>
