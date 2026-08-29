@@ -378,7 +378,7 @@
 <div class="browser" id="app-asistente">
   <div class="bchrome">
     <div class="bdots"><i></i><i></i><i></i></div>
-    <div class="burl"><span class="lock">🔒</span> itera.pe<b>/e/sabores-y-sellos</b></div>
+    <div class="burl"><span class="lock">🔒</span> itera.pe<b>/e/country-fest</b></div>
   </div>
   <div class="bviewport">
     <div class="vbody" id="asBody">
@@ -386,9 +386,9 @@
       <!-- 1 landing -->
       <section class="screen active" data-sc="as-landing">
         <div class="ticket" style="background:linear-gradient(158deg,#315CFF,#001B6B);border:1px solid rgba(255,255,255,0.15);padding:2rem 1.5rem;">
-          <span class="ttag">ITERA SUMMIT 2026 · CENTRO DE CONVENCIONES &amp; ONLINE</span>
-          <h2 style="font-size:1.75rem;color:#fff;margin:.3rem 0;">ITERA Summit 2026<br>Transformación &amp; Procesos</h2>
-          <p style="font-size:.95rem;color:rgba(255,255,255,.92);max-width:560px;margin:0 auto;">Acreditación digital oficial, agenda ejecutiva, stands de automatización y networking B2B en tiempo real.</p>
+          <span class="ttag">COUNTRY FEST 2026 · 2 DÍAS · ENTRADA LIBRE</span>
+          <h2 style="font-size:1.75rem;color:#fff;margin:.3rem 0;">Country Fest 2026<br>La feria del sabor y el estilo</h2>
+          <p style="font-size:.95rem;color:rgba(255,255,255,.92);max-width:560px;margin:0 auto;">Registro gratuito, ticket digital con QR, insignias por cada puesto que visitas y sorteo final. Todo desde tu celular.</p>
         </div>
         <div class="stack g2" style="margin-top:1.2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0.8rem;">
           <button class="btn btn-accent btn-block" data-go="as-registro" style="padding:1rem;">Registrarme gratis</button>
@@ -490,7 +490,7 @@
         <div class="card" style="margin-top:.7rem;">
           <div class="kv"><span>Estado de ingreso</span><span id="ticketEstado"></span></div>
           <div class="kv"><span>Validado</span><span class="mono" id="ticketValAt">—</span></div>
-          <div class="kv"><span>Evento</span><span>Sabores &amp; Sellos · 2 días</span></div>
+          <div class="kv"><span>Evento</span><span>Country Fest · 2 días</span></div>
           <div class="kv"><span>Sesión</span><span class="mono" id="ticketDev">—</span></div>
         </div>
         <div class="row wrap" style="margin-top:.7rem;">
@@ -516,7 +516,7 @@
         <div class="center" style="padding:1.8rem 0;">
           <div style="font-size:3.2rem;">✅</div>
           <h2 style="margin-top:.4rem;">Ingreso validado</h2>
-          <p class="tiny muted" style="margin-top:.3rem;">Bienvenido a Sabores &amp; Sellos.</p>
+          <p class="tiny muted" style="margin-top:.3rem;">Bienvenido a Country Fest.</p>
           <div class="mono tiny" id="ingOkTime" style="margin-top:.5rem;color:var(--ink-soft);"></div>
         </div>
         <div class="note n-good">Ya puedes coleccionar insignias. Consume en un puesto, cumple su mínimo y escanea su QR.</div>
@@ -528,6 +528,11 @@
         <div class="schead"><h2>Escanear QR del puesto</h2></div>
         <div id="scanGate" style="margin-bottom:.7rem;"></div>
         <div class="cam" id="camScan"><div class="off">Cámara apagada.<br><button class="btn btn-line btn-sm" id="btnCamScan" style="margin-top:.5rem;">Activar cámara</button></div></div>
+        <div class="row" style="margin-top:.6rem;gap:.4rem;">
+          <input type="text" id="scanManual" placeholder="¿No lee? Escribe el código del puesto" style="flex:1;text-transform:uppercase;">
+          <button class="btn btn-event btn-sm" id="btnScanManual">Validar</button>
+        </div>
+        <div id="scanManualMsg"></div>
         <p class="tiny muted" style="margin:.7rem 0 .4rem;"><b>Demo:</b> simula el escaneo eligiendo el puesto. Verás el mínimo de consumo de cada uno.</p>
         <div class="chips" id="scanChips"></div>
         <div class="list" id="scanSimList"></div>
@@ -683,7 +688,7 @@
 <div class="browser hide" id="app-empresa">
   <div class="bchrome">
     <div class="bdots"><i></i><i></i><i></i></div>
-    <div class="burl"><span class="lock">🔒</span> itera.pe<b>/negocios/sabores-y-sellos</b></div>
+    <div class="burl"><span class="lock">🔒</span> itera.pe<b>/negocios/country-fest</b></div>
   </div>
   <div class="bviewport">
     <div class="vbody" id="empBody">
@@ -693,7 +698,7 @@
         <div class="center" style="padding:1.2rem 0 .4rem;">
           <div style="font-size:2.2rem;">🏬</div>
           <h2 style="margin-top:.3rem;font-size:1.2rem;">Portal de negocios</h2>
-          <p class="tiny muted">Feria Sabores &amp; Sellos</p>
+          <p class="tiny muted">Country Fest</p>
         </div>
         <div class="card">
           <div class="field"><label>Correo del negocio</label><input type="email" id="el-email" value="hola@sazondelanona.pe"></div>
@@ -894,7 +899,7 @@
 <div class="browser hide" id="app-ayuda" style="--vw:560px;">
   <div class="bchrome">
     <div class="bdots"><i></i><i></i><i></i></div>
-    <div class="burl"><span class="lock">🔒</span> itera.pe<b>/staff/sabores-y-sellos</b> · Punto de Ayuda</div>
+    <div class="burl"><span class="lock">🔒</span> itera.pe<b>/staff/country-fest</b> · Punto de Ayuda</div>
   </div>
   <div class="bviewport">
     <div class="vbody" id="ayudaBody">
@@ -970,7 +975,7 @@
 <div class="browser wide hide" id="app-organizador">
   <div class="bchrome">
     <div class="bdots"><i></i><i></i><i></i></div>
-    <div class="burl"><span class="lock">🔒</span> itera.pe<b>/consola/sabores-y-sellos</b> · Organizador</div>
+    <div class="burl"><span class="lock">🔒</span> itera.pe<b>/consola/country-fest</b> · Organizador</div>
   </div>
   <div class="bviewport">
     <div class="desk">
@@ -1004,7 +1009,7 @@
             <div class="center" style="margin-bottom:.9rem;"><div style="font-size:2rem;">🔒</div>
               <h2 style="font-size:1.1rem;margin-top:.2rem;">Consola del organizador</h2>
               <p class="tiny muted">Acceso con doble factor</p></div>
-            <div class="field"><label>Correo corporativo</label><input type="email" value="control@saboresysellos.pe"></div>
+            <div class="field"><label>Correo corporativo</label><input type="email" value="control@countryfest.pe"></div>
             <div class="field"><label>Código 2FA (app autenticadora)</label><input type="text" inputmode="numeric" value="••• •••"></div>
             <button class="btn btn-accent btn-block" data-go="org-dashboard">Ingresar</button>
             <p class="tiny muted center" style="margin-top:.5rem;">Acceso por rol · principio de mínimo necesario · toda consulta a datos personales queda en auditoría.</p>
@@ -1014,7 +1019,7 @@
         <!-- 31 dashboard general -->
         <section class="dsc active" data-sc="org-dashboard">
           <div class="between" style="margin-bottom:.8rem;">
-            <div><p class="eyebrow blue">Sabores &amp; Sellos · 2 días</p><h2 style="font-size:1.35rem;">Dashboard general</h2></div>
+            <div><p class="eyebrow blue">Country Fest · 2 días</p><h2 style="font-size:1.35rem;">Dashboard general</h2></div>
             <span class="pill p-neutral">Ejemplo ilustrativo</span>
           </div>
           <div class="kpis" id="orgKpis"></div>
@@ -1209,7 +1214,7 @@
           <h2 style="font-size:1.3rem;">Configuración</h2>
           <div class="pg">
             <div class="card"><h4 style="font-size:.95rem;margin-bottom:.5rem;">Evento</h4>
-              <div class="field"><label>Nombre</label><input type="text" value="Feria Gastronómica Sabores &amp; Sellos"></div>
+              <div class="field"><label>Nombre</label><input type="text" value="Country Fest"></div>
               <div class="g2"><div class="field"><label>Día 1</label><input type="text" value="Sábado 6 de setiembre"></div>
                 <div class="field"><label>Día 2</label><input type="text" value="Domingo 7 de setiembre"></div></div>
               <div class="field"><label>Color de marca del evento</label><input type="text" value="#FF5A1F"></div>
@@ -1299,7 +1304,7 @@
     <img src="../assets/itera-isotype.png" alt="" class="iso" onerror="this.style.display='none'">
     <span class="wm">I&nbsp;T&nbsp;<span class="bar-e"></span>&nbsp;R&nbsp;A</span>
     <div class="grow"></div>
-    <span class="pevent">Sabores &amp; Sellos · Sorteo final</span>
+    <span class="pevent">Country Fest · Sorteo final</span>
   </div>
   <div class="pstage">
     <div class="pprize" id="pPrize">Listos para sortear</div>
@@ -1397,6 +1402,238 @@ function drawQR(text,canvas,scale){
     for(let r=0;r<size;r++)for(let c=0;c<size;c++)if(matrix[r][c])x.fillRect((c+q)*scale,(r+q)*scale,scale,scale);
   }catch(e){console.warn('QR',e);}
 }
+
+/* ===================================================================
+   Decodificador QR propio — contraparte del codificador de arriba.
+   Hace falta porque NINGÚN navegador de iPhone implementa
+   BarcodeDetector: Safari, Chrome y Firefox en iOS corren todos sobre
+   WebKit, y WebKit no lo soporta. Sin esto la cámara nunca funciona
+   en iPhone, que es la mitad del público de un evento.
+
+   Cubre v1-5, EC-L, modo byte y bloque único: exactamente lo que
+   genera el codificador de este prototipo.
+
+   No corrige errores a propósito: valida el frame por síndromes
+   Reed-Solomon y, si no da limpio, lo descarta y prueba el siguiente.
+   A 10 fps eso es más seguro que arriesgar una lectura equivocada.
+   =================================================================== */
+const QRDEC=(function(){
+  const EXP=new Array(512),LOG=new Array(256);
+  (function(){let x=1;for(let i=0;i<255;i++){EXP[i]=x;LOG[x]=i;x<<=1;if(x&0x100)x^=0x11D;}for(let i=255;i<512;i++)EXP[i]=EXP[i-255];})();
+  const gmul=(a,b)=>(a===0||b===0)?0:EXP[LOG[a]+LOG[b]];
+  const V={1:{total:26,ec:7},2:{total:44,ec:10},3:{total:70,ec:15},4:{total:100,ec:20},5:{total:134,ec:26}};
+  const AL={2:[6,18],3:[6,22],4:[6,26],5:[6,30]};
+  const S2V={21:1,25:2,29:3,33:4,37:5};
+  const MASKS=[(r,c)=>(r+c)%2===0,(r,c)=>r%2===0,(r,c)=>c%3===0,(r,c)=>(r+c)%3===0,
+    (r,c)=>(((r/2)|0)+((c/3)|0))%2===0,(r,c)=>((r*c)%2)+((r*c)%3)===0,
+    (r,c)=>((((r*c)%2)+((r*c)%3))%2)===0,(r,c)=>((((r+c)%2)+((r*c)%3))%2)===0];
+  function fmtVal(ec,mask){let d=(ec<<3)|mask,g=d<<10;
+    for(let i=14;i>=10;i--)if(g&(1<<i))g^=(0x537<<(i-10));
+    return ((d<<10)|g)^0x5412;}
+
+  /* mapa de patrones de función — refleja exactamente al codificador */
+  function funcMap(size,ver){
+    const res=Array.from({length:size},()=>new Array(size).fill(false));
+    const rsv=(r,c)=>{if(r>=0&&r<size&&c>=0&&c<size)res[r][c]=true;};
+    for(const[r0,c0]of[[0,0],[0,size-7],[size-7,0]])
+      for(let r=-1;r<=7;r++)for(let c=-1;c<=7;c++)rsv(r0+r,c0+c);
+    const al=AL[ver];
+    if(al){const co=[];for(const a of al)for(const b of al)co.push([a,b]);
+      const z=[[-1,7,-1,7],[-1,7,size-8,size],[size-8,size,-1,7]];
+      const ov=(r0,c0)=>{const r1=r0-2,r2=r0+2,c1=c0-2,c2=c0+2;return z.some(([a,b,c,d])=>r1<=b&&r2>=a&&c1<=d&&c2>=c);};
+      for(const[r0,c0]of co){if(ov(r0,c0))continue;
+        for(let r=-2;r<=2;r++)for(let c=-2;c<=2;c++)rsv(r0+r,c0+c);}}
+    for(let i=8;i<size-8;i++){rsv(6,i);rsv(i,6);}
+    rsv(size-8,8);
+    for(let i=0;i<9;i++){rsv(8,i);rsv(i,8);}
+    for(let i=0;i<8;i++){rsv(8,size-1-i);rsv(size-1-i,8);}
+    return res;
+  }
+
+  /* síndromes RS: 0 en todos = el frame se leyó perfecto */
+  function rsOk(cw,ecLen){
+    for(let i=0;i<ecLen;i++){
+      let s=0;const a=EXP[i];
+      for(let j=0;j<cw.length;j++)s=gmul(s,a)^cw[j];
+      if(s!==0)return false;
+    }
+    return true;
+  }
+
+  /* matriz booleana (true = módulo oscuro) -> texto */
+  function decodeMatrix(m){
+    const size=m.length, ver=S2V[size];
+    if(!ver)return null;
+    const FA=[[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
+    let raw=0;
+    for(let i=0;i<15;i++){const[r,c]=FA[i];raw=(raw<<1)|(m[r][c]?1:0);}
+    let ecL=-1,mask=-1;
+    for(let e=0;e<4&&mask<0;e++)for(let k=0;k<8;k++)if(fmtVal(e,k)===raw){ecL=e;mask=k;break;}
+    if(mask<0)return null;
+
+    const res=funcMap(size,ver), mk=MASKS[mask];
+    const bits=[];
+    let dir=-1,col=size-1;
+    while(col>0){
+      if(col===6)col--;
+      for(let i=0;i<size;i++){
+        const row=dir===-1?size-1-i:i;
+        for(const c of[col,col-1]){
+          if(res[row][c])continue;
+          bits.push((m[row][c]!==mk(row,c))?1:0);
+        }
+      }
+      dir=-dir;col-=2;
+    }
+    const inf=V[ver], cw=[];
+    for(let i=0;i+7<bits.length&&cw.length<inf.total;i+=8){
+      let b=0;for(let k=0;k<8;k++)b=(b<<1)|bits[i+k];cw.push(b);
+    }
+    if(cw.length<inf.total||!rsOk(cw,inf.ec))return null;
+
+    const data=cw.slice(0,inf.total-inf.ec);
+    let bp=0;
+    const take=n=>{let v=0;for(let i=0;i<n;i++){const byte=data[(bp/8)|0];if(byte===undefined)return -1;
+      v=(v<<1)|((byte>>(7-(bp%8)))&1);bp++;}return v;};
+    if(take(4)!==4)return null;              // solo modo byte
+    const len=take(8);
+    if(len<0||len>data.length)return null;
+    const out=[];
+    for(let i=0;i<len;i++){const b=take(8);if(b<0)return null;out.push(b);}
+    try{ return new TextDecoder().decode(new Uint8Array(out)); }catch(e){ return null; }
+  }
+
+  /* ---------- localización de patrones de búsqueda (1:1:3:1:1) ---------- */
+  function otsu(gray){
+    const h=new Array(256).fill(0);
+    for(let i=0;i<gray.length;i++)h[gray[i]]++;
+    const tot=gray.length;
+    let sum=0;for(let i=0;i<256;i++)sum+=i*h[i];
+    let sumB=0,wB=0,best=0,thr=128;
+    for(let t=0;t<256;t++){
+      wB+=h[t];if(!wB)continue;
+      const wF=tot-wB;if(!wF)break;
+      sumB+=t*h[t];
+      const mB=sumB/wB,mF=(sum-sumB)/wF,v=wB*wF*(mB-mF)*(mB-mF);
+      if(v>best){best=v;thr=t;}
+    }
+    return thr;
+  }
+  const ratioOk=r=>{
+    const u=(r[0]+r[1]+r[3]+r[4])/4;           // módulo estimado
+    if(u<1)return false;
+    const tol=u*0.6;
+    return Math.abs(r[0]-u)<tol&&Math.abs(r[1]-u)<tol&&
+           Math.abs(r[3]-u)<tol&&Math.abs(r[4]-u)<tol&&
+           Math.abs(r[2]-3*u)<tol*2.2;
+  };
+  function crossVertical(bin,w,h,cx,cy){
+    const at=(x,y)=>(x<0||y<0||x>=w||y>=h)?0:bin[y*w+x];
+    if(!at(cx,cy))return null;
+    const r=[0,0,0,0,0];
+    let y=cy;while(y>=0&&at(cx,y)){r[2]++;y--;}
+    while(y>=0&&!at(cx,y)){r[1]++;y--;}
+    while(y>=0&&at(cx,y)){r[0]++;y--;}
+    y=cy+1;while(y<h&&at(cx,y)){r[2]++;y++;}
+    while(y<h&&!at(cx,y)){r[3]++;y++;}
+    while(y<h&&at(cx,y)){r[4]++;y++;}
+    if(!r[0]||!r[1]||!r[3]||!r[4]||!ratioOk(r))return null;
+    // 5 anchos de módulo en total: 1+1+3+1+1, con el central contando por 3
+    return {y:y-r[4]-r[3]-r[2]/2, mod:(r[0]+r[1]+r[2]/3+r[3]+r[4])/5};
+  }
+  function finders(bin,w,h){
+    const cands=[];
+    for(let y=0;y<h;y++){
+      let run=[0,0,0,0,0],cur=0,cnt=0,x=0;
+      const push=len=>{run.shift();run.push(len);};
+      while(x<w){
+        const v=bin[y*w+x];
+        if(v===cur){cnt++;x++;continue;}
+        push(cnt);
+        if(cur===1&&run[4]&&run[0]&&ratioOk(run)){
+          // el centro es el run del medio (run[2]) que termina antes de run[3],run[4]
+          const end=x-run[4]-run[3];
+          const cx=Math.round(end-run[2]/2);
+          const cv=crossVertical(bin,w,h,cx,y);
+          if(cv)cands.push({x:cx,y:Math.round(cv.y),mod:cv.mod});
+        }
+        cur=v;cnt=1;x++;
+      }
+    }
+    // agrupar candidatos cercanos
+    const groups=[];
+    cands.forEach(c=>{
+      const g=groups.find(g=>Math.abs(g.x-c.x)<=g.mod*2&&Math.abs(g.y-c.y)<=g.mod*2);
+      if(g){g.x=(g.x*g.n+c.x)/(g.n+1);g.y=(g.y*g.n+c.y)/(g.n+1);g.mod=(g.mod*g.n+c.mod)/(g.n+1);g.n++;}
+      else groups.push({x:c.x,y:c.y,mod:c.mod,n:1});
+    });
+    return groups.filter(g=>g.n>=2).sort((a,b)=>b.n-a.n).slice(0,8);
+  }
+  const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+  function orderCorners(p){
+    // el vértice opuesto al lado más largo es la esquina superior izquierda
+    const d=[dist(p[1],p[2]),dist(p[0],p[2]),dist(p[0],p[1])];
+    const i=d.indexOf(Math.max(...d));
+    const tl=p[i], rest=p.filter((_,k)=>k!==i);
+    // orientación: en coordenadas de imagen la Y crece hacia abajo, así que
+    // (TR-TL) x (BL-TL) es positivo — el signo va al revés que en convención matemática
+    const v1={x:rest[0].x-tl.x,y:rest[0].y-tl.y}, v2={x:rest[1].x-tl.x,y:rest[1].y-tl.y};
+    const cross=v1.x*v2.y-v1.y*v2.x;
+    return cross>0?{tl,tr:rest[0],bl:rest[1]}:{tl,tr:rest[1],bl:rest[0]};
+  }
+  function decodeImage(gray,w,h){
+    const thr=otsu(gray);
+    const bin=new Uint8Array(w*h);
+    // inclusivo: Otsu devuelve el nivel de la propia clase oscura
+    for(let i=0;i<bin.length;i++)bin[i]=gray[i]<=thr?1:0;
+    const fs=finders(bin,w,h);
+    if(fs.length<3)return null;
+    // probar las combinaciones más prometedoras de 3 patrones
+    for(let a=0;a<fs.length-2;a++)for(let b=a+1;b<fs.length-1;b++)for(let c=b+1;c<fs.length;c++){
+      const {tl,tr,bl}=orderCorners([fs[a],fs[b],fs[c]]);
+      const mod=(tl.mod+tr.mod+bl.mod)/3;
+      if(mod<1)continue;
+      let dim=Math.round((dist(tl,tr)/mod+dist(tl,bl)/mod)/2)+7;
+      const rem=((dim-17)%4+4)%4;          // el tamaño válido es 17+4k
+      dim=rem<=2?dim-rem:dim+(4-rem);
+      if(!S2V[dim])continue;
+      const ux={x:(tr.x-tl.x)/(dim-7),y:(tr.y-tl.y)/(dim-7)};
+      const uy={x:(bl.x-tl.x)/(dim-7),y:(bl.y-tl.y)/(dim-7)};
+      const m=[];let bad=false;
+      for(let r=0;r<dim&&!bad;r++){
+        const row=[];
+        for(let col=0;col<dim;col++){
+          const fx=col-3, fy=r-3;         // el centro del finder es el módulo 3
+          const px=tl.x+ux.x*fx+uy.x*fy, py=tl.y+ux.y*fx+uy.y*fy;
+          const xi=Math.round(px), yi=Math.round(py);
+          if(xi<0||yi<0||xi>=w||yi>=h){bad=true;break;}
+          // voto de vecindad contra el ruido; con módulos finos se muestrea
+          // un solo píxel, si no la ventana invade los módulos contiguos
+          const rad=mod>=5?1:0;
+          let dark=0,tot=0;
+          for(let oy=-rad;oy<=rad;oy++)for(let ox=-rad;ox<=rad;ox++){
+            const sx=xi+ox,sy=yi+oy;
+            if(sx<0||sy<0||sx>=w||sy>=h)continue;
+            dark+=bin[sy*w+sx];tot++;
+          }
+          row.push(dark*2>tot);
+        }
+        if(!bad)m.push(row);
+      }
+      if(bad)continue;
+      const txt=decodeMatrix(m);
+      if(txt!==null)return txt;
+    }
+    return null;
+  }
+  function decodeCanvas(ctx,w,h){
+    const d=ctx.getImageData(0,0,w,h).data;
+    const gray=new Uint8Array(w*h);
+    for(let i=0,j=0;i<d.length;i+=4,j++)gray[j]=(d[i]*299+d[i+1]*587+d[i+2]*114)/1000|0;
+    return decodeImage(gray,w,h);
+  }
+  return {decodeMatrix,decodeImage,decodeCanvas};
+})();
 
 /* ===================================================================
    Datos
@@ -1519,7 +1756,7 @@ function personasSeed(){
 
 function seed(){
   return {
-    event:{name:'Feria Gastronómica Sabores & Sellos',slug:'sabores-y-sellos',dias:2,color:'#FF5A1F'},
+    event:{name:'Country Fest',slug:'country-fest',dias:2,color:'#FF5A1F'},
     demoDay:1, meId:null,
     personas:personasSeed(), empresas:empresasSeed(), scans:[], winners:[],
     dr:[{fecha:new Date(Date.now()-172800000).toLocaleDateString('es-PE'),tipo:'Acceso',estado:'Atendida'},
@@ -1759,16 +1996,53 @@ function heat(t){
 /* =============== cámara (BarcodeDetector nativo) =============== */
 async function startCam(boxId,onCode){
   const box=el(boxId); if(!box)return;
-  if(!('BarcodeDetector' in window)){
-    box.innerHTML='<div class="off">Este navegador no soporta escaneo nativo de QR.<br>Usa la simulación de abajo.</div>';return;}
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    box.innerHTML='<div class="off">Este navegador no da acceso a la cámara.<br>Usa el código manual o la lista de abajo.</div>';return;}
+  box.innerHTML='<div class="off">Abriendo cámara…</div>';
+  let stream;
   try{
-    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-    box.innerHTML='<video autoplay playsinline muted></video><div class="reticle"></div>';
-    const v=box.querySelector('video'); v.srcObject=stream;
-    const det=new BarcodeDetector({formats:['qr_code']});
-    const timer=setInterval(async()=>{try{const c=await det.detect(v);if(c.length)onCode(c[0].rawValue);}catch(e){}},350);
-    streams[boxId]={stream,timer};
-  }catch(e){ box.innerHTML='<div class="off">No se pudo abrir la cámara.<br>'+e.message+'</div>'; }
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
+  }catch(e){
+    const msg=(e&&(e.name==='NotAllowedError'||e.name==='SecurityError'))
+      ? 'Permiso de cámara denegado.<br><span style="opacity:.75;">En iPhone: Ajustes › Safari › Cámara › Preguntar o Permitir. Luego recarga.</span>'
+      : (location.protocol!=='https:'&&location.hostname!=='localhost')
+        ? 'La cámara solo funciona sobre HTTPS.'
+        : 'No se pudo abrir la cámara.<br>'+(e&&e.message?e.message:'');
+    box.innerHTML='<div class="off">'+msg+'</div>';
+    return;
+  }
+  box.innerHTML='<video playsinline muted autoplay></video><div class="reticle"></div>';
+  const v=box.querySelector('video');
+  v.setAttribute('playsinline','');           // iOS: sin esto abre a pantalla completa
+  v.setAttribute('webkit-playsinline','');
+  v.muted=true; v.srcObject=stream;
+  try{ await v.play(); }catch(e){}
+
+  // BarcodeDetector cuando existe (Android/Chrome); en iPhone no existe,
+  // así que cae al decodificador propio.
+  let det=null;
+  if('BarcodeDetector' in window){
+    try{ det=new BarcodeDetector({formats:['qr_code']}); }catch(e){ det=null; }
+  }
+  const cv=document.createElement('canvas'), cx=cv.getContext('2d',{willReadFrequently:true});
+  let busy=false;
+  const timer=setInterval(async()=>{
+    if(busy||v.readyState<2||!v.videoWidth)return;
+    busy=true;
+    try{
+      if(det){
+        const c=await det.detect(v);
+        if(c.length){ onCode(c[0].rawValue); busy=false; return; }
+      }
+      const scale=Math.min(1,540/Math.max(v.videoWidth,v.videoHeight));
+      cv.width=Math.round(v.videoWidth*scale); cv.height=Math.round(v.videoHeight*scale);
+      cx.drawImage(v,0,0,cv.width,cv.height);
+      const txt=QRDEC.decodeCanvas(cx,cv.width,cv.height);
+      if(txt)onCode(txt);
+    }catch(e){}
+    busy=false;
+  },140);
+  streams[boxId]={stream,timer};
 }
 
 /* =============== confeti (solo en los dos momentos de celebración) =============== */
@@ -1794,7 +2068,7 @@ function confetti(){
 /* =================== ASISTENTE =================== */
 function ticketEl(p){
   const d=document.createElement('div'); d.className='ticket';
-  d.innerHTML='<span class="ttag">Ticket personal · Sabores &amp; Sellos</span>'+
+  d.innerHTML='<span class="ttag">Ticket personal · Country Fest</span>'+
     '<div class="qrbox"><canvas></canvas></div>'+
     '<div class="tname">'+p.nombre+' '+(p.apellido||'')+'</div>'+
     '<div class="tcode">'+p.code+'</div>'+
@@ -1864,9 +2138,9 @@ function sendLink(canal){
   const dest = canal==='wa' ? ('WhatsApp ••• '+(p.cel||'').slice(-3)) : ((p.email||'tu correo').replace(/^(.{2}).*@/,'$1•••@'));
   const token=mkcode('LNK');
   box.innerHTML =
-    '<div class="wa"><div class="whead">'+(canal==='wa'?'💬 WhatsApp · Sabores &amp; Sellos':'✉️ Correo · Sabores &amp; Sellos')+'</div>'+
+    '<div class="wa"><div class="whead">'+(canal==='wa'?'💬 WhatsApp · Country Fest':'✉️ Correo · Country Fest')+'</div>'+
     'Hola '+p.nombre+' 👋 Toca este enlace para abrir tu ticket en este equipo:<br>'+
-    '<a href="#">itera.pe/e/sabores-y-sellos/a/'+token+'</a><br>'+
+    '<a href="#">itera.pe/e/country-fest/a/'+token+'</a><br>'+
     '<span style="opacity:.7;font-size:.72rem;">Vence en 15 minutos · un solo uso</span></div>'+
     '<p class="tiny muted" style="margin:.6rem 0;">Enviado a <b>'+dest+'</b>. En la demo, tocar el botón simula que abriste el enlace.</p>'+
     '<button class="btn btn-accent btn-block" id="recOpen">Simular que abro el enlace</button>';
@@ -1904,10 +2178,27 @@ function renderScan(){
     list.appendChild(it);
   });
 }
+function empDeCodigo(raw){
+  const q=(raw||'').trim();
+  if(!q)return null;
+  return state.empresas.find(x=>q.indexOf(x.qrToken)>=0||q.indexOf('|'+x.id+'|')>=0)
+      || state.empresas.find(x=>x.qrToken.toUpperCase()===q.toUpperCase())
+      || null;
+}
 el('btnCamScan').addEventListener('click',()=>startCam('camScan',raw=>{
-  const e=state.empresas.find(x=>raw.indexOf(x.qrToken)>=0||raw.indexOf('|'+x.id+'|')>=0);
+  const e=empDeCodigo(raw);
   if(e)processScan(e.id);
 }));
+/* red de seguridad: si la cámara no lee (luz, pantalla sucia, permiso denegado),
+   el código impreso bajo el QR del puesto siempre sirve */
+function scanManual(){
+  const inp=el('scanManual'), msg=el('scanManualMsg');
+  const e=empDeCodigo(inp.value);
+  if(!e){ msg.innerHTML='<div class="flash bad" style="margin-top:.5rem;">Código no reconocido. Revisa el código bajo el QR del puesto.</div>'; return; }
+  msg.innerHTML=''; inp.value=''; processScan(e.id);
+}
+el('btnScanManual').addEventListener('click',scanManual);
+el('scanManual').addEventListener('keydown',ev=>{ if(ev.key==='Enter'){ev.preventDefault();scanManual();} });
 
 function processScan(empresaId){
   const p=me(), e=emp(empresaId), rb=el('scanResultBox');
@@ -2250,7 +2541,7 @@ el('formRapido').addEventListener('submit',ev=>{
     ? '<div class="note n-warn tiny">Ya existía un registro con ese DNI. Se recupera su ticket, no se duplica.</div>'
     : '<div class="note n-good tiny"><b>Registro creado.</b> Sin contraseña: la persona abre el enlace en su celular y queda con la sesión guardada.</div>')+
     '<div class="wa" style="margin-top:.6rem;"><div class="whead">💬 Enviado a '+(p.cel?'••• '+p.cel.slice(-3):'su celular')+'</div>'+
-    'Hola '+p.nombre+' 👋 Este es tu ticket para Sabores &amp; Sellos:<br><a href="#">itera.pe/e/sabores-y-sellos/a/'+mkcode('LNK')+'</a></div>'+
+    'Hola '+p.nombre+' 👋 Este es tu ticket para Country Fest:<br><a href="#">itera.pe/e/country-fest/a/'+mkcode('LNK')+'</a></div>'+
     '<div class="row wrap" style="margin-top:.6rem;"><button class="btn btn-good btn-sm" id="rpVal" style="flex:1;">Dar ingreso ahora</button>'+
     '<button class="btn btn-line btn-sm" id="rpPrint" style="flex:1;">Imprimir ticket</button></div>';
   const t=document.createElement('div'); t.style.marginTop='.7rem'; t.appendChild(ticketEl(p)); box.appendChild(t);
@@ -2322,7 +2613,7 @@ el('ay-rev-q').addEventListener('input',function(){
     save();
     box.innerHTML='<div class="flash good">✓ Enlace enviado a ••• '+(p.cel||'000').slice(-3)+'</div>'+
       '<div class="wa" style="margin-top:.6rem;"><div class="whead">💬 WhatsApp</div>Toca para recuperar tu ticket:<br>'+
-      '<a href="#">itera.pe/e/sabores-y-sellos/a/'+mkcode('LNK')+'</a><br>'+
+      '<a href="#">itera.pe/e/country-fest/a/'+mkcode('LNK')+'</a><br>'+
       '<span style="opacity:.7;font-size:.72rem;">Vence en 15 min · un solo uso · re-vinculación autorizada por staff</span></div>';
   });
 });
