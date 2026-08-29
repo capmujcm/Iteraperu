@@ -1482,22 +1482,39 @@ const SIM={
   consent:{terminos:2450,privacidad:2450,marketing:1510,compartir:980}
 };
 
+/* BBDD de prueba: 100 personas deterministas (mismos DNI/códigos que el backend). */
+const SEED_PERSONAS_N = 100;
 function personasSeed(){
-  const b=[['Marta','Vidal','30111222'],['Julián','Peralta','29887766'],['Sofía','Ramos','31456789'],
-    ['Ezequiel','Castro','28776655'],['Lucía','Fernández','32001122'],['Nicolás','Bravo','27665544'],
-    ['Camila','Rojas','33445566'],['Diego','Salas','25998877'],['Renata','Ochoa','34112233'],['Iván','Meza','26554433']];
-  const nb=[4,1,6,0,3,5,2,0,8,1];
-  return b.map((p,i)=>({
-    id:'p'+(i+1), dni:p[2], nombre:p[0], apellido:p[1],
-    cel:'9'+(61000000+i*837261).toString().slice(0,8),
-    email:p[0].toLowerCase()+'@correo.pe', code:mkcode('TKT'),
-    origen: i<6?'web':(i<8?'rapido':'web'),
-    estado: i<7?'validado':'pendiente', validadoAt: i<7?Date.now()-(i+1)*3400000:null,
-    perfilCompleto: i!==6&&i!==7,
-    consents:{terminos:true,privacidad:true,marketing:i%3!==0,compartir:i%4===0},
-    device:'DEV-S'+i,
-    badges:(()=>{const a=[];for(let k=0;k<nb[i];k++)a.push({empresaId:'e'+(((i*3+k*5)%16)+1),ts:Date.now()-(k*1700000+i*90000),day:(k%2)+1,ticketNo:k+1});return a;})()
-  }));
+  const FN=['María','José','Luis','Carlos','Ana','Rosa','Jorge','Miguel','Carmen','Juan','Pedro','Lucía','Elena','Sofía','Diego','Andrés','Fernando','Patricia','Gabriela','Ricardo','Manuel','Verónica','Daniela','Renato','Camila','Mateo','Valentina','Sebastián','Alejandra','Rodrigo','Paula','Bruno','Ximena','Álvaro','Fiorella','Gonzalo','Milagros','Óscar','Claudia','Héctor'];
+  const LN=['García','Rodríguez','Flores','Torres','Rojas','Ramírez','Castillo','Vargas','Chávez','Quispe','Mamani','Huamán','Sánchez','Díaz','Cruz','Gutiérrez','Reyes','Morales','Ríos','Salazar','Espinoza','Cáceres','Ponce','Valdivia','Meza','Ochoa','Bravo','Peralta','Vidal','Fernández','Salas','Ramos','Castro','Paredes','Zúñiga','Aguilar','Benites','Cabrera','Delgado','Rivas'];
+  const EMP=['Retail Group Perú','Fintech Andina','Logística Express','Banco Líder','Agroindustrias del Sur','Almacenes Centrales','Minera Los Andes','Textil Pacífico','Clínica San Rafael','Universidad Continental','Alicorp','Interbank','Rímac Seguros','Entel Perú','Cálidda','Ferreyros','Cencosud','Independiente'];
+  const CAR=['Analista de Procesos','Jefe de Operaciones','Gerente de TI','Coordinador de Proyectos','Director Comercial','Especialista en Automatización','Subgerente de Logística','Consultor Senior','Product Owner','Data Analyst','Jefe de Innovación','Ingeniero de Sistemas'];
+  const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z]/g,'');
+  const anchors=[['Carlos','Ponce'],['Ana','Valenzuela'],['Diego','Morales'],['Lucía','Cárdenas'],['Fernando','Ríos']];
+  const out=[];
+  for(let i=0;i<SEED_PERSONAS_N;i++){
+    const nombre  = i<anchors.length ? anchors[i][0] : FN[(i*7)%FN.length];
+    const apellido= i<anchors.length ? anchors[i][1] : LN[(i*13+3)%LN.length];
+    const dni = String(40100000 + i*98717).slice(0,8);
+    const validado = (i%20) < 13;                       // ~65% ya ingresó
+    const nb = (i*3 + (i%4)) % 9;                        // 0..8 insignias
+    out.push({
+      id:'p'+(i+1), dni, nombre, apellido,
+      cel:'9'+String(60000000+i*813467).slice(0,8),
+      email: norm(nombre)+'.'+norm(apellido)+'@correo.pe',
+      code:'ITR-'+String(1000+i),
+      empresa: EMP[(i*5+1)%EMP.length], cargo: CAR[(i*3)%CAR.length],
+      tipo: i<3?'organizador':(i%17===0?'speaker':(i%9===0?'vip':(i%23===0?'staff':'general'))),
+      origen: i%5===0?'rapido':'web',
+      estado: validado?'validado':'pendiente',
+      validadoAt: validado ? Date.now()-(((i*37)%560)+5)*60000 : null,
+      perfilCompleto: i%7!==0,
+      consents:{terminos:true,privacidad:true,marketing:i%3!==0,compartir:i%4===0},
+      device:'DEV-S'+i,
+      badges:(()=>{const a=[];for(let k=0;k<nb;k++)a.push({empresaId:'e'+(((i*3+k*5)%16)+1),ts:Date.now()-(k*1700000+i*90000),day:(k%2)+1,ticketNo:k+1});return a;})()
+    });
+  }
+  return out;
 }
 
 function seed(){
@@ -1511,7 +1528,9 @@ function seed(){
 }
 let state=null;
 function load(){try{const r=localStorage.getItem(DB);state=r?JSON.parse(r):seed();}catch(e){state=seed();}
-  if(!state||!state.personas||!state.empresas)state=seed();}
+  if(!state||!state.personas||!state.empresas)state=seed();
+  // Migración de caché antiguo: sube automáticamente a la BBDD de prueba de 100 personas.
+  if(state.personas.length<SEED_PERSONAS_N){state=seed();save();}}
 function save(){try{localStorage.setItem(DB,JSON.stringify(state));}catch(e){}}
 load();
 

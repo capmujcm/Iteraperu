@@ -56,33 +56,69 @@ const inMemoryStore = {
   ]
 };
 
-const SEED_ATTENDEES = [
-  { nombre: 'Carlos', apellido: 'Ponce', email: 'carlos.ponce@itera.tech', empresa: 'ITERA Enterprise', cargo: 'CEO & Founder', tipo: 'organizador', code: 'ITR-7701', token: 'tok-carlos-7701' },
-  { nombre: 'Ana', apellido: 'Valenzuela', email: 'ana.valenzuela@retailgroup.com', empresa: 'Retail Group Perú', cargo: 'Directora de Operaciones', tipo: 'vip', code: 'ITR-8812', token: 'tok-ana-8812' },
-  { nombre: 'Diego', apellido: 'Morales', email: 'diego.morales@fintechperu.io', empresa: 'Fintech Andina', cargo: 'Head of Technology', tipo: 'speaker', code: 'ITR-5520', token: 'tok-diego-5520' },
-  { nombre: 'Lucía', apellido: 'Cárdenas', email: 'lucia.c@logisticaexpress.pe', empresa: 'Logística Express', cargo: 'Gerente de Cadena de Suministro', tipo: 'general', code: 'ITR-3304', token: 'tok-lucia-3304' },
-  { nombre: 'Fernando', apellido: 'Ríos', email: 'fernando.rios@bancolider.com', empresa: 'Banco Líder', cargo: 'VP de Transformación Digital', tipo: 'vip', code: 'ITR-9905', token: 'tok-fernando-9905' },
-  { nombre: 'Mariana', apellido: 'Vega', email: 'm.vega@agroindustria.pe', empresa: 'Agroindustrias del Sur', cargo: 'Jefa de Innovación & TI', tipo: 'general', code: 'ITR-4411', token: 'tok-mariana-4411' },
-  { nombre: 'Roberto', apellido: 'Alarcón', email: 'roberto@almacenes.com', empresa: 'Almacenes Centrales', cargo: 'Director Financiero', tipo: 'general', code: 'ITR-2208', token: 'tok-roberto-2208' },
-  { nombre: 'Sofía', apellido: 'Gutiérrez', email: 'sofia.g@consultores.pe', empresa: 'Gutiérrez & Asoc.', cargo: 'Managing Partner', tipo: 'speaker', code: 'ITR-6633', token: 'tok-sofia-6633' }
+// -----------------------------------------------------------------------------
+// BBDD de prueba: 100 asistentes deterministas.
+// Mismos DNI / códigos / tokens que el front (evento-plataforma/prototipo.html)
+// para que el check-in en Puerta resuelva contra las mismas identidades.
+// -----------------------------------------------------------------------------
+const SEED_ATTENDEES_N = 100;
+
+const FIRST_NAMES = ['María', 'José', 'Luis', 'Carlos', 'Ana', 'Rosa', 'Jorge', 'Miguel', 'Carmen', 'Juan', 'Pedro', 'Lucía', 'Elena', 'Sofía', 'Diego', 'Andrés', 'Fernando', 'Patricia', 'Gabriela', 'Ricardo', 'Manuel', 'Verónica', 'Daniela', 'Renato', 'Camila', 'Mateo', 'Valentina', 'Sebastián', 'Alejandra', 'Rodrigo', 'Paula', 'Bruno', 'Ximena', 'Álvaro', 'Fiorella', 'Gonzalo', 'Milagros', 'Óscar', 'Claudia', 'Héctor'];
+const LAST_NAMES = ['García', 'Rodríguez', 'Flores', 'Torres', 'Rojas', 'Ramírez', 'Castillo', 'Vargas', 'Chávez', 'Quispe', 'Mamani', 'Huamán', 'Sánchez', 'Díaz', 'Cruz', 'Gutiérrez', 'Reyes', 'Morales', 'Ríos', 'Salazar', 'Espinoza', 'Cáceres', 'Ponce', 'Valdivia', 'Meza', 'Ochoa', 'Bravo', 'Peralta', 'Vidal', 'Fernández', 'Salas', 'Ramos', 'Castro', 'Paredes', 'Zúñiga', 'Aguilar', 'Benites', 'Cabrera', 'Delgado', 'Rivas'];
+const SEED_EMPRESAS = ['Retail Group Perú', 'Fintech Andina', 'Logística Express', 'Banco Líder', 'Agroindustrias del Sur', 'Almacenes Centrales', 'Minera Los Andes', 'Textil Pacífico', 'Clínica San Rafael', 'Universidad Continental', 'Alicorp', 'Interbank', 'Rímac Seguros', 'Entel Perú', 'Cálidda', 'Ferreyros', 'Cencosud', 'Independiente'];
+const SEED_CARGOS = ['Analista de Procesos', 'Jefe de Operaciones', 'Gerente de TI', 'Coordinador de Proyectos', 'Director Comercial', 'Especialista en Automatización', 'Subgerente de Logística', 'Consultor Senior', 'Product Owner', 'Data Analyst', 'Jefe de Innovación', 'Ingeniero de Sistemas'];
+const SEED_ANCHORS = [
+  ['Carlos', 'Ponce'], ['Ana', 'Valenzuela'], ['Diego', 'Morales'], ['Lucía', 'Cárdenas'], ['Fernando', 'Ríos']
 ];
 
+const _slug = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z]/g, '');
+
+function buildSeedAttendees() {
+  const now = Date.now();
+  const list = [];
+  for (let i = 0; i < SEED_ATTENDEES_N; i++) {
+    const nombre = i < SEED_ANCHORS.length ? SEED_ANCHORS[i][0] : FIRST_NAMES[(i * 7) % FIRST_NAMES.length];
+    const apellido = i < SEED_ANCHORS.length ? SEED_ANCHORS[i][1] : LAST_NAMES[(i * 13 + 3) % LAST_NAMES.length];
+    const dni = String(40100000 + i * 98717).slice(0, 8);
+    const validado = (i % 20) < 13; // ~65% ya hizo check-in
+    const tipo = i < 3 ? 'organizador'
+      : (i % 17 === 0 ? 'speaker'
+        : (i % 9 === 0 ? 'vip'
+          : (i % 23 === 0 ? 'staff' : 'general')));
+    list.push({
+      id: `att-${i + 1}`,
+      nombre,
+      apellido,
+      dni,
+      cel: '9' + String(60000000 + i * 813467).slice(0, 8),
+      email: `${_slug(nombre)}.${_slug(apellido)}@correo.pe`,
+      empresa: SEED_EMPRESAS[(i * 5 + 1) % SEED_EMPRESAS.length],
+      cargo: SEED_CARGOS[(i * 3) % SEED_CARGOS.length],
+      tipo_ticket: tipo,
+      codigo_ticket: `ITR-${1000 + i}`,
+      qr_token: `tok-${dni}`,
+      estado: validado ? 'checkin' : 'valido',
+      checkin_count: validado ? 1 : 0,
+      ultimo_checkin: validado ? new Date(now - (((i * 37) % 560) + 5) * 60000).toISOString() : null,
+      badges: ['Bienvenida'].concat((i * 3 + (i % 4)) % 9 > 3 ? ['Networking'] : [])
+    });
+  }
+  return list;
+}
+
 function seedMemory() {
-  inMemoryStore.asistentes = SEED_ATTENDEES.map((a, idx) => ({
-    id: `att-${idx + 1}`,
-    nombre: a.nombre,
-    apellido: a.apellido,
-    email: a.email,
-    empresa: a.empresa,
-    cargo: a.cargo,
-    tipo_ticket: a.tipo,
-    codigo_ticket: a.code,
-    qr_token: a.token,
-    estado: idx < 3 ? 'checkin' : 'valido',
-    checkin_count: idx < 3 ? 1 : 0,
-    ultimo_checkin: idx < 3 ? new Date().toISOString() : null,
-    badges: ['Bienvenida', 'Networking']
-  }));
+  inMemoryStore.asistentes = buildSeedAttendees();
+  inMemoryStore.checkins = inMemoryStore.asistentes
+    .filter(a => a.estado === 'checkin')
+    .map(a => ({
+      id: `chk-seed-${a.id}`,
+      ticket_code: a.codigo_ticket,
+      nombre: `${a.nombre} ${a.apellido}`,
+      puerta: 'Puerta Principal',
+      staff: 'Seed',
+      timestamp: a.ultimo_checkin,
+      isDuplicate: false
+    }));
 }
 seedMemory();
 
@@ -127,9 +163,25 @@ fastify.get('/api/events/current', async () => {
 fastify.get('/api/events/analytics', async () => {
   const attendees = inMemoryStore.asistentes;
   const totalRegistrados = attendees.length;
-  const totalIngresados = attendees.filter(a => a.estado === 'checkin').length;
-  const aforoMax = 500;
+  const ingresados = attendees.filter(a => a.estado === 'checkin');
+  const totalIngresados = ingresados.length;
+  const aforoMax = inMemoryStore.eventos[0]?.aforo_max || 500;
   const aforoPct = Math.round((totalIngresados / aforoMax) * 100);
+
+  // Timeline real: acumulado de check-ins por hora del día.
+  const horas = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+  const porHora = {};
+  ingresados.forEach(a => {
+    if (!a.ultimo_checkin) return;
+    const h = new Date(a.ultimo_checkin).getHours();
+    const key = String(h).padStart(2, '0') + ':00';
+    porHora[key] = (porHora[key] || 0) + 1;
+  });
+  let acumulado = 0;
+  const timelineHoras = horas.map(hora => {
+    acumulado += porHora[hora] || 0;
+    return { hora, ingresos: acumulado };
+  });
 
   return {
     success: true,
@@ -138,21 +190,17 @@ fastify.get('/api/events/analytics', async () => {
       totalIngresados,
       aforoMax,
       aforoPct,
+      tasaIngreso: totalRegistrados ? Math.round((totalIngresados / totalRegistrados) * 100) : 0,
+      standsLeadsCount: inMemoryStore.standsLeads.length,
+      preguntasCount: inMemoryStore.preguntas.length,
       porTipo: {
         vip: attendees.filter(a => a.tipo_ticket === 'vip').length,
         general: attendees.filter(a => a.tipo_ticket === 'general').length,
         speaker: attendees.filter(a => a.tipo_ticket === 'speaker').length,
+        staff: attendees.filter(a => a.tipo_ticket === 'staff').length,
         organizador: attendees.filter(a => a.tipo_ticket === 'organizador').length
       },
-      standsLeadsCount: inMemoryStore.standsLeads.length,
-      timelineHoras: [
-        { hora: '08:00', ingresos: 12 },
-        { hora: '09:00', ingresos: 48 },
-        { hora: '10:00', ingresos: 95 },
-        { hora: '11:00', ingresos: 140 },
-        { hora: '12:00', ingresos: 180 },
-        { hora: '13:00', ingresos: Math.max(totalIngresados, 180) }
-      ]
+      timelineHoras
     }
   };
 });
@@ -170,7 +218,10 @@ fastify.post('/api/attendees/register', async (req, reply) => {
   const { nombre, apellido, email, dni, cel, empresa, cargo, tipo_ticket } = req.body || {};
   if (!nombre) return reply.status(400).send({ error: 'Nombre es requerido' });
 
-  const randomCode = `ITR-${Math.floor(1000 + Math.random() * 9000)}`;
+  // Códigos nuevos por encima del rango sembrado (ITR-1000..ITR-1099) para evitar colisiones.
+  let seq = 1100;
+  while (inMemoryStore.asistentes.some(a => a.codigo_ticket === `ITR-${seq}`)) seq++;
+  const randomCode = `ITR-${seq}`;
   const randomToken = `tok-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 7)}`;
 
   const newAttendee = {
