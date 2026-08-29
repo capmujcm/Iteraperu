@@ -1583,6 +1583,29 @@ function hostOf(sc){
   }
   return null;
 }
+/* Despachador de render por pantalla.
+   Los renderers viven en bloques <script> posteriores, así que se resuelven por
+   nombre en tiempo de ejecución. Todo va envuelto en try/catch: un renderer que
+   falle no debe romper la navegación de la app entera. */
+var RENDERERS={
+  'as-ticket':'renderTicket', 'as-qr':'renderQrBig', 'as-escanear':'renderScan',
+  'as-insignias':'renderInsignias', 'as-empresas':'renderEmpresasList',
+  'as-perfil':'renderPerfil', 'as-completar':'renderCompletar', 'as-privacidad':'renderPrefs',
+  'emp-dashboard':'renderEmpDash', 'emp-estadisticas':'renderEmpStats',
+  'emp-interacciones':'renderEmpInt', 'emp-qr':'renderEmpQr', 'emp-dinamica':'renderDinamica',
+  'org-dashboard':'renderOrgDash', 'org-indicadores':'renderOrgIndicadores',
+  'org-dia':'renderOrgDia', 'org-hora':'renderOrgHora', 'org-personas':'renderOrgPersonas',
+  'org-empresas':'renderOrgEmpresas', 'org-rubros':'renderOrgRubros',
+  'org-ranking':'renderOrgRanking', 'org-interacciones':'renderOrgInteracciones',
+  'org-insignias':'renderOrgInsignias', 'org-tickets':'renderOrgTickets',
+  'org-sorteo':'renderOrgSorteo', 'org-privacidad':'renderOrgPrivacidad'
+};
+function render(sc){
+  const name=(typeof RENDERERS!=='undefined')&&RENDERERS[sc]; if(!name)return;
+  const fn=window[name];
+  if(typeof fn!=='function')return;
+  try{ fn(); }catch(e){ console.warn('[render '+sc+']',e); }
+}
 function showScreen(sc){
   const host=hostOf(sc); if(!host)return;
   host.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.dataset.sc===sc));
@@ -2048,6 +2071,11 @@ function renderPerfil(){
     '<div class="kv"><span>Insignias / tickets</span><span class="mono">'+p.badges.length+' / '+p.badges.length+'</span></div>'+
     '<div class="kv"><span>Acceso</span><span>Sin contraseña · '+deviceId()+'</span></div></div>';
 }
+function renderCompletar(){
+  const p=me(); if(!p)return;
+  el('cp-nom').value=p.nombre||''; el('cp-ape').value=p.apellido||'';
+  el('cp-cel').value=p.cel||'';    el('cp-email').value=p.email||'';
+}
 function renderPrefs(){
   const p=me(); if(!p)return;
   el('pref-marketing').checked=!!p.consents.marketing;
@@ -2314,6 +2342,307 @@ el('ay-cp-q').addEventListener('input',function(){
     box.innerHTML='<div class="flash good">✓ Perfil actualizado</div>';
   });
 });
+
+/* ===================================================================
+   ORGANIZADOR · consola
+   Los KPIs grandes salen de SIM (ejemplo ilustrativo); todo lo que
+   depende de personas/empresas se calcula del estado real de la demo.
+   =================================================================== */
+const rubroDe = e => rubro(e.rubroId);
+const insDeRubro = rId => state.empresas.filter(e=>e.rubroId===rId).reduce((s,e)=>s+empIns(e),0);
+const pctTicket = p => p.badges.length;
+
+function renderOrgDash(){
+  kpiCards(el('orgKpis'),[
+    ['Registrados', SIM.registrados+state.personas.length, '+'+state.personas.length+' en demo'],
+    ['Ingresaron', SIM.ingresaron, SIM.tasa+'% de asistencia'],
+    ['Insignias entregadas', SIM.insignias+liveIns(), '+'+liveIns()+' en demo'],
+    ['Escaneos totales', SIM.escaneos+liveScans(), '+'+liveScans()+' en demo']
+  ]);
+  renderFunnel(el('orgFunnel'),SIM.funnel);
+  svgLines(el('orgHero'),[
+    {color:'var(--accent)',data:SIM.ingHora.d1},
+    {color:'var(--event)', data:SIM.ingHora.d2}],SIM.horas,{h:150});
+  barList(el('orgTopEmp'),state.empresas.slice().sort((a,b)=>empIns(b)-empIns(a)).slice(0,6)
+    .map(e=>({l:e.emoji+' '+e.nombre,v:empIns(e)})));
+  barList(el('orgDist'),SIM.dist.map(d=>({l:d.k+' insignias',v:d.v})),{pct:true});
+  el('waOptin').textContent=n(SIM.consent.marketing);
+  el('waPct').textContent=Math.round(SIM.consent.marketing/SIM.registrados*100)+'%';
+  el('waShare').textContent=n(SIM.consent.compartir);
+}
+
+function renderOrgIndicadores(){
+  kvList(el('indReg'),[['Registros totales',SIM.registrados],['Completos',SIM.regCompletos],
+    ['Incompletos',SIM.regIncompletos],['Nunca ingresaron',SIM.noIngresaron]]);
+  kvList(el('indIng'),[['Ingresos validados',SIM.ingresaron],['Tasa de asistencia',SIM.tasa+'%'],
+    ['Día 1',SIM.d1.ingresos],['Día 2',SIM.d2.ingresos]]);
+  kvList(el('indInt'),[['Escaneos',SIM.escaneos],['Usuarios únicos que escanearon',SIM.usuariosUnicos],
+    ['Empresas participantes',SIM.empresas],['Promedio de puestos por persona',SIM.promEmp]]);
+  kvList(el('indDin'),[['Insignias entregadas',SIM.insignias],['Personas con ≥1 insignia',SIM.conInsignia],
+    ['Promedio de insignias',SIM.promIns],['Tickets del sorteo',SIM.insignias]]);
+}
+
+function renderOrgDia(){
+  const rows=[['Registrados',SIM.d1.registrados,SIM.d2.registrados],
+    ['Ingresos',SIM.d1.ingresos,SIM.d2.ingresos],['Escaneos',SIM.d1.escaneos,SIM.d2.escaneos],
+    ['Insignias',SIM.d1.insignias,SIM.d2.insignias],['Usuarios activos',SIM.d1.activos,SIM.d2.activos]];
+  el('tblDia').querySelector('tbody').innerHTML=rows.map(([l,a,b])=>{
+    const v=Math.round((b-a)/a*100);
+    return '<tr><td>'+l+'</td><td class="num mono">'+n(a)+'</td><td class="num mono">'+n(b)+'</td>'+
+      '<td class="num mono">'+n(a+b)+'</td><td class="num"><span class="pill '+(v>=0?'p-good':'p-warn')+'">'+
+      (v>=0?'+':'')+v+'%</span></td></tr>';}).join('');
+  svgLines(el('diaScans'),[{color:'var(--accent)',data:SIM.scanHora.d1},{color:'var(--event)',data:SIM.scanHora.d2}],SIM.horas,{h:140});
+  svgLines(el('diaIns'), [{color:'var(--accent)',data:SIM.insHora.d1}, {color:'var(--event)',data:SIM.insHora.d2}], SIM.horas,{h:140});
+}
+
+function renderOrgHora(){
+  svgLines(el('horaChart'),[{color:'var(--accent)',data:SIM.scanHora.d1},{color:'var(--event)',data:SIM.scanHora.d2}],SIM.horas,{h:160});
+  const max=Math.max(...state.empresas.map(empIns));
+  el('venueHeat').innerHTML='<svg class="chart" viewBox="0 0 300 200">'+
+    '<rect x="8" y="8" width="284" height="184" rx="10" fill="none" stroke="var(--line)" stroke-width="1.5"/>'+
+    state.empresas.map(e=>{const t=empIns(e)/max, r=5+t*11;
+      return '<circle cx="'+e.ubic.x+'" cy="'+e.ubic.y+'" r="'+r.toFixed(1)+'" fill="'+heat(t)+'" opacity=".85"/>';}).join('')+
+    '</svg>';
+  barList(el('peakList'),SIM.horas.map((h,i)=>({l:h+':00–'+(+h+1)+':00',v:SIM.scanHora.d1[i]+SIM.scanHora.d2[i]}))
+    .sort((a,b)=>b.v-a.v).slice(0,5));
+}
+
+function renderOrgPersonas(){
+  const ps=state.personas;
+  kpiCards(el('perKpis'),[
+    ['Personas registradas', ps.length],
+    ['Ingreso validado', ps.filter(p=>p.estado==='validado').length],
+    ['Con ≥1 insignia', ps.filter(p=>p.badges.length>0).length],
+    ['Perfil incompleto', ps.filter(p=>!p.perfilCompleto).length]
+  ]);
+  el('perTable').innerHTML=ps.slice(0,60).map(p=>
+    '<tr><td><b>'+p.nombre+' '+(p.apellido||'')+'</b><br><span class="tiny muted mono">'+p.dni+'</span></td>'+
+    '<td>'+(p.origen==='rapido'?'Puerta':'Web')+'</td>'+
+    '<td>'+(p.perfilCompleto?'<span class="pill p-good">Completo</span>':'<span class="pill p-warn">Incompleto</span>')+'</td>'+
+    '<td>'+(p.estado==='validado'?'<span class="pill p-good">Ingresó</span>':'<span class="pill p-neutral">Pendiente</span>')+'</td>'+
+    '<td class="num mono">'+p.badges.length+'</td><td class="num mono">'+pctTicket(p)+'</td>'+
+    '<td>'+(p.consents&&p.consents.marketing?'Sí':'No')+'</td></tr>').join('')+
+    (ps.length>60?'<tr><td colspan="7" class="tiny muted center">… y '+(ps.length-60)+' más. La exportación completa es auditada.</td></tr>':'');
+}
+
+function renderOrgEmpresas(){
+  el('orgEmpTable').innerHTML=state.empresas.map(e=>{
+    const sc=empScans(e), ins=empIns(e), cv=Math.round(ins/Math.max(1,sc)*100);
+    return '<tr><td>'+e.emoji+' <b>'+e.nombre+'</b></td><td>'+rubroDe(e).nombre+'</td>'+
+      '<td class="num mono">S/ '+e.montoMin+'</td><td class="mono">'+e.stand+'</td>'+
+      '<td class="num mono">'+n(sc)+'</td><td class="num mono">'+n(ins)+'</td>'+
+      '<td class="num"><span class="pill '+(cv>=60?'p-good':cv>=40?'p-warn':'p-bad')+'">'+cv+'%</span></td>'+
+      '<td>'+(e.ubic.verificada?'<span class="pill p-good">Verificado</span>':'<span class="pill p-warn">Pendiente</span>')+'</td></tr>';
+  }).join('');
+}
+
+function renderOrgRubros(){
+  el('rubroTable').innerHTML=RUBROS.map(r=>{
+    const es=state.empresas.filter(e=>e.rubroId===r.id);
+    const prom=es.length?Math.round(es.reduce((s,e)=>s+e.montoMin,0)/es.length):0;
+    return '<tr><td>'+r.emoji+' '+r.nombre+'</td><td class="num mono">S/ '+r.min+'</td>'+
+      '<td class="num mono">S/ '+r.max+'</td><td class="num mono">S/ '+r.sug+'</td>'+
+      '<td class="num mono">'+es.length+'</td><td class="num mono">'+(prom?'S/ '+prom:'—')+'</td>'+
+      '<td class="num mono">'+n(insDeRubro(r.id))+'</td></tr>';
+  }).join('');
+  barList(el('rubroIns'),RUBROS.filter(r=>insDeRubro(r.id)>0).map(r=>({l:r.emoji+' '+r.nombre,v:insDeRubro(r.id)})));
+  const mx=Math.max(...state.empresas.map(empIns)), mxM=Math.max(...state.empresas.map(e=>e.montoMin));
+  el('rubroScatter').innerHTML='<svg class="chart" viewBox="0 0 300 150">'+
+    '<line x1="26" y1="126" x2="290" y2="126" stroke="var(--line)"/><line x1="26" y1="12" x2="26" y2="126" stroke="var(--line)"/>'+
+    state.empresas.map(e=>{const x=26+(e.montoMin/mxM)*258, y=126-(empIns(e)/mx)*104;
+      return '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="4.5" fill="'+e.color+'" opacity=".85"/>';}).join('')+
+    '<text x="158" y="145" text-anchor="middle" font-size="8" fill="var(--ink-mut)">monto mínimo (S/) →</text></svg>';
+}
+
+function renderOrgRanking(){
+  const ranked=state.empresas.slice().sort((a,b)=>empIns(b)-empIns(a));
+  el('rankTable').innerHTML=ranked.map((e,i)=>
+    '<tr><td class="mono">'+(i+1)+'</td><td>'+e.emoji+' <b>'+e.nombre+'</b></td><td>'+rubroDe(e).nombre+'</td>'+
+    '<td class="num mono">'+n(empIns(e))+'</td><td class="num mono">'+n(e.usuariosSim)+'</td>'+
+    '<td class="num mono">'+n(empScans(e))+'</td>'+
+    '<td class="num mono">'+Math.round(e.usuariosSim/SIM.usuariosUnicos*100)+'%</td></tr>').join('');
+  barList(el('rankLow'),ranked.slice(-5).reverse().map(e=>({l:e.emoji+' '+e.nombre,v:empIns(e),color:'linear-gradient(90deg,var(--warn),#FFC46B)'})));
+  barList(el('rankCat'),RUBROS.filter(r=>insDeRubro(r.id)>0).map(r=>({l:r.emoji+' '+r.nombre,v:insDeRubro(r.id)})));
+}
+
+function renderOrgInteracciones(){
+  kpiCards(el('intKpis'),[
+    ['Escaneos totales', SIM.escaneos+liveScans()],
+    ['Usuarios únicos', SIM.usuariosUnicos],
+    ['Promedio de puestos por persona', SIM.promEmp],
+    ['Escaneos repetidos', Math.round(SIM.escaneos*.18)]
+  ]);
+  barList(el('intCat'),RUBROS.filter(r=>insDeRubro(r.id)>0)
+    .map(r=>({l:r.emoji+' '+r.nombre,v:state.empresas.filter(e=>e.rubroId===r.id).reduce((s,e)=>s+empScans(e),0)})));
+  svgLines(el('intHora'),[{color:'var(--accent)',data:SIM.scanHora.d1},{color:'var(--event)',data:SIM.scanHora.d2}],SIM.horas,{h:150});
+  const tb=el('intLive');
+  if(!state.scans.length){ tb.innerHTML='<tr><td colspan="5" class="tiny muted center">Todavía no hay escaneos en esta sesión. Ve al perfil Asistente y escanea el QR de un puesto.</td></tr>'; return; }
+  const RES={duplicado:['p-warn','Repetido · sin ticket'],sin_registro:['p-bad','Sin registro'],ok:['p-good','Insignia +1']};
+  tb.innerHTML=state.scans.slice().reverse().slice(0,20).map(s=>{
+    const e=emp(s.empresaId), r=RES[s.reason]||['p-neutral',s.reason||'—'];
+    return '<tr><td class="mono">'+fT(s.ts)+'</td><td>'+(e?e.emoji+' '+e.nombre:'—')+'</td>'+
+      '<td>Día '+s.day+'</td><td><span class="pill '+r[0]+'">'+r[1]+'</span></td>'+
+      '<td class="mono tiny">'+(s.device||deviceId())+'</td></tr>';}).join('');
+}
+
+function renderOrgInsignias(){
+  kpiCards(el('insKpis'),[
+    ['Insignias entregadas', SIM.insignias+liveIns()],
+    ['Personas con insignia', SIM.conInsignia],
+    ['Promedio por persona', SIM.promIns],
+    ['Máximo por persona', Math.max(0,...state.personas.map(p=>p.badges.length))]
+  ]);
+  barList(el('insByEmp'),state.empresas.slice().sort((a,b)=>empIns(b)-empIns(a)).slice(0,8)
+    .map(e=>({l:e.emoji+' '+e.nombre,v:empIns(e)})));
+  svgLines(el('insByHour'),[{color:'var(--accent)',data:SIM.insHora.d1},{color:'var(--event)',data:SIM.insHora.d2}],SIM.horas,{h:150});
+}
+
+function renderOrgTickets(){
+  const ps=state.personas.slice().sort((a,b)=>b.badges.length-a.badges.length);
+  kpiCards(el('tkKpis'),[
+    ['Tickets en juego', SIM.insignias+liveIns()],
+    ['Participantes elegibles', ps.filter(p=>p.badges.length>0).length],
+    ['Promedio de tickets', SIM.promIns],
+    ['Sin tickets', ps.filter(p=>!p.badges.length).length]
+  ]);
+  barList(el('tkDist'),SIM.dist.map(d=>({l:d.k+' tickets',v:d.v})),{pct:true});
+  el('tkTop').innerHTML=ps.slice(0,10).map(p=>
+    '<tr><td>'+p.nombre+' '+(p.apellido||'')+'</td><td class="num mono">'+p.badges.length+'</td>'+
+    '<td class="num mono">'+pctTicket(p)+'</td>'+
+    '<td>'+(p.badges.length?'<span class="pill p-good">Sí</span>':'<span class="pill p-neutral">No</span>')+'</td></tr>').join('');
+}
+
+/* ---- sorteo ponderado por insignias ---- */
+function elegibles(regla){
+  return state.personas.filter(p=>{
+    const b=p.badges.length;
+    if(regla==='ingreso') return p.estado==='validado' && b>=1;
+    if(regla==='rubros'){
+      const rs=new Set(p.badges.map(x=>{const e=emp(x.empresaId);return e?e.rubroId:null;}).filter(Boolean));
+      return rs.size>=3;
+    }
+    return b>=(+regla||1);
+  });
+}
+function sortearPonderado(regla){
+  const el_=elegibles(regla);
+  const urna=[]; el_.forEach(p=>{for(let i=0;i<p.badges.length;i++)urna.push(p);});
+  if(!urna.length)return null;
+  return urna[Math.floor(Math.random()*urna.length)];
+}
+function renderOrgSorteo(){
+  const regla=el('soRegla').value, el_=elegibles(regla);
+  kpiCards(el('soKpis'),[
+    ['Participantes elegibles', el_.length],
+    ['Tickets en la urna', el_.reduce((s,p)=>s+p.badges.length,0)],
+    ['Ganadores sorteados', state.winners.length],
+    ['Regla activa', el('soRegla').selectedOptions[0].textContent]
+  ]);
+  const w=el('soWinners');
+  w.innerHTML=state.winners.length
+    ? state.winners.map((x,i)=>'<div class="item"><div class="logo" style="background:var(--gold-soft);">🏆</div>'+
+        '<div class="gr"><b>'+x.nombre+'</b><span>'+(x.premio||'Premio')+' · '+fD(x.ts)+' '+fT(x.ts)+' · '+x.tickets+' tickets</span></div></div>').join('')
+    : '<p class="tiny muted center" style="padding:.8rem;">Todavía no hay ganadores.</p>';
+}
+el('soRegla').addEventListener('change',renderOrgSorteo);
+el('btnSortear').addEventListener('click',()=>{
+  const regla=el('soRegla').value, premio=el('soPremio').value.trim()||'Premio del sorteo';
+  const g=sortearPonderado(regla);
+  const box=el('soResult');
+  if(!g){ box.innerHTML='<div class="flash warn">Nadie cumple la regla seleccionada todavía.</div>'; return; }
+  state.winners.unshift({nombre:g.nombre+' '+(g.apellido||''),dni:g.dni,premio,tickets:g.badges.length,ts:Date.now()});
+  save();
+  box.innerHTML='<div class="flash good">🏆 Ganador: <b>'+g.nombre+' '+(g.apellido||'')+'</b> — '+premio+
+    ' <span class="tiny">('+g.badges.length+' tickets en la urna)</span></div>';
+  confetti(); renderOrgSorteo();
+});
+
+function renderOrgPrivacidad(){
+  const t=SIM.registrados;
+  barList(el('privConsent'),[
+    {l:'Términos aceptados',v:Math.round(SIM.consent.terminos/t*100)},
+    {l:'Privacidad leída',v:Math.round(SIM.consent.privacidad/t*100)},
+    {l:'Avisos por WhatsApp',v:Math.round(SIM.consent.marketing/t*100)},
+    {l:'Compartir con puestos',v:Math.round(SIM.consent.compartir/t*100)}
+  ],{pct:true});
+  el('privDR').innerHTML=state.dr.map(d=>'<tr><td class="mono">'+d.fecha+'</td><td>'+d.tipo+'</td>'+
+    '<td><span class="pill '+(d.estado==='Atendida'?'p-good':'p-warn')+'">'+d.estado+'</span></td></tr>').join('');
+}
+
+/* ---- reportes CSV ---- */
+function toCSV(rows){ return rows.map(r=>r.map(c=>{
+  const s=String(c==null?'':c); return /[",;\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}).join(';')).join('\n'); }
+document.querySelectorAll('[data-report]').forEach(b=>b.addEventListener('click',()=>{
+  const kind=b.dataset.report; let rows=[];
+  if(kind==='general'){
+    rows=[['Indicador','Dia 1','Dia 2','Total'],
+      ['Registrados',SIM.d1.registrados,SIM.d2.registrados,SIM.registrados],
+      ['Ingresos',SIM.d1.ingresos,SIM.d2.ingresos,SIM.ingresaron],
+      ['Escaneos',SIM.d1.escaneos,SIM.d2.escaneos,SIM.escaneos],
+      ['Insignias',SIM.d1.insignias,SIM.d2.insignias,SIM.insignias]];
+  } else if(kind==='empresa'){
+    rows=[['Puesto','Rubro','Stand','Minimo','Escaneos','Insignias','Conversion %']].concat(
+      state.empresas.map(e=>[e.nombre,rubroDe(e).nombre,e.stand,e.montoMin,empScans(e),empIns(e),
+        Math.round(empIns(e)/Math.max(1,empScans(e))*100)]));
+  } else if(kind==='sorteo'){
+    rows=[['Ticket','Nombre','Insignias','Tickets','Elegible']].concat(
+      state.personas.map(p=>[p.code,p.nombre+' '+(p.apellido||''),p.badges.length,pctTicket(p),p.badges.length?'Si':'No']));
+  } else {
+    rows=[['Ticket','Terminos','Privacidad','Marketing','Compartir','Origen']].concat(
+      state.personas.map(p=>[p.code,'Si','Si',p.consents.marketing?'Si':'No',p.consents.compartir?'Si':'No',p.origen]));
+  }
+  el('reportOut').value=toCSV(rows);
+}));
+el('btnCopyReport').addEventListener('click',()=>{
+  const t=el('reportOut'); if(!t.value)return;
+  navigator.clipboard.writeText(t.value).then(()=>{
+    const b=el('btnCopyReport'); b.textContent='Copiado ✓'; setTimeout(()=>b.textContent='Copiar',1400);
+  }).catch(()=>{});
+});
+
+/* ---- modo proyección del sorteo ---- */
+function projRefresh(){
+  const el_=elegibles(el('soRegla').value);
+  el('pTickets').textContent=n(el_.reduce((s,p)=>s+p.badges.length,0));
+  el('pElig').textContent=n(el_.length);
+  el('pWinners').innerHTML=state.winners.slice(0,6)
+    .map(w=>'<span class="wchip">🏆 <b>'+w.nombre+'</b> · '+(w.premio||'Premio')+'</span>').join('');
+}
+const openProj=()=>{ el('proj').classList.add('open'); projRefresh(); };
+const closeProj=()=>{ el('proj').classList.remove('open'); };
+if(el('btnAbrirProy')) el('btnAbrirProy').addEventListener('click',openProj);
+if(el('btnProy')) el('btnProy').addEventListener('click',openProj);
+el('pClose').addEventListener('click',closeProj);
+el('pFull').addEventListener('click',()=>{
+  const d=document.documentElement;
+  if(!document.fullscreenElement){ if(d.requestFullscreen)d.requestFullscreen().catch(()=>{}); }
+  else if(document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+});
+el('pSpin').addEventListener('click',()=>{
+  const premio=el('pPrizeInput').value.trim()||'Premio del sorteo';
+  const g=sortearPonderado(el('soRegla').value);
+  if(!g){ el('pName').textContent='Sin elegibles'; return; }
+  el('pPrize').textContent=premio;
+  const pool=elegibles(el('soRegla').value);
+  let t=0; const spin=setInterval(()=>{
+    el('pName').textContent=pool[Math.floor(Math.random()*pool.length)].nombre;
+    if(++t>18){ clearInterval(spin);
+      el('pName').textContent=g.nombre+' '+(g.apellido||'');
+      state.winners.unshift({nombre:g.nombre+' '+(g.apellido||''),dni:g.dni,premio,tickets:g.badges.length,ts:Date.now()});
+      save(); confetti(); projRefresh();
+      if(typeof renderOrgSorteo==='function') renderOrgSorteo();
+    }
+  },70);
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&el('proj').classList.contains('open'))closeProj(); });
+
+/* ---- arranque: los renderers ya están definidos, repinta la pantalla activa ---- */
+(function boot(){
+  ['asBody','empBody','ayudaBody'].forEach(id=>{
+    const a=el(id)&&el(id).querySelector('.screen.active'); if(a)render(a.dataset.sc);
+  });
+  const d=el('orgMain')&&el('orgMain').querySelector('.dsc.active'); if(d)render(d.dataset.sc);
+})();
 
 /* ===================================================================
    ITERA Real-Time API Synchronization Bridge (Railway Backend)
