@@ -140,13 +140,14 @@ async function query(text, params = []) {
 // -----------------------------------------------------------------------------
 // Seguridad: autenticación de staff/admin y limitación de tasa
 // -----------------------------------------------------------------------------
-// Token de administración/staff. Si NO se configura, el servidor corre en modo
-// demo abierto (útil en local) pero avisa por consola. En producción (Railway)
-// basta con definir ADMIN_TOKEN para blindar los endpoints sensibles.
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
+// Token de administración/staff. Es OBLIGATORIO: si no se configura, los
+// endpoints con datos personales responden 503 en vez de quedar abiertos
+// (seguro por defecto). Definir ADMIN_TOKEN en el servicio los habilita.
+// .trim() porque al pegar en paneles como Railway se cuelan espacios/saltos.
+const ADMIN_TOKEN = (process.env.ADMIN_TOKEN || '').trim();
 const AUTH_ENABLED = ADMIN_TOKEN.length > 0;
 if (!AUTH_ENABLED) {
-  console.warn('[SEGURIDAD] ADMIN_TOKEN no configurado: los endpoints de staff/admin quedan SIN protección. Define ADMIN_TOKEN en Railway para blindar producción.');
+  console.warn('[SEGURIDAD] ADMIN_TOKEN no configurado: los endpoints con datos personales quedan CERRADOS (503) hasta que se defina. Configúralo en las variables del servicio.');
 } else if (ADMIN_TOKEN.length < 16) {
   console.warn('[SEGURIDAD] ADMIN_TOKEN es corto (<16 caracteres). Usa un token largo y aleatorio.');
 }
@@ -162,8 +163,18 @@ function safeEqual(a, b) {
 
 // preHandler: exige token de admin en endpoints sensibles (si AUTH_ENABLED).
 async function requireAdmin(req, reply) {
-  if (!AUTH_ENABLED) return; // modo demo abierto
-  const header = req.headers['x-admin-token'] || (req.headers['authorization'] || '').replace(/^Bearer\s+/i, '');
+  // Cerrado por defecto: sin ADMIN_TOKEN configurado NADIE accede a los datos
+  // personales. Se prefiere denegar el servicio a filtrar PII por un despiste
+  // de configuración. El flujo de puerta del staff sigue funcionando porque el
+  // front valida el ingreso contra su almacenamiento local.
+  if (!AUTH_ENABLED) {
+    reply.code(503).send({
+      error: 'Servicio de datos no disponible: falta configurar ADMIN_TOKEN en el servidor.',
+      hint: 'Define la variable de entorno ADMIN_TOKEN en el servicio y vuelve a desplegar.'
+    });
+    return reply;
+  }
+  const header = (req.headers['x-admin-token'] || (req.headers['authorization'] || '').replace(/^Bearer\s+/i, '')).trim();
   if (!header || !safeEqual(header, ADMIN_TOKEN)) {
     reply.code(401).send({ error: 'No autorizado. Falta o es inválido el token de staff.' });
     return reply;
