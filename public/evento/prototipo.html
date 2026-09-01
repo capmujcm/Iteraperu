@@ -1641,6 +1641,10 @@ const QRDEC=(function(){
 const DB='itera_evt_v2';
 const el=id=>document.getElementById(id);
 const uid=()=>Math.random().toString(36).slice(2,10);
+// Escapa texto de usuario antes de insertarlo en innerHTML (defensa anti-XSS).
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// Nombre completo escapado (para renders en innerHTML).
+const NM=o=>esc((o&&o.nombre||'')+' '+(o&&o.apellido||'')).trim();
 const mkcode=p=>p+'-'+Math.random().toString(36).slice(2,8).toUpperCase();
 function deviceId(){let d;try{d=localStorage.getItem('itera_dev');}catch(e){}
   if(!d){d='DEV-'+Math.random().toString(36).slice(2,7).toUpperCase();try{localStorage.setItem('itera_dev',d);}catch(e){}}return d;}
@@ -2070,10 +2074,10 @@ function ticketEl(p){
   const d=document.createElement('div'); d.className='ticket';
   d.innerHTML='<span class="ttag">Ticket personal · Country Fest</span>'+
     '<div class="qrbox"><canvas></canvas></div>'+
-    '<div class="tname">'+p.nombre+' '+(p.apellido||'')+'</div>'+
-    '<div class="tcode">'+p.code+'</div>'+
-    '<div class="tsub">DNI '+p.dni+'</div>';
-  drawQR('ITERA|TKT|'+p.code+'|'+p.dni,d.querySelector('canvas'),4);
+    '<div class="tname">'+NM(p)+'</div>'+
+    '<div class="tcode">'+esc(p.code)+'</div>'+
+    '<div class="tsub">DNI '+esc(p.dni)+'</div>';
+  drawQR('ITERA|TKT|'+esc(p.code)+'|'+p.dni,d.querySelector('canvas'),4);
   return d;
 }
 function renderTicket(){
@@ -2087,7 +2091,7 @@ function renderTicket(){
 }
 function renderQrBig(){
   const p=me(); if(!p)return;
-  drawQR('ITERA|TKT|'+p.code+'|'+p.dni,el('qrBig'),6);
+  drawQR('ITERA|TKT|'+esc(p.code)+'|'+p.dni,el('qrBig'),6);
   el('qrBigCode').textContent=p.code;
   el('qrBigName').textContent=p.nombre+' '+(p.apellido||'');
 }
@@ -2139,7 +2143,7 @@ function sendLink(canal){
   const token=mkcode('LNK');
   box.innerHTML =
     '<div class="wa"><div class="whead">'+(canal==='wa'?'💬 WhatsApp · Country Fest':'✉️ Correo · Country Fest')+'</div>'+
-    'Hola '+p.nombre+' 👋 Toca este enlace para abrir tu ticket en este equipo:<br>'+
+    'Hola '+esc(p.nombre)+' 👋 Toca este enlace para abrir tu ticket en este equipo:<br>'+
     '<a href="#">itera.pe/e/country-fest/a/'+token+'</a><br>'+
     '<span style="opacity:.7;font-size:.72rem;">Vence en 15 minutos · un solo uso</span></div>'+
     '<p class="tiny muted" style="margin:.6rem 0;">Enviado a <b>'+dest+'</b>. En la demo, tocar el botón simula que abriste el enlace.</p>'+
@@ -2352,12 +2356,12 @@ function renderEmpPerfil(id){
 function renderPerfil(){
   const p=me(), box=el('perfilBox');
   if(!p){ box.innerHTML='<div class="note n-warn tiny">Sin registro. <b data-go="as-registro" style="color:var(--accent);cursor:pointer;">Registrarme</b></div>'; return; }
-  box.innerHTML='<div class="card"><div class="between" style="margin-bottom:.4rem;"><b>'+p.nombre+' '+(p.apellido||'')+'</b>'+
+  box.innerHTML='<div class="card"><div class="between" style="margin-bottom:.4rem;"><b>'+NM(p)+'</b>'+
     (p.perfilCompleto?'<span class="pill p-good">Perfil completo</span>':'<span class="pill p-warn">Incompleto</span>')+'</div>'+
-    '<div class="kv"><span>DNI</span><span class="mono">'+p.dni+'</span></div>'+
+    '<div class="kv"><span>DNI</span><span class="mono">'+esc(p.dni)+'</span></div>'+
     '<div class="kv"><span>Celular</span><span class="mono">'+(p.cel||'—')+'</span></div>'+
     '<div class="kv"><span>Correo</span><span>'+(p.email||'—')+'</span></div>'+
-    '<div class="kv"><span>Ticket</span><span class="mono">'+p.code+'</span></div>'+
+    '<div class="kv"><span>Ticket</span><span class="mono">'+esc(p.code)+'</span></div>'+
     '<div class="kv"><span>Origen</span><span>'+(p.origen==='rapido'?'Registro rápido en puerta':'Web')+'</span></div>'+
     '<div class="kv"><span>Insignias / tickets</span><span class="mono">'+p.badges.length+' / '+p.badges.length+'</span></div>'+
     '<div class="kv"><span>Acceso</span><span>Sin contraseña · '+deviceId()+'</span></div></div>';
@@ -2540,8 +2544,8 @@ el('formRapido').addEventListener('submit',ev=>{
   box.innerHTML=(existed
     ? '<div class="note n-warn tiny">Ya existía un registro con ese DNI. Se recupera su ticket, no se duplica.</div>'
     : '<div class="note n-good tiny"><b>Registro creado.</b> Sin contraseña: la persona abre el enlace en su celular y queda con la sesión guardada.</div>')+
-    '<div class="wa" style="margin-top:.6rem;"><div class="whead">💬 Enviado a '+(p.cel?'••• '+p.cel.slice(-3):'su celular')+'</div>'+
-    'Hola '+p.nombre+' 👋 Este es tu ticket para Country Fest:<br><a href="#">itera.pe/e/country-fest/a/'+mkcode('LNK')+'</a></div>'+
+    '<div class="wa" style="margin-top:.6rem;"><div class="whead">💬 Enviado a '+(p.cel?'••• '+esc(p.cel.slice(-3)):'su celular')+'</div>'+
+    'Hola '+esc(p.nombre)+' 👋 Este es tu ticket para Country Fest:<br><a href="#">itera.pe/e/country-fest/a/'+mkcode('LNK')+'</a></div>'+
     '<div class="row wrap" style="margin-top:.6rem;"><button class="btn btn-good btn-sm" id="rpVal" style="flex:1;">Dar ingreso ahora</button>'+
     '<button class="btn btn-line btn-sm" id="rpPrint" style="flex:1;">Imprimir ticket</button></div>';
   const t=document.createElement('div'); t.style.marginTop='.7rem'; t.appendChild(ticketEl(p)); box.appendChild(t);
@@ -2566,8 +2570,8 @@ el('ay-q').addEventListener('input',function(){
   if(!rows.length){ if(this.value.trim())list.innerHTML='<p class="tiny muted center" style="padding:.8rem;">Sin coincidencias.</p>'; return; }
   rows.forEach(p=>{
     const it=document.createElement('div'); it.className='item';
-    it.innerHTML='<div class="gr"><b>'+p.nombre+' '+(p.apellido||'')+'</b>'+
-      '<span>DNI '+p.dni+' · '+p.code+' · '+(p.origen==='rapido'?'registro rápido':'web')+' · '+p.badges.length+' insignias</span></div>'+
+    it.innerHTML='<div class="gr"><b>'+NM(p)+'</b>'+
+      '<span>DNI '+esc(p.dni)+' · '+esc(p.code)+' · '+(p.origen==='rapido'?'registro rápido':'web')+' · '+p.badges.length+' insignias</span></div>'+
       '<div class="row">'+(p.estado==='validado'?'<span class="pill p-good">Ingresó</span>':'<button class="btn btn-good btn-sm" data-a="v">Validar</button>')+
       '<button class="btn btn-line btn-sm" data-a="t">Ticket</button></div>';
     const bv=it.querySelector('[data-a="v"]');
@@ -2585,14 +2589,14 @@ el('ay-val-q').addEventListener('input',function(){
   const p=state.personas.find(x=>x.dni===q||x.code.toLowerCase()===q);
   if(!p){ box.innerHTML=q?'<div class="flash bad">Sin coincidencias. Verifica el DNI o usa Registro rápido.</div>':''; return; }
   if(p.estado==='validado'){
-    box.innerHTML='<div class="flash warn">'+p.nombre+' '+(p.apellido||'')+' ya registró ingreso el '+fD(p.validadoAt)+' a las '+fT(p.validadoAt)+'.</div>';
+    box.innerHTML='<div class="flash warn">'+NM(p)+' ya registró ingreso el '+fD(p.validadoAt)+' a las '+fT(p.validadoAt)+'.</div>';
     return;
   }
-  box.innerHTML='<div class="item"><div class="gr"><b>'+p.nombre+' '+(p.apellido||'')+'</b>'+
-    '<span>DNI '+p.dni+' · '+p.code+'</span></div><button class="btn btn-good">Dar ingreso</button></div>';
+  box.innerHTML='<div class="item"><div class="gr"><b>'+NM(p)+'</b>'+
+    '<span>DNI '+esc(p.dni)+' · '+esc(p.code)+'</span></div><button class="btn btn-good">Dar ingreso</button></div>';
   box.querySelector('button').addEventListener('click',()=>{
     p.estado='validado'; p.validadoAt=Date.now(); save();
-    box.innerHTML='<div class="flash good">✓ Ingreso validado: '+p.nombre+' '+(p.apellido||'')+'</div>';
+    box.innerHTML='<div class="flash good">✓ Ingreso validado: '+NM(p)+'</div>';
     setTimeout(()=>{ el('ay-val-q').value=''; box.innerHTML=''; el('ay-val-q').focus(); },1600);
   });
 });
@@ -2600,10 +2604,10 @@ el('ay-rev-q').addEventListener('input',function(){
   const q=this.value.trim(), box=el('ayRevResult');
   const p=state.personas.find(x=>x.dni===q);
   if(!p){ box.innerHTML=q?'<p class="tiny muted">Sin coincidencias.</p>':''; return; }
-  box.innerHTML='<div class="card"><div class="between"><b>'+p.nombre+' '+(p.apellido||'')+'</b>'+
+  box.innerHTML='<div class="card"><div class="between"><b>'+NM(p)+'</b>'+
     '<span class="pill p-gold">'+p.badges.length+' insignias</span></div>'+
-    '<div class="kv"><span>DNI</span><span class="mono">'+p.dni+'</span></div>'+
-    '<div class="kv"><span>Ticket</span><span class="mono">'+p.code+'</span></div>'+
+    '<div class="kv"><span>DNI</span><span class="mono">'+esc(p.dni)+'</span></div>'+
+    '<div class="kv"><span>Ticket</span><span class="mono">'+esc(p.code)+'</span></div>'+
     '<div class="kv"><span>Dispositivo actual</span><span class="mono">'+(p.device||'ninguno')+'</span></div>'+
     '<label class="consent" style="margin-top:.6rem;"><input type="checkbox" id="revChk">'+
     '<span class="ct"><b>Verifiqué el documento físico</b>Queda registrado con mi usuario de staff y la hora.</span></label>'+
@@ -2621,11 +2625,11 @@ el('ay-cp-q').addEventListener('input',function(){
   const q=this.value.trim(), box=el('ayCpResult');
   const p=q?state.personas.find(x=>x.dni.indexOf(q)>=0):null;
   if(!p){ box.innerHTML=q?'<p class="tiny muted">Sin coincidencias.</p>':''; return; }
-  box.innerHTML='<div class="card"><div class="between" style="margin-bottom:.5rem;"><b>'+p.nombre+' '+(p.apellido||'')+'</b>'+
+  box.innerHTML='<div class="card"><div class="between" style="margin-bottom:.5rem;"><b>'+NM(p)+'</b>'+
     (p.perfilCompleto?'<span class="pill p-good">Completo</span>':'<span class="pill p-warn">Incompleto</span>')+'</div>'+
-    '<div class="field"><label>Apellidos</label><input type="text" id="cpa" value="'+(p.apellido||'')+'"></div>'+
-    '<div class="field"><label>Celular</label><input type="tel" id="cpc" value="'+(p.cel||'')+'"></div>'+
-    '<div class="field"><label>Correo</label><input type="email" id="cpe" value="'+(p.email||'')+'"></div>'+
+    '<div class="field"><label>Apellidos</label><input type="text" id="cpa" value="'+esc(p.apellido||'')+'"></div>'+
+    '<div class="field"><label>Celular</label><input type="tel" id="cpc" value="'+esc(p.cel||'')+'"></div>'+
+    '<div class="field"><label>Correo</label><input type="email" id="cpe" value="'+esc(p.email||'')+'"></div>'+
     '<button class="btn btn-event btn-block" id="cpsave">Guardar</button></div>';
   el('cpsave').addEventListener('click',()=>{
     p.apellido=el('cpa').value.trim(); p.cel=el('cpc').value.trim(); p.email=el('cpe').value.trim();
@@ -2707,7 +2711,7 @@ function renderOrgPersonas(){
     ['Perfil incompleto', ps.filter(p=>!p.perfilCompleto).length]
   ]);
   el('perTable').innerHTML=ps.slice(0,60).map(p=>
-    '<tr><td><b>'+p.nombre+' '+(p.apellido||'')+'</b><br><span class="tiny muted mono">'+p.dni+'</span></td>'+
+    '<tr><td><b>'+NM(p)+'</b><br><span class="tiny muted mono">'+esc(p.dni)+'</span></td>'+
     '<td>'+(p.origen==='rapido'?'Puerta':'Web')+'</td>'+
     '<td>'+(p.perfilCompleto?'<span class="pill p-good">Completo</span>':'<span class="pill p-warn">Incompleto</span>')+'</td>'+
     '<td>'+(p.estado==='validado'?'<span class="pill p-good">Ingresó</span>':'<span class="pill p-neutral">Pendiente</span>')+'</td>'+
@@ -2798,7 +2802,7 @@ function renderOrgTickets(){
   ]);
   barList(el('tkDist'),SIM.dist.map(d=>({l:d.k+' tickets',v:d.v})),{pct:true});
   el('tkTop').innerHTML=ps.slice(0,10).map(p=>
-    '<tr><td>'+p.nombre+' '+(p.apellido||'')+'</td><td class="num mono">'+p.badges.length+'</td>'+
+    '<tr><td>'+NM(p)+'</td><td class="num mono">'+p.badges.length+'</td>'+
     '<td class="num mono">'+pctTicket(p)+'</td>'+
     '<td>'+(p.badges.length?'<span class="pill p-good">Sí</span>':'<span class="pill p-neutral">No</span>')+'</td></tr>').join('');
 }
@@ -2832,7 +2836,7 @@ function renderOrgSorteo(){
   const w=el('soWinners');
   w.innerHTML=state.winners.length
     ? state.winners.map((x,i)=>'<div class="item"><div class="logo" style="background:var(--gold-soft);">🏆</div>'+
-        '<div class="gr"><b>'+x.nombre+'</b><span>'+(x.premio||'Premio')+' · '+fD(x.ts)+' '+fT(x.ts)+' · '+x.tickets+' tickets</span></div></div>').join('')
+        '<div class="gr"><b>'+esc(x.nombre)+'</b><span>'+esc(x.premio||'Premio')+' · '+fD(x.ts)+' '+fT(x.ts)+' · '+x.tickets+' tickets</span></div></div>').join('')
     : '<p class="tiny muted center" style="padding:.8rem;">Todavía no hay ganadores.</p>';
 }
 el('soRegla').addEventListener('change',renderOrgSorteo);
@@ -2843,7 +2847,7 @@ el('btnSortear').addEventListener('click',()=>{
   if(!g){ box.innerHTML='<div class="flash warn">Nadie cumple la regla seleccionada todavía.</div>'; return; }
   state.winners.unshift({nombre:g.nombre+' '+(g.apellido||''),dni:g.dni,premio,tickets:g.badges.length,ts:Date.now()});
   save();
-  box.innerHTML='<div class="flash good">🏆 Ganador: <b>'+g.nombre+' '+(g.apellido||'')+'</b> — '+premio+
+  box.innerHTML='<div class="flash good">🏆 Ganador: <b>'+NM(g)+'</b> — '+premio+
     ' <span class="tiny">('+g.badges.length+' tickets en la urna)</span></div>';
   confetti(); renderOrgSorteo();
 });
@@ -2897,7 +2901,7 @@ function projRefresh(){
   el('pTickets').textContent=n(el_.reduce((s,p)=>s+p.badges.length,0));
   el('pElig').textContent=n(el_.length);
   el('pWinners').innerHTML=state.winners.slice(0,6)
-    .map(w=>'<span class="wchip">🏆 <b>'+w.nombre+'</b> · '+(w.premio||'Premio')+'</span>').join('');
+    .map(w=>'<span class="wchip">🏆 <b>'+esc(w.nombre)+'</b> · '+esc(w.premio||'Premio')+'</span>').join('');
 }
 const openProj=()=>{ el('proj').classList.add('open'); projRefresh(); };
 const closeProj=()=>{ el('proj').classList.remove('open'); };
@@ -2940,7 +2944,38 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&el('proj').classLi
    =================================================================== */
 (function initApiBridge() {
   const badge = el('apiStatusBadge');
-  
+
+  // --- Token de staff/organizador -------------------------------------------
+  // Los endpoints sensibles (lista de asistentes, analítica, check-in, seed)
+  // exigen el token que el servidor define en ADMIN_TOKEN. Se guarda solo en
+  // este navegador. Para cargarlo: abrir la app con ?staff=TU_TOKEN, o llamar
+  // a iteraSetStaffToken('TU_TOKEN') desde la consola.
+  const TK = 'itera_staff_token';
+  function staffToken() { try { return localStorage.getItem(TK) || ''; } catch (e) { return ''; } }
+  window.iteraSetStaffToken = function (t) {
+    try { t ? localStorage.setItem(TK, t) : localStorage.removeItem(TK); } catch (e) {}
+    return '✓ Token de staff guardado en este dispositivo.';
+  };
+  // Permite entregar el token por URL al staff y lo limpia de la barra al instante.
+  try {
+    const qs = new URLSearchParams(location.search);
+    const fromUrl = qs.get('staff');
+    if (fromUrl) {
+      window.iteraSetStaffToken(fromUrl);
+      qs.delete('staff');
+      history.replaceState(null, '', location.pathname + (qs.toString() ? '?' + qs : '') + location.hash);
+    }
+  } catch (e) {}
+  // fetch con credenciales de staff adjuntas.
+  function authFetch(url, opts) {
+    const o = Object.assign({}, opts);
+    o.headers = Object.assign({}, o.headers);
+    const t = staffToken();
+    if (t) o.headers['X-Admin-Token'] = t;
+    return fetch(url, o);
+  }
+  window.iteraAuthFetch = authFetch;
+
   // 1. Comprobar salud del servidor y memoria
   fetch('/api/health')
     .then(r => r.json())
@@ -2964,7 +2999,12 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&el('proj').classLi
       resetBtn.disabled = true;
       resetBtn.textContent = 'Cargando Demo...';
       try {
-        await fetch('/api/events/seed', { method: 'POST' });
+        const seedRes = await authFetch('/api/events/seed', { method: 'POST' });
+        if (seedRes.status === 401) {
+          if (badge) { badge.className = 'pill p-warn'; badge.textContent = '● Requiere token de staff'; }
+          resetBtn.disabled = false; resetBtn.textContent = 'Cargar Demo';
+          return;
+        }
         localStorage.removeItem('itera_evt_v2');
         if (badge) badge.textContent = '✓ Base de datos reinicializada';
         setTimeout(() => location.reload(), 500);
@@ -2983,7 +3023,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&el('proj').classLi
         const val = valInput.value.trim();
         if (!val) return;
         try {
-          const res = await fetch('/api/tickets/checkin', {
+          const res = await authFetch('/api/tickets/checkin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ code: val, dni: val })
@@ -2991,10 +3031,12 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&el('proj').classLi
           const data = await res.json();
           const box = el('ayValResult');
           if (box) {
-            if (data.success) {
-              box.innerHTML = `<div class="flash ${data.isDuplicate ? 'warn' : 'good'}">${data.message} — ${data.attendee.nombre} ${data.attendee.apellido} (${(data.attendee.tipo_ticket||'General').toUpperCase()})</div>`;
+            if (res.status === 401) {
+              box.innerHTML = '<div class="flash bad">✕ Sesión de staff no autorizada. Pide el enlace con token al organizador.</div>';
+            } else if (data.success) {
+              box.innerHTML = `<div class="flash ${data.isDuplicate ? 'warn' : 'good'}">${esc(data.message)} — ${NM(data.attendee)} (${esc(String(data.attendee.tipo_ticket||'General').toUpperCase())})</div>`;
             } else {
-              box.innerHTML = `<div class="flash bad">✕ ${data.error || 'Ticket no encontrado'}</div>`;
+              box.innerHTML = `<div class="flash bad">✕ ${esc(data.error || 'Ticket no encontrado')}</div>`;
             }
           }
         } catch (err) {}
@@ -3005,7 +3047,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&el('proj').classLi
   // 4. Captura de Leads en Stand (Sincronización en vivo)
   window.apiScanStandLead = async function(standId, attendeeCode, notas) {
     try {
-      const res = await fetch('/api/stands/scan-lead', {
+      const res = await authFetch('/api/stands/scan-lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ stand_id: standId, attendee_code: attendeeCode, notas })

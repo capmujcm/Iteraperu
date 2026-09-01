@@ -15,9 +15,13 @@ let pool = null;
 if (connectionString) {
   try {
     const isInternal = connectionString.includes('.railway.internal') || connectionString.includes('localhost');
+    // Por defecto no se valida el certificado (Railway/Heroku usan certs gestionados
+    // que muchas veces no encadenan a una CA pública). Para endurecer, exporta
+    // DB_SSL_REJECT_UNAUTHORIZED=true cuando tu proveedor exponga una CA válida.
+    const rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED === 'true';
     pool = new Pool({
       connectionString,
-      ssl: isInternal ? false : { rejectUnauthorized: false },
+      ssl: isInternal ? false : { rejectUnauthorized },
       max: 3,
       idleTimeoutMillis: 10000,
       connectionTimeoutMillis: 4000
@@ -134,9 +138,73 @@ async function query(text, params = []) {
 }
 
 // -----------------------------------------------------------------------------
+// Seguridad: autenticación de staff/admin y limitación de tasa
+// -----------------------------------------------------------------------------
+// Token de administración/staff. Si NO se configura, el servidor corre en modo
+// demo abierto (útil en local) pero avisa por consola. En producción (Railway)
+// basta con definir ADMIN_TOKEN para blindar los endpoints sensibles.
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
+const AUTH_ENABLED = ADMIN_TOKEN.length > 0;
+if (!AUTH_ENABLED) {
+  console.warn('[SEGURIDAD] ADMIN_TOKEN no configurado: los endpoints de staff/admin quedan SIN protección. Define ADMIN_TOKEN en Railway para blindar producción.');
+} else if (ADMIN_TOKEN.length < 16) {
+  console.warn('[SEGURIDAD] ADMIN_TOKEN es corto (<16 caracteres). Usa un token largo y aleatorio.');
+}
+
+// Comparación en tiempo constante para evitar ataques de temporización.
+function safeEqual(a, b) {
+  const crypto = require('crypto');
+  const ba = Buffer.from(String(a));
+  const bb = Buffer.from(String(b));
+  if (ba.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ba, bb);
+}
+
+// preHandler: exige token de admin en endpoints sensibles (si AUTH_ENABLED).
+async function requireAdmin(req, reply) {
+  if (!AUTH_ENABLED) return; // modo demo abierto
+  const header = req.headers['x-admin-token'] || (req.headers['authorization'] || '').replace(/^Bearer\s+/i, '');
+  if (!header || !safeEqual(header, ADMIN_TOKEN)) {
+    reply.code(401).send({ error: 'No autorizado. Falta o es inválido el token de staff.' });
+    return reply;
+  }
+}
+
+// Limitador de tasa en memoria (ventana deslizante por IP) — frena fuerza bruta
+// y enumeración de DNIs/códigos sin añadir dependencias.
+const rateBuckets = new Map();
+function rateLimit(max, windowMs) {
+  return async (req, reply) => {
+    const ip = req.ip || 'unknown';
+    const now = Date.now();
+    let b = rateBuckets.get(ip);
+    if (!b || now > b.reset) { b = { count: 0, reset: now + windowMs }; rateBuckets.set(ip, b); }
+    b.count++;
+    if (b.count > max) {
+      reply.code(429).send({ error: 'Demasiadas solicitudes. Espera un momento e intenta de nuevo.' });
+      return reply;
+    }
+  };
+}
+// Limpieza periódica de buckets vencidos.
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, v] of rateBuckets) { if (now > v.reset) rateBuckets.delete(k); }
+}, 60000).unref();
+
+// -----------------------------------------------------------------------------
 // Plugins
 // -----------------------------------------------------------------------------
-fastify.register(require('@fastify/cors'), { origin: true });
+// CORS restringido: por defecto solo mismo origen (el navegador no aplica CORS a
+// peticiones del mismo origen, así que la app sigue funcionando). Para permitir
+// orígenes externos concretos, exporta ALLOWED_ORIGINS="https://a.com,https://b.com".
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
+  .split(',').map(s => s.trim()).filter(Boolean);
+fastify.register(require('@fastify/cors'), {
+  origin: allowedOrigins.length ? allowedOrigins : false,
+  methods: ['GET', 'POST'],
+  maxAge: 86400
+});
 fastify.register(require('@fastify/static'), {
   root: path.join(__dirname, 'public'),
   prefix: '/',
@@ -160,7 +228,7 @@ fastify.get('/api/events/current', async () => {
   return { success: true, event: inMemoryStore.eventos[0] };
 });
 
-fastify.get('/api/events/analytics', async () => {
+fastify.get('/api/events/analytics', { preHandler: requireAdmin }, async () => {
   const attendees = inMemoryStore.asistentes;
   const totalRegistrados = attendees.length;
   const ingresados = attendees.filter(a => a.estado === 'checkin');
@@ -205,16 +273,16 @@ fastify.get('/api/events/analytics', async () => {
   };
 });
 
-fastify.post('/api/events/seed', async () => {
+fastify.post('/api/events/seed', { preHandler: requireAdmin }, async () => {
   seedMemory();
   return { success: true, message: 'Datos demo inicializados con éxito', count: inMemoryStore.asistentes.length };
 });
 
-fastify.get('/api/attendees', async () => {
+fastify.get('/api/attendees', { preHandler: requireAdmin }, async () => {
   return { success: true, count: inMemoryStore.asistentes.length, attendees: inMemoryStore.asistentes };
 });
 
-fastify.post('/api/attendees/register', async (req, reply) => {
+fastify.post('/api/attendees/register', { preHandler: rateLimit(20, 60000) }, async (req, reply) => {
   const { nombre, apellido, email, dni, cel, empresa, cargo, tipo_ticket } = req.body || {};
   if (!nombre) return reply.status(400).send({ error: 'Nombre es requerido' });
 
@@ -246,7 +314,7 @@ fastify.post('/api/attendees/register', async (req, reply) => {
   return reply.status(201).send({ success: true, attendee: newAttendee });
 });
 
-fastify.post('/api/tickets/verify', async (req, reply) => {
+fastify.post('/api/tickets/verify', { preHandler: rateLimit(20, 60000) }, async (req, reply) => {
   const { token, code, dni } = req.body || {};
   const attendee = inMemoryStore.asistentes.find(
     a => (token && a.qr_token === token) || 
@@ -258,7 +326,7 @@ fastify.post('/api/tickets/verify', async (req, reply) => {
   return { valid: true, attendee, alreadyCheckedIn: attendee.estado === 'checkin' };
 });
 
-fastify.post('/api/tickets/checkin', async (req, reply) => {
+fastify.post('/api/tickets/checkin', { preHandler: requireAdmin }, async (req, reply) => {
   const { token, code, dni, puerta, staff_nombre } = req.body || {};
   const attendee = inMemoryStore.asistentes.find(
     a => (token && a.qr_token === token) || 
@@ -297,7 +365,7 @@ fastify.get('/api/stands', async () => {
   return { success: true, stands: inMemoryStore.stands };
 });
 
-fastify.post('/api/stands/scan-lead', async (req, reply) => {
+fastify.post('/api/stands/scan-lead', { preHandler: requireAdmin }, async (req, reply) => {
   const { stand_id, attendee_code, attendee_token, interes, notas } = req.body || {};
   const attendee = inMemoryStore.asistentes.find(
     a => (attendee_token && a.qr_token === attendee_token) || 
@@ -323,7 +391,7 @@ fastify.get('/api/qa', async () => {
   return { success: true, count: sorted.length, questions: sorted };
 });
 
-fastify.post('/api/qa/ask', async (req, reply) => {
+fastify.post('/api/qa/ask', { preHandler: rateLimit(15, 60000) }, async (req, reply) => {
   const { autor, pregunta } = req.body || {};
   if (!pregunta) return reply.status(400).send({ error: 'Pregunta requerida' });
 
@@ -339,14 +407,14 @@ fastify.post('/api/qa/ask', async (req, reply) => {
   return reply.status(201).send({ success: true, question: newQ });
 });
 
-fastify.post('/api/qa/:id/upvote', async (req, reply) => {
+fastify.post('/api/qa/:id/upvote', { preHandler: rateLimit(60, 60000) }, async (req, reply) => {
   const q = inMemoryStore.preguntas.find(item => item.id === req.params.id);
   if (!q) return reply.status(404).send({ error: 'Pregunta no encontrada' });
   q.votos += 1;
   return { success: true, votos: q.votos };
 });
 
-fastify.post('/api/leads', async (request, reply) => {
+fastify.post('/api/leads', { preHandler: rateLimit(15, 60000) }, async (request, reply) => {
   const { nombre, empresa, cargo, email, telefono, tamano_empresa, desafio, horas_semanales_perdidas, ahorro_estimado_usd, mensaje } = request.body || {};
   if (!nombre || !email || !empresa) return reply.status(400).send({ error: 'Nombre, email y empresa son requeridos' });
 

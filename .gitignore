@@ -20,3 +20,8 @@ node_modules/
 dist/
 build/
 .cache/
+
+# Secretos y entorno (NUNCA versionar)
+.env
+.env.*
+!.env.example
