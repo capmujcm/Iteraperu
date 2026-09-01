@@ -220,7 +220,10 @@ fastify.get('/api/health', async () => {
     uptime: process.uptime(),
     memory: process.memoryUsage().rss,
     db: pool ? 'connected' : 'memory_ready',
-    attendeesCount: inMemoryStore.asistentes.length
+    attendeesCount: inMemoryStore.asistentes.length,
+    // Diagnóstico operativo: indica si la protección de endpoints está activa.
+    // Solo expone un booleano; nunca el token ni su longitud.
+    auth: AUTH_ENABLED ? 'enabled' : 'DISABLED'
   };
 });
 
