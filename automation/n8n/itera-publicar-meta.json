@@ -1,0 +1,307 @@
+{
+  "name": "ITERA · Publicar en Instagram y Facebook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "itera-publicar",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Recibir publicación",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-620, 300],
+      "webhookId": "itera-publicar"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "api",
+              "value": "v21.0",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "igUserId",
+              "value": "PEGA_AQUI_EL_INSTAGRAM_USER_ID",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "pageId",
+              "value": "PEGA_AQUI_EL_FACEBOOK_PAGE_ID",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "caption",
+              "value": "={{ $json.body.caption }}",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "images",
+              "value": "={{ $json.body.images }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "config",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-400, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Una imagen por item. Instagram admite de 2 a 10 en un carrusel.\nconst c = $input.first().json;\nif (!Array.isArray(c.images) || c.images.length === 0) {\n  throw new Error('Falta el arreglo \"images\" con al menos una URL pública de imagen.');\n}\nif (c.images.length > 10) {\n  throw new Error('Instagram admite un máximo de 10 imágenes por carrusel.');\n}\nreturn c.images.map((url) => ({ json: { imageUrl: url, api: c.api, igUserId: c.igUserId, pageId: c.pageId } }));"
+      },
+      "id": "split-ig",
+      "name": "IG · una imagen por item",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-160, 180]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/{{ $json.api }}/{{ $json.igUserId }}/media",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "image_url",
+              "value": "={{ $json.imageUrl }}"
+            },
+            {
+              "name": "is_carousel_item",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ig-item",
+      "name": "IG · contenedor por imagen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [60, 180]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "ig-collect",
+      "name": "IG · juntar IDs",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [280, 180]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/{{ $('Config').first().json.api }}/{{ $('Config').first().json.igUserId }}/media",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "media_type",
+              "value": "CAROUSEL"
+            },
+            {
+              "name": "children",
+              "value": "={{ $json.data.map(d => d.id).join(',') }}"
+            },
+            {
+              "name": "caption",
+              "value": "={{ $('Config').first().json.caption }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ig-carousel",
+      "name": "IG · contenedor del carrusel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [500, 180]
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "id": "ig-wait",
+      "name": "Esperar procesamiento",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [720, 180],
+      "webhookId": "itera-espera"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/{{ $('Config').first().json.api }}/{{ $('Config').first().json.igUserId }}/media_publish",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "creation_id",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ig-publish",
+      "name": "IG · publicar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [940, 180]
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $input.first().json;\nreturn c.images.map((url) => ({ json: { imageUrl: url, api: c.api, pageId: c.pageId } }));"
+      },
+      "id": "split-fb",
+      "name": "FB · una imagen por item",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-160, 440]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/{{ $json.api }}/{{ $json.pageId }}/photos",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.imageUrl }}"
+            },
+            {
+              "name": "published",
+              "value": "false"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fb-upload",
+      "name": "FB · subir foto sin publicar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [60, 440]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "fb-collect",
+      "name": "FB · juntar IDs",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [280, 440]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/{{ $('Config').first().json.api }}/{{ $('Config').first().json.pageId }}/feed",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "={{ $('Config').first().json.caption }}"
+            },
+            {
+              "name": "attached_media",
+              "value": "={{ JSON.stringify($json.data.map(d => ({ media_fbid: d.id }))) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fb-publish",
+      "name": "FB · publicar álbum",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [500, 440]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, instagram: $json.id }) }}",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1160, 180]
+    }
+  ],
+  "connections": {
+    "Recibir publicación": {
+      "main": [[{ "node": "Config", "type": "main", "index": 0 }]]
+    },
+    "Config": {
+      "main": [
+        [
+          { "node": "IG · una imagen por item", "type": "main", "index": 0 },
+          { "node": "FB · una imagen por item", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "IG · una imagen por item": {
+      "main": [[{ "node": "IG · contenedor por imagen", "type": "main", "index": 0 }]]
+    },
+    "IG · contenedor por imagen": {
+      "main": [[{ "node": "IG · juntar IDs", "type": "main", "index": 0 }]]
+    },
+    "IG · juntar IDs": {
+      "main": [[{ "node": "IG · contenedor del carrusel", "type": "main", "index": 0 }]]
+    },
+    "IG · contenedor del carrusel": {
+      "main": [[{ "node": "Esperar procesamiento", "type": "main", "index": 0 }]]
+    },
+    "Esperar procesamiento": {
+      "main": [[{ "node": "IG · publicar", "type": "main", "index": 0 }]]
+    },
+    "IG · publicar": {
+      "main": [[{ "node": "Responder", "type": "main", "index": 0 }]]
+    },
+    "FB · una imagen por item": {
+      "main": [[{ "node": "FB · subir foto sin publicar", "type": "main", "index": 0 }]]
+    },
+    "FB · subir foto sin publicar": {
+      "main": [[{ "node": "FB · juntar IDs", "type": "main", "index": 0 }]]
+    },
+    "FB · juntar IDs": {
+      "main": [[{ "node": "FB · publicar álbum", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

@@ -2,30 +2,52 @@
 
 > **ITERA** es un socio estratégico de transformación empresarial, optimización de procesos, automatización inteligente y ciencia de datos aplicada para organizaciones en crecimiento.
 
----
-
-## 🚀 Estructura del Repositorio
-
-- **[`index.html`](index.html) / [`homepage-v3.html`](homepage-v3.html)**: Sitio web oficial y landing page interactiva de ITERA.
-  - Simulador cinético de partículas en Hero (física interactiva de datos y flujo acelerado).
-  - Escáner de fricción operativa en tiempo real por áreas de negocio.
-  - El Método ITERA (01 Cuestionar, 02 Eliminar, 03 Simplificar, 04 Acelerar, 05 Evolucionar + ciclo continuo).
-  - Modelo 360° (Entender / Optimizar / Anticipar).
-  - Simulador de ROI y capacidad operativa.
-  - Formulario CRO B2B de diagnóstico.
-- **[`brand-deck.html`](brand-deck.html)**: Manual de marca interactivo y Brand System Guidelines (tokens de diseño, paleta, tipografía *Satoshi* y reglas de aplicación).
-- **[`evento-plataforma/`](evento-plataforma/)**: Prototipo interactivo de la Plataforma de Eventos de ITERA.
-  - **[`prototipo.html`](evento-plataforma/prototipo.html)**: Plataforma integral con conmutador de roles en vivo (Asistente, Staff / Puerta, Expositor / Stand, Speaker, Organizador / Admin) y motor de acreditación QR dinámico.
-  - **[`qr-test.html`](evento-plataforma/qr-test.html)**: Motor QR nativo en JavaScript (Reed-Solomon GF(256)).
-- **[`assets/`](assets/)**: Recursos gráficos y vectoriales oficiales de la marca (isotipo, logotipo completo, SVG).
+- **Producción:** https://iteraperu.pe (Railway)
+- **Stack:** Node 18+ · Fastify · PostgreSQL (con fallback in-memory)
 
 ---
 
-## 💻 Visualización Local & Despliegue
+## Estructura del Repositorio
 
-Este proyecto está construido con tecnologías web estándar de ultra-alto rendimiento (HTML5, CSS3 Custom Properties, JavaScript Vanilla Canvas y SVG). No requiere instalación de dependencias pesadas para su visualización.
+```
+public/                   Todo lo que se sirve al navegador (static root)
+  index.html              Landing oficial de ITERA  →  /
+  brand-deck.html         Manual de marca           →  /brand
+  evento/
+    prototipo.html        Plataforma de eventos     →  /evento y rutas por rol
+    qr-test.html          Banco de pruebas del motor QR
+  assets/                 Isotipo, logotipo, SVG y piezas para redes
+db/
+  schema.sql              Esquema de referencia de PostgreSQL
+automation/
+  n8n/                    Workflows de automatización (publicación en Meta)
+server.js                 Servidor Fastify: API + rutas de páginas
+```
 
-Simplemente abre cualquiera de los archivos `.html` en cualquier navegador web moderno o habilita **GitHub Pages** en la rama `main`.
+Nada fuera de `public/` es accesible por HTTP.
+
+## Rutas
+
+| Ruta | Sirve |
+|---|---|
+| `/` | Landing ITERA |
+| `/brand` | Brand deck |
+| `/evento` | Prototipo de la plataforma de eventos |
+| `/asistente` `/persona` `/empresa` `/organizador` `/proveedor` `/staff` `/ayuda` | El mismo prototipo, abierto en el rol correspondiente |
+| `/api/*` | API del evento (health, events, attendees, tickets, stands, qa, leads) |
+
+## Desarrollo local
+
+```bash
+npm install
+npm run dev     # node --watch server.js
+```
+
+Servidor en `http://localhost:3000`. Sin `DATABASE_URL` la API funciona igual usando el store in-memory.
+
+## Variables de entorno
+
+Ver [`.env.example`](.env.example): `PORT`, `NODE_ENV`, `DATABASE_URL`.
 
 ---
 
