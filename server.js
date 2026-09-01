@@ -184,6 +184,9 @@ async function requireAdmin(req, reply) {
 // Limitador de tasa en memoria (ventana deslizante por IP) — frena fuerza bruta
 // y enumeración de DNIs/códigos sin añadir dependencias.
 const rateBuckets = new Map();
+// Identificador del proceso, para detectar si hay varias réplicas sirviendo
+// (cada réplica tendría su propio contador en memoria).
+const INSTANCE_ID = Math.random().toString(36).slice(2, 8);
 
 // Detrás del proxy de Railway, req.ip es la IP del proxy y no distingue
 // visitantes. La cabecera X-Forwarded-For llega como "cliente, proxy1, ...";
@@ -239,8 +242,12 @@ fastify.register(require('@fastify/static'), {
 // -----------------------------------------------------------------------------
 // Rutas API
 // -----------------------------------------------------------------------------
-fastify.get('/api/health', async () => {
+fastify.get('/api/health', async (req) => {
   return {
+    // Diagnóstico temporal del limitador de tasa.
+    instance: INSTANCE_ID,
+    ipKey: clientIp(req),
+    buckets: rateBuckets.size,
     status: 'ok',
     uptime: process.uptime(),
     memory: process.memoryUsage().rss,
