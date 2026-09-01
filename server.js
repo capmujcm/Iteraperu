@@ -247,7 +247,9 @@ fastify.get('/api/health', async (req) => {
     // Diagnóstico temporal del limitador de tasa.
     instance: INSTANCE_ID,
     ipKey: clientIp(req),
-    buckets: rateBuckets.size,
+    xff: req.headers['x-forwarded-for'] || null,
+    reqIp: req.ip,
+    buckets: Array.from(rateBuckets.entries()).map(([k, v]) => k + '=' + v.count),
     status: 'ok',
     uptime: process.uptime(),
     memory: process.memoryUsage().rss,
