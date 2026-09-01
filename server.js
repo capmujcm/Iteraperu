@@ -184,9 +184,23 @@ async function requireAdmin(req, reply) {
 // Limitador de tasa en memoria (ventana deslizante por IP) — frena fuerza bruta
 // y enumeración de DNIs/códigos sin añadir dependencias.
 const rateBuckets = new Map();
+
+// Detrás del proxy de Railway, req.ip es la IP del proxy y no distingue
+// visitantes. La cabecera X-Forwarded-For llega como "cliente, proxy1, ...";
+// se toma la ÚLTIMA entrada porque es la que añade el proxy de confianza: las
+// anteriores las puede falsificar quien llama para eludir el límite.
+function clientIp(req) {
+  const xff = req.headers['x-forwarded-for'];
+  if (xff) {
+    const parts = String(xff).split(',').map(s => s.trim()).filter(Boolean);
+    if (parts.length) return parts[parts.length - 1];
+  }
+  return req.ip || 'unknown';
+}
+
 function rateLimit(max, windowMs) {
   return async (req, reply) => {
-    const ip = req.ip || 'unknown';
+    const ip = clientIp(req);
     const now = Date.now();
     let b = rateBuckets.get(ip);
     if (!b || now > b.reset) { b = { count: 0, reset: now + windowMs }; rateBuckets.set(ip, b); }
