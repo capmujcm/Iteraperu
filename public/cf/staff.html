@@ -571,7 +571,13 @@
   }
 
   document.addEventListener('cf:pantalla', function (ev) {
-    if (ev.detail.pantalla === 'puestos') pintarPuestos();
+    if (ev.detail.pantalla !== 'puestos') return;
+    // Se limpia el resultado anterior: si no, al volver a esta pantalla se
+    // veria "✓ Puesto creado" de una creacion pasada y parecería que se acaba
+    // de crear otro.
+    limpiar('puestosResult');
+    el('formPuesto').hidden = true;
+    pintarPuestos();
   });
 
   /* --------------------------------------------------------------------- */
