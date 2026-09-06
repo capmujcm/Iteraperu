@@ -30,6 +30,7 @@ lib/
   routes-auth.js          Rutas de registro, ingreso y soporte
   routes-insignias.js     Puestos, insignias y tickets de sorteo
   routes-empresa.js       Rol Empresa: acceso, ficha, logo y panel
+  routes-staff.js         Cuentas de staff, roles y bitácora de acciones
 db/
   schema.sql              Esquema de PostgreSQL. Idempotente: se aplica en cada arranque
 automation/
@@ -46,9 +47,9 @@ Nada fuera de `public/` es accesible por HTTP.
 | `/` | Landing ITERA |
 | `/brand` | Brand deck |
 | `/e/country-fest` | **App real del asistente** (`/e`, `/entrada` redirigen aquí) |
-| `/staff/country-fest` | **App real del Punto de Ayuda** (requiere `?staff=TOKEN`) |
+| `/staff/country-fest` | **Punto de Ayuda** — usuario y contraseña de staff |
 | `/negocios/country-fest` | **Panel del puesto participante** |
-| `/consola/country-fest` | **Consola del organizador** (requiere `?staff=TOKEN`) |
+| `/consola/country-fest` | **Consola del organizador** — solo rol organizador |
 | `/evento` | Prototipo comercial, con datos ficticios |
 | `/api/*` | API del evento |
 
@@ -64,12 +65,65 @@ Son dos cosas distintas y conviene no confundirlas:
   así que enseñarlo a un cliente no crea asistentes reales. Toda la API está
   simulada dentro del propio archivo.
 
-### Poner en marcha el Punto de Ayuda
+## Cuentas de staff y roles
 
-El equipo de staff abre `https://iteraperu.pe/staff/country-fest?staff=EL_TOKEN`.
-El token se guarda en ese navegador y se borra de la barra de direcciones al
-instante. Después el staff escribe su nombre y su puesto, que quedan registrados
-en cada ingreso que valide y en cada contraseña que restablezca.
+Cada persona del equipo tiene **su usuario y su contraseña**. No hay token
+compartido en el día a día.
+
+| Acción | staff | organizador |
+|---|---|---|
+| Validar ingreso, registro rápido, buscar por DNI | ✅ | ✅ |
+| Restablecer contraseña de un asistente | ✅ | ✅ |
+| Consola con métricas del evento | — | ✅ |
+| Crear puestos y emitir sus QR | — | ✅ |
+| **Descargar los CSV con DNI y correos** | — | ✅ |
+| Gestionar usuarios de staff | — | ✅ |
+
+Los botones que no corresponden se ocultan, pero **la comprobación real está en
+el servidor** (`requireRol` en `lib/routes-staff.js`). Manipular la interfaz no
+sirve de nada.
+
+### Arrancar desde cero
+
+Todavía no hay usuarios, así que el primer organizador se crea con el
+`ADMIN_TOKEN`:
+
+1. `iteraperu.pe/staff/country-fest` → «Usar el token de emergencia» → pega el
+   `ADMIN_TOKEN` de las variables de Railway.
+2. Menú → **Usuarios de staff** → **Crear usuario**, rol `organizador`.
+3. Anota el usuario y la clave temporal: se muestran **una sola vez**.
+4. Cierra sesión, entra con tu usuario y define tu contraseña.
+5. Crea al resto del equipo con rol `staff`.
+
+Después, guarda el `ADMIN_TOKEN` y deja de repartirlo.
+
+### El ADMIN_TOKEN como llave de emergencia
+
+Se conserva para crear el primer organizador y para recuperar el acceso si el
+último organizador pierde su clave. Actúa como organizador y sus acciones se
+registran como «Token de emergencia», sin nombre. Cambiarlo invalida
+inmediatamente ese camino, no las sesiones de los usuarios.
+
+### Autoría verificada
+
+El nombre que queda en cada check-in y en cada restablecimiento sale de la
+**sesión**, no del cuerpo de la petición. Antes el staff lo escribía a mano y
+cualquiera podía poner el de otro. Las acciones de gestión quedan además en
+`acciones_staff`.
+
+Se puede **desactivar** a una persona: sus sesiones se cierran al instante. No
+se borra la cuenta, porque sus acciones pasadas deben seguir teniendo autor. El
+sistema no permite desactivar al último organizador activo.
+
+| Endpoint | Acceso |
+|---|---|
+| `POST /api/staff/login` | Público (15/min) |
+| `GET /api/staff/me` · `POST /api/staff/logout` | Sesión de staff |
+| `POST /api/staff/change-password` | Sesión de staff |
+| `GET`/`POST /api/staff/usuarios` | Organizador |
+| `POST /api/staff/usuarios/:id/clave` | Organizador — repone la clave |
+| `POST /api/staff/usuarios/:id/activo` | Organizador — activa o desactiva |
+| `GET /api/staff/acciones` | Organizador — bitácora |
 
 ## Acceso de los asistentes
 
