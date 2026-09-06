@@ -3,10 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#FF5A1F">
+<meta name="theme-color" content="#E60067">
 <meta name="robots" content="noindex">
 <title>Country Fest · Mi entrada</title>
 <link rel="icon" href="/assets/itera-mark.svg">
+<link rel="preconnect" href="https://api.fontshare.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="/cf/app.css">
 </head>
 <body>
@@ -14,8 +19,9 @@
 <div class="app">
   <header class="apphead">
     <div class="ev">
-      <span class="dot"></span>
-      <b id="evNombre">Country Fest</b>
+      <img src="/assets/country-fest-logo-clean.png" alt="Country Fest" class="ev-logo-img">
+      <b id="evNombre" class="sr-only">Country Fest 2026</b>
+      <span class="ev-tag">2026</span>
     </div>
     <button class="btn btn-line btn-sm" id="btnSalir" hidden>Salir</button>
   </header>
@@ -31,17 +37,33 @@
 
     <!-- ================= bienvenida ================= -->
     <section class="screen" data-sc="landing">
-      <p class="eyebrow">Country Fest</p>
-      <h2 style="font-size:1.55rem;margin:.3rem 0 .5rem;">Tu entrada al evento</h2>
-      <p class="muted tiny" style="margin-bottom:1.2rem;">
-        Regístrate una vez y tu entrada queda en este celular. En la puerta solo tienes que mostrar tu código QR.
-      </p>
-      <div class="stack">
-        <button class="btn btn-event btn-block" style="padding:1rem;" data-go="registro">Crear mi registro</button>
-        <button class="btn btn-line btn-block" style="padding:1rem;" data-go="login">Ya me registré</button>
+      <div class="ticket" style="background:linear-gradient(165deg,#0A1128 0%,#200B26 55%,#3A0B22 100%);border:1px solid rgba(255,222,0,0.28);padding:2rem 1.4rem;box-shadow:0 14px 34px -10px rgba(230,0,103,.4);border-radius:18px;margin-bottom:1.1rem;">
+        <div class="fest-bunting">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <img src="/assets/country-fest-logo-clean.png" alt="Country Fest 2026" style="width:280px;max-width:85%;height:auto;display:block;margin:0 auto .8rem;filter:drop-shadow(0 6px 16px rgba(0,0,0,.45));">
+        <span class="ttag" style="color:var(--event-yellow);border:1px solid rgba(255,222,0,.38);background:rgba(255,222,0,.12);letter-spacing:.08em;font-size:.65rem;padding:.3rem .75rem;">26 Y 27 DE SEPTIEMBRE · LA VILLA COUNTRY CLUB · ILO</span>
+        <p style="font-size:.88rem;color:rgba(255,255,255,.92);line-height:1.45;margin-top:.85rem;">
+          Registro gratuito, ticket digital con QR, insignias por cada puesto que visitas y sorteo final. Todo desde tu celular.
+        </p>
       </div>
-      <div class="soft tiny muted" style="margin-top:1.2rem;">
-        <b>¿Qué necesitas?</b> Tu DNI y una contraseña que elijas. Nada más.
+
+      <div class="stack" style="gap:.75rem;">
+        <button class="btn btn-event btn-block" style="padding:1rem;font-size:.95rem;" data-go="registro">Registrarme gratis</button>
+        <button class="btn btn-line btn-block" style="padding:1rem;font-size:.95rem;" data-go="login">Ya me registré / Mi Ticket</button>
+      </div>
+
+      <div class="card" style="margin-top:1.1rem;">
+        <h4 style="font-size:.92rem;margin-bottom:.5rem;">Cómo funciona tu entrada digital</h4>
+        <div class="stack" style="gap:.45rem;font-size:.78rem;">
+          <div class="kv"><span>1 · Registro</span><span>Tu DNI y una clave propia</span></div>
+          <div class="kv"><span>2 · En Puerta</span><span>Muestras tu QR al ingresar</span></div>
+          <div class="kv"><span>3 · Puestos</span><span>Escaneas para sumar tickets de sorteo</span></div>
+        </div>
+      </div>
+
+      <div class="soft tiny muted" style="margin-top:1rem;text-align:center;">
+        ⚡ <b>Sin descargar apps:</b> Funciona directamente en tu navegador.
       </div>
     </section>
 
@@ -83,41 +105,42 @@
 
     <!-- ================= registro: consentimiento ================= -->
     <section class="screen" data-sc="terminos">
-      <div class="schead"><button class="back" data-go="registro" aria-label="Volver">‹</button><h2>Privacidad</h2></div>
+      <div class="schead"><button class="back" data-go="registro" aria-label="Volver">‹</button><h2>Autorizaciones</h2></div>
       <div class="stepper"><i class="on"></i><i class="on"></i></div>
-      <p class="eyebrow">Paso 2 de 2 · Autorizaciones</p>
+      <p class="eyebrow">Paso 2 de 2 · Finalizar registro</p>
+      <p class="tiny muted" style="margin:.25rem 0 .9rem;">Para emitir tu entrada digital confirma tu consentimiento según ley.</p>
 
-      <div class="note n-info tiny" style="margin:.7rem 0 .9rem;">
-        <b>Quién trata tus datos.</b> Responsable: la empresa organizadora de Country Fest.
-        Encargado del tratamiento: itera.
-        <b>Para qué:</b> acreditarte, emitir tu entrada y controlar el ingreso.
-        <b>Cuánto tiempo:</b> hasta 12 meses después del evento.
+      <div class="stack" style="gap:.65rem;">
+        <label class="consent" for="cs-privacidad">
+          <input type="checkbox" id="cs-privacidad">
+          <span class="ct">
+            <b style="font-size:.86rem;">Acepto los <span class="legal-link" id="linkTerminos">Términos y Condiciones</span> y la <span class="legal-link" id="linkPrivacidad">Política de Privacidad</span> <span class="req" style="color:var(--bad);">· Obligatorio</span></b>
+            <span class="tiny muted" style="display:block;margin-top:.15rem;line-height:1.45;">
+              Tratamiento de DNI, nombres, celular y correo para acreditación y acceso conforme a la Ley N° 29733.
+            </span>
+          </span>
+        </label>
+
+        <label class="consent" for="cs-marketing">
+          <input type="checkbox" id="cs-marketing">
+          <span class="ct">
+            <b style="font-size:.86rem;">Avisos del festival y resultados del sorteo <span class="req" style="color:var(--good);">· Opcional</span></b>
+            <span class="tiny muted" style="display:block;margin-top:.15rem;line-height:1.45;">
+              Notificaciones sobre horarios de espectáculos, mapa de puestos y sorteo oficial vía WhatsApp.
+            </span>
+          </span>
+        </label>
       </div>
 
-      <label class="consent" for="cs-privacidad">
-        <input type="checkbox" id="cs-privacidad">
-        <span class="ct">
-          <b>Acepto el tratamiento de mis datos <span class="req" style="color:var(--bad);">· Obligatorio</span></b>
-          Nombre, documento, celular y correo, para acreditación e ingreso al evento.
-        </span>
-      </label>
-
-      <label class="consent" for="cs-marketing">
-        <input type="checkbox" id="cs-marketing">
-        <span class="ct">
-          <b>Quiero recibir avisos del evento <span class="req" style="color:var(--ink-mut);">· Opcional</span></b>
-          Horarios y novedades por WhatsApp. Puedes desactivarlo cuando quieras.
-        </span>
-      </label>
-
-      <div class="soft tiny muted" style="margin-top:.8rem;">
-        Puedes pedir acceso, rectificación o eliminación de tus datos escribiendo a
-        <a href="mailto:datos@iteraperu.pe">datos@iteraperu.pe</a>. No compartimos tus datos
-        identificables con los puestos participantes.
+      <div class="soft center tiny muted" style="margin-top:1.1rem;padding:.75rem .9rem;">
+        🔒 <b>Tus datos están protegidos.</b> Conforme a la <b>Ley N° 29733</b>, no compartimos tus datos con terceros.
+        <div style="margin-top:.4rem;">
+          <span class="legal-link" id="linkLegalInfo">Ver detalles legales y derechos ARCO ›</span>
+        </div>
       </div>
 
       <div id="regError2" style="margin-top:.7rem;"></div>
-      <button class="btn btn-event btn-block" id="btnFinishReg" style="margin-top:.9rem;" disabled>Crear mi entrada</button>
+      <button class="btn btn-event btn-block" id="btnFinishReg" style="margin-top:.95rem;padding:1rem;font-size:.95rem;" disabled>Crear mi entrada</button>
     </section>
 
     <!-- ================= ingreso ================= -->
@@ -281,6 +304,116 @@
   </nav>
 </div>
 
+<!-- Modal Legal Bottom-Sheet (caleta, formal y con pestañas directas) -->
+<div class="modal-backdrop" id="modalLegal">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h3 id="modalTitle">📜 Términos y Condiciones</h3>
+      <button class="modal-close" id="btnCerrarModal" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-tabs" id="modalTabs">
+      <button type="button" class="modal-tab-btn active" data-tab="terminos">📜 Términos</button>
+      <button type="button" class="modal-tab-btn" data-tab="privacidad">🛡️ Privacidad</button>
+      <button type="button" class="modal-tab-btn" data-tab="arco">⚖️ Derechos ARCO</button>
+    </div>
+    <div class="modal-content" id="modalContent">
+      <!-- PANEL 1: TÉRMINOS Y CONDICIONES -->
+      <div class="modal-tab-panel active" id="panel-terminos">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem;">
+          <b style="font-size:.95rem;color:var(--ink);">📜 Bases y Condiciones del Festival</b>
+          <span class="pill p-neutral" style="font-size:.62rem;">Country Fest 2026</span>
+        </div>
+        <p style="margin-bottom:.55rem;">
+          <b>1. Entrada digital intransferible:</b> Cada credencial con código QR identifica exclusivamente al titular registrado con su DNI para el acceso al recinto <b>La Villa Country Club (Ilo)</b> los días 26 y 27 de Septiembre de 2026. Queda terminantemente prohibida su reventa o cesión no autorizada.
+        </p>
+        <p style="margin-bottom:.55rem;">
+          <b>2. Aforo y derecho de admisión:</b> El ingreso al recinto está supeditado a la capacidad máxima autorizada por las autoridades y al cumplimiento riguroso de las normas de convivencia, seguridad ciudadana y orden público del evento.
+        </p>
+        <p style="margin-bottom:.55rem;">
+          <b>3. Dinámica oficial de insignias y sorteo:</b> Cada puesto o stand oficial que visites otorga 1 insignia digital escaneando su QR único. Cada insignia acumulada acredita 1 opción o ticket para los sorteos oficiales de premios del festival.
+        </p>
+        <p style="margin-bottom:.55rem;">
+          <b>4. Cuidado de pertenencias y conducta:</b> La organización no asume responsabilidad por pérdidas o extravíos de objetos personales en las instalaciones. Toda falta de respeto o alteración del orden motivará el retiro inmediato del recinto.
+        </p>
+        <div class="soft tiny muted" style="margin-top:.75rem;">
+          ℹ️ Al registrarte y portar tu credencial QR declaras conocer y aceptar íntegramente estas bases generales de Country Fest 2026.
+        </div>
+      </div>
+
+      <!-- PANEL 2: POLÍTICA DE PRIVACIDAD -->
+      <div class="modal-tab-panel" id="panel-privacidad">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem;">
+          <b style="font-size:.95rem;color:var(--ink);display:flex;align-items:center;gap:.35rem;">
+            <span>🛡️</span> Política de Privacidad
+          </b>
+          <span class="pill p-blue" style="font-size:.62rem;">Ley N° 29733</span>
+        </div>
+        <p class="tiny muted" style="margin-bottom:.65rem;line-height:1.45;">
+          En estricto cumplimiento de la <b>Ley de Protección de Datos Personales (Ley N° 29733)</b> y su Reglamento (D.S. 003-2013-JUS):
+        </p>
+        <div class="card" style="border-left:3.5px solid var(--accent);background:var(--surface);margin-bottom:.85rem;">
+          <div class="stack" style="gap:.35rem;font-size:.78rem;">
+            <div class="kv"><span>Titular del Banco:</span><span>Comité Organizador Country Fest 2026</span></div>
+            <div class="kv"><span>Operador Tecnológico:</span><span>ITERA Perú</span></div>
+            <div class="kv"><span>Datos recopilados:</span><span>DNI, Nombres, Celular y Correo Electrónico</span></div>
+            <div class="kv"><span>Finalidad principal:</span><span>Acreditación, emisión de credencial QR y control de acceso</span></div>
+            <div class="kv"><span>Plazo de custodia:</span><span>Hasta 12 meses posteriores al festival para fines de auditoría</span></div>
+          </div>
+        </div>
+        <div class="soft tiny muted" style="line-height:1.45;">
+          🔒 <b>Confidencialidad absoluta:</b> Tus datos personales jamás serán comercializados ni cedidos a marcas o puestos del festival. Los expositores únicamente reciben métricas agregadas y estadísticas anónimas.
+        </div>
+      </div>
+
+      <!-- PANEL 3: DERECHOS ARCO -->
+      <div class="modal-tab-panel" id="panel-arco">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem;">
+          <b style="font-size:.95rem;color:var(--ink);display:flex;align-items:center;gap:.35rem;">
+            <span>⚖️</span> Ejercicio de Derechos ARCO
+          </b>
+          <span class="pill p-good" style="font-size:.62rem;">Tus Derechos</span>
+        </div>
+        <p class="tiny muted" style="margin-bottom:.65rem;line-height:1.45;">
+          Conforme a la Ley N° 29733, puedes ejercer tus derechos de <b>Acceso, Rectificación, Cancelación y Oposición (ARCO)</b> de manera libre y gratuita:
+        </p>
+        <div class="stack" style="gap:.45rem;margin-bottom:.85rem;">
+          <div class="soft" style="padding:.5rem .75rem;">
+            <b style="font-size:.82rem;color:var(--ink);">👁️ Acceso:</b>
+            <span class="tiny muted" style="display:block;margin-top:.1rem;">Conocer la información almacenada en el banco de datos y los fines de su tratamiento.</span>
+          </div>
+          <div class="soft" style="padding:.5rem .75rem;">
+            <b style="font-size:.82rem;color:var(--ink);">✏️ Rectificación:</b>
+            <span class="tiny muted" style="display:block;margin-top:.1rem;">Actualizar o subsanar cualquier dato inexacto (DNI, nombres, teléfono o correo).</span>
+          </div>
+          <div class="soft" style="padding:.5rem .75rem;">
+            <b style="font-size:.82rem;color:var(--ink);">🗑️ Cancelación:</b>
+            <span class="tiny muted" style="display:block;margin-top:.1rem;">Solicitar la supresión de tus datos de nuestros registros concluido el festival.</span>
+          </div>
+          <div class="soft" style="padding:.5rem .75rem;">
+            <b style="font-size:.82rem;color:var(--ink);">🛑 Oposición:</b>
+            <span class="tiny muted" style="display:block;margin-top:.1rem;">Oponerte al envío de comunicaciones informativas o de espectáculos.</span>
+          </div>
+        </div>
+        <div class="card" style="background:var(--surface-2);border-left:3.5px solid var(--good);">
+          <b style="font-size:.84rem;color:var(--ink);">Procedimiento de atención:</b>
+          <p class="tiny muted" style="margin:.3rem 0 .5rem;line-height:1.45;">
+            Envía tu requerimiento por escrito adjuntando foto o copia simple de tu DNI al correo oficial:
+          </p>
+          <a href="mailto:datos@iteraperu.pe?subject=Ejercicio%20de%20Derechos%20ARCO%20-%20Country%20Fest" class="btn btn-line btn-block btn-sm" style="font-weight:700;">
+            ✉️ datos@iteraperu.pe
+          </a>
+          <p class="tiny muted" style="margin-top:.45rem;font-size:.72rem;">
+            ⏱️ Plazos legales: Rectificación y Cancelación en máx. 10 días hábiles; Acceso en máx. 20 días hábiles.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-event btn-block btn-sm" id="btnAceptarModal">Entendido / Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <script src="/cf/app.js"></script>
 <script>
 /* =============================================================================
@@ -351,11 +484,15 @@
     const caja = el('ticketBox');
     caja.innerHTML =
       '<div class="ticket">' +
-        '<span class="ttag">' + esc(String(persona.tipo_ticket || 'general').toUpperCase()) + '</span>' +
+        '<div class="fest-bunting" style="margin-bottom:-.2rem;">' +
+          '<span></span><span></span><span></span><span></span><span></span><span></span><span></span>' +
+        '</div>' +
+        '<img src="/assets/country-fest-logo-clean.png" alt="Country Fest" class="ticket-logo">' +
+        '<span class="ttag" style="color:var(--event-yellow);border:1px solid rgba(255,222,0,.35);background:rgba(255,222,0,.12);letter-spacing:.08em;">' + esc(String(persona.tipo_ticket || 'general').toUpperCase()) + '</span>' +
         '<div class="qrbox"><canvas id="qrCanvas"></canvas></div>' +
         '<div class="tname">' + NM(persona) + '</div>' +
         '<div class="tcode">' + esc(persona.codigo_ticket || '') + '</div>' +
-        '<div class="tsub">Country Fest</div>' +
+        '<div class="tsub">26 y 27 de Septiembre · La Villa Country Club · Ilo</div>' +
       '</div>';
 
     // El QR lleva el token aleatorio del servidor, no el DNI: quien lo fotografie
@@ -407,6 +544,97 @@
     };
     go('terminos');
   });
+
+  /* --------------------------------------------------------------------- */
+  /* modal legal (caleta, formal y diferenciado por pestañas)              */
+  /* --------------------------------------------------------------------- */
+  const tabTitles = {
+    terminos: '📜 Términos y Condiciones',
+    privacidad: '🛡️ Política de Privacidad',
+    arco: '⚖️ Derechos ARCO y Marco Legal'
+  };
+
+  function setModalLegalTab(tabName) {
+    const tabs = ['terminos', 'privacidad', 'arco'];
+    const activeTab = tabs.includes(tabName) ? tabName : 'terminos';
+
+    const titleEl = el('modalTitle');
+    if (titleEl) titleEl.textContent = tabTitles[activeTab];
+
+    const tabContainer = el('modalTabs');
+    if (tabContainer) {
+      tabContainer.querySelectorAll('.modal-tab-btn').forEach(function (btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === activeTab);
+      });
+    }
+
+    tabs.forEach(function (t) {
+      const panel = el('panel-' + t);
+      if (panel) panel.classList.toggle('active', t === activeTab);
+    });
+
+    const content = el('modalContent');
+    if (content) content.scrollTop = 0;
+  }
+
+  function abrirModalLegal(tabName) {
+    setModalLegalTab(tabName || 'terminos');
+    const m = el('modalLegal');
+    if (m) m.classList.add('open');
+  }
+
+  function cerrarModalLegal() {
+    const m = el('modalLegal');
+    if (m) m.classList.remove('open');
+  }
+
+  const modalTabs = el('modalTabs');
+  if (modalTabs) {
+    modalTabs.querySelectorAll('.modal-tab-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        setModalLegalTab(this.getAttribute('data-tab'));
+      });
+    });
+  }
+
+  const linkTerminos = el('linkTerminos');
+  if (linkTerminos) {
+    linkTerminos.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      abrirModalLegal('terminos');
+    });
+  }
+
+  const linkPrivacidad = el('linkPrivacidad');
+  if (linkPrivacidad) {
+    linkPrivacidad.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      abrirModalLegal('privacidad');
+    });
+  }
+
+  const linkLegalInfo = el('linkLegalInfo');
+  if (linkLegalInfo) {
+    linkLegalInfo.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      abrirModalLegal('arco');
+    });
+  }
+
+  const btnCerrarM = el('btnCerrarModal');
+  if (btnCerrarM) btnCerrarM.addEventListener('click', cerrarModalLegal);
+  const btnAceptarM = el('btnAceptarModal');
+  if (btnAceptarM) btnAceptarM.addEventListener('click', cerrarModalLegal);
+
+  const modalBg = el('modalLegal');
+  if (modalBg) {
+    modalBg.addEventListener('click', function (ev) {
+      if (ev.target === this) cerrarModalLegal();
+    });
+  }
 
   // El boton de crear solo se habilita con el consentimiento obligatorio marcado.
   el('cs-privacidad').addEventListener('change', function () {
@@ -538,7 +766,7 @@
   // JSON, que multiplicaría el peso de la respuesta por cada insignia.
   function medalla(i, ganada) {
     const fondo = ganada
-      ? 'background:linear-gradient(135deg,' + esc(i.color || '#FF5A1F') + ',#111);'
+      ? 'background:linear-gradient(135deg,' + esc(i.color || '#E60067') + ',#111);'
       : '';
     const cara = i.tiene_logo
       ? '<img class="logo-insignia" src="/api/empresas/' + encodeURIComponent(i.empresa_id) + '/logo"' +
@@ -639,7 +867,7 @@
         '<div class="flash good">' + esc(datos.message) + '</div>' +
         '<div class="card center" style="margin-top:.7rem;">' +
           '<div class="medal" style="width:104px;height:104px;margin:0 auto .5rem;aspect-ratio:auto;' +
-            'background:linear-gradient(135deg,' + esc(e.color || '#FF5A1F') + ',#111);">' +
+            'background:linear-gradient(135deg,' + esc(e.color || '#E60067') + ',#111);">' +
             '<span class="em">' + esc(e.emoji || '🎪') + '</span></div>' +
           '<b>' + esc(e.nombre) + '</b>' +
           '<p class="tiny muted">' + esc(e.rubro || '') + (e.stand ? ' · ' + esc(e.stand) : '') + '</p>' +

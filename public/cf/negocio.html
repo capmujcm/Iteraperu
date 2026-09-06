@@ -3,13 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0F9B6C">
+<meta name="theme-color" content="#E60067">
 <meta name="robots" content="noindex">
 <title>Country Fest · Mi puesto</title>
 <link rel="icon" href="/assets/itera-mark.svg">
+<link rel="preconnect" href="https://api.fontshare.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="/cf/app.css">
 <style>
-  .apphead .dot{background:var(--good);}
+  .apphead .dot{background:var(--event);}
   .logo-preview{
     width:120px;height:120px;object-fit:contain;background:#fff;border-radius:14px;
     border:1px solid var(--line);padding:6px;display:block;margin:0 auto;}
@@ -20,7 +25,7 @@
   .stat .n{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;line-height:1;}
   .stat .l{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-top:.25rem;}
   .barras{display:flex;align-items:flex-end;gap:3px;height:90px;margin-top:.6rem;}
-  .barras div{flex:1;background:var(--good);border-radius:3px 3px 0 0;min-height:2px;}
+  .barras div{flex:1;background:var(--event);border-radius:3px 3px 0 0;min-height:2px;}
   .barras-x{display:flex;gap:3px;margin-top:.25rem;}
   .barras-x span{flex:1;font-size:.55rem;color:var(--ink-mut);text-align:center;}
 </style>
@@ -29,7 +34,11 @@
 
 <div class="app">
   <header class="apphead">
-    <div class="ev"><span class="dot"></span><b id="evNombre">Country Fest</b></div>
+    <div class="ev">
+      <img src="/assets/country-fest-logo-clean.png" alt="Country Fest" class="ev-logo-img">
+      <b id="evNombre" class="sr-only">Country Fest</b>
+      <span class="pill p-event" style="font-size:.62rem;">Puesto</span>
+    </div>
     <button class="btn btn-line btn-sm" id="btnSalir" hidden>Salir</button>
   </header>
 
