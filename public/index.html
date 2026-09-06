@@ -427,6 +427,21 @@
       background: rgba(59, 232, 176, 0.14); border: 1px solid var(--green);
       color: var(--green); font-size: 0.86rem; text-align: center;
     }
+    #form-err {
+      display: none; margin-top: 1rem; padding: 0.9rem; border-radius: 10px;
+      background: rgba(255, 106, 106, 0.12); border: 1px solid #ff6a6a;
+      color: #ff9b9b; font-size: 0.86rem; text-align: center;
+    }
+    .consent-line {
+      display: flex; gap: 0.65rem; align-items: flex-start;
+      font-size: 0.78rem; line-height: 1.45; color: var(--faint);
+      margin-bottom: 1.1rem; cursor: pointer;
+    }
+    .consent-line input { margin-top: 0.15rem; flex-shrink: 0; accent-color: var(--blue); }
+    .consent-line a { color: var(--blue-soft, #8ca2e1); text-decoration: underline; }
+    .field input.invalid, .field select.invalid, .field textarea.invalid,
+    .consent-line.invalid { border-color: #ff6a6a; }
+    .consent-line.invalid { color: #ff9b9b; }
 
     /* ============================================================
        FOOTER
@@ -657,15 +672,15 @@
           </div>
 
           <div class="card reveal">
-            <form id="contact-form">
+            <form id="contact-form" novalidate>
               <div class="field-row">
-                <div class="field"><label>Nombre y apellido *</label><input type="text" placeholder="Carlos Mendoza" required></div>
-                <div class="field"><label>Empresa *</label><input type="text" placeholder="Empresa S.A." required></div>
+                <div class="field"><label for="f-nombre">Nombre y apellido *</label><input id="f-nombre" name="nombre" type="text" autocomplete="name" maxlength="120" placeholder="Carlos Mendoza" required></div>
+                <div class="field"><label for="f-empresa">Empresa *</label><input id="f-empresa" name="empresa" type="text" autocomplete="organization" maxlength="150" placeholder="Empresa S.A." required></div>
               </div>
-              <div class="field"><label>Email corporativo *</label><input type="email" placeholder="carlos@empresa.com" required></div>
+              <div class="field"><label for="f-email">Email corporativo *</label><input id="f-email" name="email" type="email" autocomplete="email" maxlength="150" placeholder="carlos@empresa.com" required></div>
               <div class="field">
-                <label>Principal desafío operativo</label>
-                <select style="background:#0D1119;">
+                <label for="f-desafio">Principal desafío operativo</label>
+                <select id="f-desafio" name="desafio" style="background:#0D1119;">
                   <option>Procesos lentos y cuellos de botella manuales</option>
                   <option>Información dispersa en hojas de cálculo</option>
                   <option>Sistemas desconectados que no se integran</option>
@@ -673,12 +688,21 @@
                   <option>Otro desafío estratégico</option>
                 </select>
               </div>
-              <div class="field"><label>¿Qué te gustaría mejorar en los próximos 90 días? (opcional)</label><textarea rows="3" placeholder="Cuéntanos brevemente sobre tus procesos actuales..."></textarea></div>
+              <div class="field"><label for="f-mensaje">¿Qué te gustaría mejorar en los próximos 90 días? (opcional)</label><textarea id="f-mensaje" name="mensaje" rows="3" maxlength="1000" placeholder="Cuéntanos brevemente sobre tus procesos actuales..."></textarea></div>
+
+              <!-- Ley 29733: consentimiento previo, informado y expreso. Sin
+                   marcar esta casilla no se envía nada al servidor. -->
+              <label class="consent-line" for="f-consent">
+                <input id="f-consent" name="consent" type="checkbox" required>
+                <span>Autorizo a ITERA a tratar mis datos (nombre, empresa y correo) para responder a esta solicitud de diagnóstico y contactarme al respecto. Puedo revocar esta autorización escribiendo a <a href="mailto:hola@iteraperu.pe">hola@iteraperu.pe</a>. <a href="#privacidad">Política de privacidad</a>.</span>
+              </label>
+
               <button type="submit" class="btn" style="width:100%; justify-content:space-between;" id="btn-submit">
                 Solicitar diagnóstico
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
               </button>
-              <div id="form-ok">✓ Solicitud recibida. Un director de ITERA se pondrá en contacto contigo a la brevedad.</div>
+              <div id="form-ok" role="status">✓ Solicitud recibida. Un director de ITERA se pondrá en contacto contigo a la brevedad.</div>
+              <div id="form-err" role="alert"></div>
             </form>
           </div>
         </div>
@@ -854,17 +878,94 @@
       });
     });
 
-    // ---- Formulario ----
-    $('contact-form').addEventListener('submit', e => {
-      e.preventDefault();
+    // ---- Formulario de diagnóstico ----
+    // Envía a /api/leads, que guarda en la tabla `leads_diagnostico`. Si el
+    // envío falla, se dice claramente: antes se mostraba "Solicitud recibida"
+    // pasados 600 ms sin haber enviado nada a ningún sitio.
+    (function initContactForm() {
+      const form = $('contact-form');
+      if (!form) return;
+
       const btn = $('btn-submit');
-      btn.disabled = true; btn.textContent = 'Procesando...';
-      setTimeout(() => {
-        $('form-ok').style.display = 'block';
-        e.target.reset();
-        btn.disabled = false; btn.textContent = '✓ Solicitud enviada';
-      }, 600);
-    });
+      const okBox = $('form-ok');
+      const errBox = $('form-err');
+      const consent = $('f-consent');
+      const consentLine = document.querySelector('.consent-line');
+      const textoBoton = btn.textContent.trim();
+
+      const marcar = (elem, mal) => elem && elem.classList.toggle('invalid', mal);
+
+      function fallar(mensaje, foco) {
+        okBox.style.display = 'none';
+        errBox.textContent = mensaje;
+        errBox.style.display = 'block';
+        if (foco) foco.focus();
+      }
+
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+        errBox.style.display = 'none';
+        okBox.style.display = 'none';
+
+        const nombre = $('f-nombre').value.trim();
+        const empresa = $('f-empresa').value.trim();
+        const email = $('f-email').value.trim();
+
+        marcar($('f-nombre'), !nombre);
+        marcar($('f-empresa'), !empresa);
+        // Validación deliberadamente laxa: solo descarta lo que claramente no
+        // es un correo. El servidor es quien decide de verdad.
+        const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        marcar($('f-email'), !emailOk);
+        marcar(consentLine, !consent.checked);
+
+        if (!nombre) return fallar('Escribe tu nombre y apellido.', $('f-nombre'));
+        if (!empresa) return fallar('Escribe el nombre de tu empresa.', $('f-empresa'));
+        if (!emailOk) return fallar('Revisa tu correo electrónico.', $('f-email'));
+        if (!consent.checked) return fallar('Necesitamos tu autorización para tratar tus datos y poder responderte.', consent);
+
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+
+        try {
+          const res = await fetch('/api/leads', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nombre,
+              empresa,
+              email,
+              cargo: '',
+              desafio: $('f-desafio').value,
+              mensaje: $('f-mensaje').value.trim(),
+              origen: 'landing_web',
+              consentimiento: true
+            })
+          });
+
+          if (res.status === 429) {
+            fallar('Demasiados envíos seguidos. Espera un minuto e inténtalo de nuevo.');
+            return;
+          }
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            fallar(data.error || 'No pudimos registrar tu solicitud. Escríbenos a hola@iteraperu.pe y lo vemos.');
+            return;
+          }
+
+          okBox.style.display = 'block';
+          form.reset();
+          [$('f-nombre'), $('f-empresa'), $('f-email'), consentLine].forEach(x => marcar(x, false));
+          btn.textContent = '✓ Solicitud enviada';
+          return;
+        } catch (err) {
+          fallar('No hay conexión con el servidor. Inténtalo de nuevo o escríbenos a hola@iteraperu.pe.');
+        } finally {
+          btn.disabled = false;
+          if (okBox.style.display !== 'block') btn.textContent = textoBoton;
+        }
+      });
+    })();
   </script>
 </body>
 </html>

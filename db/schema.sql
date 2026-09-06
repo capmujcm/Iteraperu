@@ -90,3 +90,96 @@ CREATE TABLE IF NOT EXISTS preguntas_live (
   respondida BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- =============================================================================
+-- 7. Autenticación de asistentes: DNI + contraseña propia
+-- =============================================================================
+-- Regla de negocio: la persona entra con su DNI y una contraseña que elige ella
+-- misma. Antes el re-ingreso dependía de un enlace al celular/WhatsApp, lo que
+-- dejaba fuera a quien registró mal su número. La sesión se mantiene en el
+-- mismo dispositivo mediante un token de sesión (tabla `sesiones`).
+--
+-- NUNCA se guarda la contraseña en claro: solo el hash scrypt y su sal.
+
+-- El DNI y el celular no existían en el esquema original.
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS dni VARCHAR(15);
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS celular VARCHAR(30);
+
+-- Registro rápido en puerta: nunca se bloquea el ingreso por falta de correo.
+ALTER TABLE asistentes_tickets ALTER COLUMN email DROP NOT NULL;
+ALTER TABLE asistentes_tickets ALTER COLUMN apellido DROP NOT NULL;
+
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS password_hash TEXT;
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS password_salt TEXT;
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS password_algo VARCHAR(20) DEFAULT 'scrypt';
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS password_updated_at TIMESTAMP WITH TIME ZONE;
+
+-- Restablecimiento por soporte: la contraseña temporal (CF2026) caduca y
+-- obliga a definir una nueva en el primer ingreso.
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN DEFAULT false;
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS temp_password_expires_at TIMESTAMP WITH TIME ZONE;
+
+-- Freno a la fuerza bruta sobre un DNI concreto.
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS failed_login_count INT DEFAULT 0;
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS locked_until TIMESTAMP WITH TIME ZONE;
+
+-- Un DNI identifica a una sola persona dentro de un mismo evento.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_tickets_evento_dni
+  ON asistentes_tickets (evento_id, dni) WHERE dni IS NOT NULL;
+
+-- 8. Sesiones activas (una por dispositivo)
+-- Se almacena el SHA-256 del token, nunca el token: si la base se filtra, las
+-- sesiones vivas no quedan expuestas.
+CREATE TABLE IF NOT EXISTS sesiones (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  ticket_id UUID NOT NULL REFERENCES asistentes_tickets(id) ON DELETE CASCADE,
+  token_hash CHAR(64) UNIQUE NOT NULL,
+  device_id VARCHAR(60),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  last_seen_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  revoked_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX IF NOT EXISTS idx_sesiones_token ON sesiones (token_hash);
+CREATE INDEX IF NOT EXISTS idx_sesiones_ticket ON sesiones (ticket_id);
+
+-- 9. Bitácora de restablecimientos de contraseña
+-- Trazabilidad: quién del staff restableció a quién y cuándo.
+CREATE TABLE IF NOT EXISTS password_resets_log (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  ticket_id UUID REFERENCES asistentes_tickets(id) ON DELETE SET NULL,
+  staff_nombre VARCHAR(100),
+  punto_ayuda VARCHAR(80),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_resets_created ON password_resets_log (created_at DESC);
+
+-- =============================================================================
+-- 10. Consentimiento de los leads de la web (Ley 29733)
+-- =============================================================================
+-- Hay que poder demostrar que el consentimiento fue previo, informado y
+-- expreso. Se guarda la marca, el momento y el texto que la persona aceptó,
+-- porque ese texto puede cambiar con el tiempo.
+ALTER TABLE leads_diagnostico ADD COLUMN IF NOT EXISTS consentimiento BOOLEAN DEFAULT false;
+ALTER TABLE leads_diagnostico ADD COLUMN IF NOT EXISTS consentimiento_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE leads_diagnostico ADD COLUMN IF NOT EXISTS consentimiento_texto TEXT;
+
+-- =============================================================================
+-- 11. Consentimiento de los asistentes (Ley 29733)
+-- =============================================================================
+-- Se valida en el registro pero tambien hay que poder DEMOSTRARLO despues.
+-- Se guarda la marca, el momento, el texto aceptado y por que via se recogio
+-- (la persona en la web, o el staff en el Punto de Ayuda con el documento
+-- delante).
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS consentimiento BOOLEAN DEFAULT false;
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS consentimiento_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS consentimiento_texto TEXT;
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS consentimiento_via VARCHAR(30);
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS acepta_marketing BOOLEAN DEFAULT false;
+
+-- Quien creo el registro: 'web' (la propia persona) o 'staff' (registro rapido
+-- en puerta). Sirve para auditar y para saber que fichas estan incompletas.
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS origen VARCHAR(20) DEFAULT 'web';
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS creado_por VARCHAR(100);

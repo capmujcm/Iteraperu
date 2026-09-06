@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FF5A1F">
+<meta name="robots" content="noindex">
+<title>Country Fest · Mi entrada</title>
+<link rel="icon" href="/assets/itera-mark.svg">
+<link rel="stylesheet" href="/cf/app.css">
+</head>
+<body>
+
+<div class="app">
+  <header class="apphead">
+    <div class="ev">
+      <span class="dot"></span>
+      <b id="evNombre">Country Fest</b>
+    </div>
+    <button class="btn btn-line btn-sm" id="btnSalir" hidden>Salir</button>
+  </header>
+
+  <div class="offbar" id="offbar">Sin conexión con el servidor. Revisa tu señal.</div>
+
+  <div class="vbody">
+
+    <!-- ================= arranque ================= -->
+    <section class="screen active" data-sc="cargando">
+      <div class="loading">Cargando…</div>
+    </section>
+
+    <!-- ================= bienvenida ================= -->
+    <section class="screen" data-sc="landing">
+      <p class="eyebrow">Country Fest</p>
+      <h2 style="font-size:1.55rem;margin:.3rem 0 .5rem;">Tu entrada al evento</h2>
+      <p class="muted tiny" style="margin-bottom:1.2rem;">
+        Regístrate una vez y tu entrada queda en este celular. En la puerta solo tienes que mostrar tu código QR.
+      </p>
+      <div class="stack">
+        <button class="btn btn-event btn-block" style="padding:1rem;" data-go="registro">Crear mi registro</button>
+        <button class="btn btn-line btn-block" style="padding:1rem;" data-go="login">Ya me registré</button>
+      </div>
+      <div class="soft tiny muted" style="margin-top:1.2rem;">
+        <b>¿Qué necesitas?</b> Tu DNI y una contraseña que elijas. Nada más.
+      </div>
+    </section>
+
+    <!-- ================= registro: datos ================= -->
+    <section class="screen" data-sc="registro">
+      <div class="schead"><button class="back" data-go="landing" aria-label="Volver">‹</button><h2>Crear mi registro</h2></div>
+      <div class="stepper"><i class="on"></i><i></i></div>
+      <p class="eyebrow">Paso 1 de 2 · Tus datos</p>
+      <p class="tiny muted" style="margin:.25rem 0 .9rem;">Solo pedimos lo necesario para acreditarte y entregarte tu entrada.</p>
+
+      <form id="formReg" novalidate>
+        <div class="field">
+          <label for="rg-dni">DNI o documento</label>
+          <input type="text" id="rg-dni" inputmode="numeric" autocomplete="username" required placeholder="Sin puntos ni espacios">
+        </div>
+        <div class="g2">
+          <div class="field"><label for="rg-nom">Nombres</label><input type="text" id="rg-nom" autocomplete="given-name" required></div>
+          <div class="field"><label for="rg-ape">Apellidos</label><input type="text" id="rg-ape" autocomplete="family-name" required></div>
+        </div>
+        <div class="field"><label for="rg-cel">Celular (WhatsApp)</label><input type="tel" id="rg-cel" autocomplete="tel" placeholder="9xx xxx xxx"></div>
+        <div class="field"><label for="rg-email">Correo electrónico</label><input type="email" id="rg-email" autocomplete="email"></div>
+
+        <div class="field">
+          <label for="rg-pass">Crea tu contraseña</label>
+          <input type="password" id="rg-pass" autocomplete="new-password" required placeholder="Mínimo 6 caracteres">
+        </div>
+        <div class="field">
+          <label for="rg-pass2">Repite la contraseña</label>
+          <input type="password" id="rg-pass2" autocomplete="new-password" required>
+        </div>
+        <p class="tiny muted" style="margin:-.4rem 0 .8rem;">
+          Con tu DNI y esta contraseña entras desde cualquier celular. Si la olvidas, en el Punto de Ayuda te la restablecen.
+        </p>
+
+        <div id="regError"></div>
+        <button class="btn btn-event btn-block" type="submit" style="margin-top:.9rem;">Continuar</button>
+      </form>
+    </section>
+
+    <!-- ================= registro: consentimiento ================= -->
+    <section class="screen" data-sc="terminos">
+      <div class="schead"><button class="back" data-go="registro" aria-label="Volver">‹</button><h2>Privacidad</h2></div>
+      <div class="stepper"><i class="on"></i><i class="on"></i></div>
+      <p class="eyebrow">Paso 2 de 2 · Autorizaciones</p>
+
+      <div class="note n-info tiny" style="margin:.7rem 0 .9rem;">
+        <b>Quién trata tus datos.</b> Responsable: la empresa organizadora de Country Fest.
+        Encargado del tratamiento: itera.
+        <b>Para qué:</b> acreditarte, emitir tu entrada y controlar el ingreso.
+        <b>Cuánto tiempo:</b> hasta 12 meses después del evento.
+      </div>
+
+      <label class="consent" for="cs-privacidad">
+        <input type="checkbox" id="cs-privacidad">
+        <span class="ct">
+          <b>Acepto el tratamiento de mis datos <span class="req" style="color:var(--bad);">· Obligatorio</span></b>
+          Nombre, documento, celular y correo, para acreditación e ingreso al evento.
+        </span>
+      </label>
+
+      <label class="consent" for="cs-marketing">
+        <input type="checkbox" id="cs-marketing">
+        <span class="ct">
+          <b>Quiero recibir avisos del evento <span class="req" style="color:var(--ink-mut);">· Opcional</span></b>
+          Horarios y novedades por WhatsApp. Puedes desactivarlo cuando quieras.
+        </span>
+      </label>
+
+      <div class="soft tiny muted" style="margin-top:.8rem;">
+        Puedes pedir acceso, rectificación o eliminación de tus datos escribiendo a
+        <a href="mailto:datos@iteraperu.pe">datos@iteraperu.pe</a>. No compartimos tus datos
+        identificables con los puestos participantes.
+      </div>
+
+      <div id="regError2" style="margin-top:.7rem;"></div>
+      <button class="btn btn-event btn-block" id="btnFinishReg" style="margin-top:.9rem;" disabled>Crear mi entrada</button>
+    </section>
+
+    <!-- ================= ingreso ================= -->
+    <section class="screen" data-sc="login">
+      <div class="schead"><button class="back" data-go="landing" aria-label="Volver">‹</button><h2>Ingresar</h2></div>
+      <p class="tiny muted" style="margin-bottom:.9rem;">Entra con tu DNI y la contraseña que creaste. La sesión queda abierta en este celular.</p>
+
+      <form class="card" id="formLogin" novalidate>
+        <div class="field"><label for="lg-dni">Tu DNI</label><input type="text" id="lg-dni" inputmode="numeric" autocomplete="username" required></div>
+        <div class="field"><label for="lg-pass">Contraseña</label><input type="password" id="lg-pass" autocomplete="current-password" required></div>
+        <button class="btn btn-event btn-block" type="submit">Ingresar</button>
+      </form>
+
+      <div id="loginResult" style="margin-top:.8rem;"></div>
+
+      <div class="soft tiny muted" style="margin-top:.9rem;">
+        <b>¿Olvidaste tu contraseña?</b> Acércate a un Punto de Ayuda con tu documento.
+        Te dan una contraseña temporal válida por 30 minutos y al entrar eliges una nueva.
+      </div>
+    </section>
+
+    <!-- ================= cambio de contraseña obligatorio ================= -->
+    <section class="screen" data-sc="cambiar-clave">
+      <div class="schead"><h2>Define tu contraseña</h2></div>
+      <div class="note n-warn tiny" style="margin-bottom:.9rem;">
+        Entraste con la contraseña temporal del Punto de Ayuda. Elige una propia para continuar.
+      </div>
+      <form class="card" id="formClave" novalidate>
+        <div class="field"><label for="ck-actual">Contraseña temporal</label><input type="password" id="ck-actual" autocomplete="current-password" required></div>
+        <div class="field"><label for="ck-nueva">Contraseña nueva</label><input type="password" id="ck-nueva" autocomplete="new-password" required placeholder="Mínimo 6 caracteres"></div>
+        <div class="field"><label for="ck-nueva2">Repite la nueva</label><input type="password" id="ck-nueva2" autocomplete="new-password" required></div>
+        <button class="btn btn-event btn-block" type="submit">Guardar y continuar</button>
+      </form>
+      <div id="clvResult" style="margin-top:.8rem;"></div>
+    </section>
+
+    <!-- ================= mi entrada ================= -->
+    <section class="screen" data-sc="ticket">
+      <div class="schead"><h2>Mi entrada</h2></div>
+      <div id="ticketBox"></div>
+      <div class="card" style="margin-top:.8rem;">
+        <div class="kv"><span>Estado</span><span id="ticketEstado"></span></div>
+        <div class="kv"><span>Código</span><span class="mono" id="ticketCodigo"></span></div>
+      </div>
+      <div class="note n-info tiny" style="margin-top:.8rem;">
+        Guarda esta pantalla o toma una captura. En la puerta el staff escanea tu QR.
+        Si el celular se queda sin batería, con tu DNI te ubican en el Punto de Ayuda.
+      </div>
+    </section>
+
+    <!-- ================= perfil ================= -->
+    <section class="screen" data-sc="perfil">
+      <div class="schead"><h2>Mi perfil</h2></div>
+      <div class="card" id="perfilBox"></div>
+
+      <div class="card" style="margin-top:.7rem;">
+        <h4 style="font-size:.92rem;margin-bottom:.5rem;">Seguridad</h4>
+        <button class="btn btn-line btn-block btn-sm" data-go="cambiar-clave-voluntario">Cambiar mi contraseña</button>
+      </div>
+
+      <div class="card" style="margin-top:.7rem;">
+        <h4 style="font-size:.92rem;margin-bottom:.5rem;">Mis datos</h4>
+        <p class="tiny muted" style="margin-bottom:.6rem;">
+          Puedes pedir acceso, corrección o eliminación de tus datos personales.
+          Se responde en un máximo de 20 días hábiles, según la Ley 29733.
+        </p>
+        <a class="btn btn-line btn-block btn-sm" href="mailto:datos@iteraperu.pe?subject=Solicitud%20sobre%20mis%20datos%20-%20Country%20Fest">Escribir a datos@iteraperu.pe</a>
+      </div>
+    </section>
+
+    <!-- ================= cambio de contraseña voluntario ================= -->
+    <section class="screen" data-sc="cambiar-clave-voluntario">
+      <div class="schead"><button class="back" data-go="perfil" aria-label="Volver">‹</button><h2>Cambiar contraseña</h2></div>
+      <form class="card" id="formClave2" novalidate>
+        <div class="field"><label for="cv-actual">Contraseña actual</label><input type="password" id="cv-actual" autocomplete="current-password" required></div>
+        <div class="field"><label for="cv-nueva">Contraseña nueva</label><input type="password" id="cv-nueva" autocomplete="new-password" required placeholder="Mínimo 6 caracteres"></div>
+        <div class="field"><label for="cv-nueva2">Repite la nueva</label><input type="password" id="cv-nueva2" autocomplete="new-password" required></div>
+        <button class="btn btn-event btn-block" type="submit">Guardar</button>
+      </form>
+      <p class="tiny muted" style="margin-top:.6rem;">Al cambiarla se cierran tus sesiones en otros equipos.</p>
+      <div id="clv2Result" style="margin-top:.8rem;"></div>
+    </section>
+
+    <!-- ================= ayuda ================= -->
+    <section class="screen" data-sc="ayuda">
+      <div class="schead"><h2>Ayuda</h2></div>
+      <div class="stack">
+        <div class="soft">
+          <b style="font-size:.87rem;">No puedo mostrar mi QR</b>
+          <p class="tiny muted" style="margin-top:.2rem;">Acércate a un Punto de Ayuda: te ubican con tu DNI y te dejan pasar.</p>
+        </div>
+        <div class="soft">
+          <b style="font-size:.87rem;">Cambié de celular</b>
+          <p class="tiny muted" style="margin-top:.2rem;">Entra con tu DNI y tu contraseña desde el equipo nuevo. Tu entrada aparece ahí.</p>
+        </div>
+        <div class="soft">
+          <b style="font-size:.87rem;">Olvidé mi contraseña</b>
+          <p class="tiny muted" style="margin-top:.2rem;">Ve a un Punto de Ayuda con tu documento. Te dan una temporal válida 30 minutos y eliges una nueva al entrar.</p>
+        </div>
+        <div class="soft">
+          <b style="font-size:.87rem;">Me equivoqué en mis datos</b>
+          <p class="tiny muted" style="margin-top:.2rem;">En el Punto de Ayuda los corrigen, o escribe a datos@iteraperu.pe.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <nav class="vnav" id="vnav" hidden>
+    <button data-go="ticket"><span class="i">🎟️</span>Mi entrada</button>
+    <button data-go="perfil"><span class="i">👤</span>Perfil</button>
+    <button data-go="ayuda"><span class="i">💬</span>Ayuda</button>
+  </nav>
+</div>
+
+<script src="/cf/app.js"></script>
+<script>
+/* =============================================================================
+   Country Fest - app del asistente
+   ============================================================================= */
+(function () {
+  'use strict';
+
+  let persona = null;
+
+  // Datos del registro en curso. La contrasena vive SOLO aqui, en memoria, y se
+  // descarta en cuanto el servidor responde. Nunca toca localStorage.
+  let borrador = null;
+
+  /* --------------------------------------------------------------------- */
+  /* utilidades de pantalla                                                */
+  /* --------------------------------------------------------------------- */
+  function aviso(caja, tipo, mensaje) {
+    const c = el(caja);
+    if (c) c.innerHTML = '<div class="flash ' + tipo + '">' + esc(mensaje) + '</div>';
+  }
+  function limpiar(caja) {
+    const c = el(caja);
+    if (c) c.innerHTML = '';
+  }
+
+  // Bloquea el boton mientras hay una peticion en curso, para que un doble
+  // toque no cree dos registros.
+  async function conBoton(btn, textoOcupado, fn) {
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = textoOcupado;
+    try {
+      return await fn();
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  }
+
+  function mostrarNav(visible) {
+    const nav = el('vnav');
+    if (nav) nav.hidden = !visible;
+    const salir = el('btnSalir');
+    if (salir) salir.hidden = !visible;
+  }
+
+  /* --------------------------------------------------------------------- */
+  /* sesion                                                                */
+  /* --------------------------------------------------------------------- */
+  function establecerPersona(p) {
+    persona = p;
+    mostrarNav(true);
+    pintarTicket();
+    pintarPerfil();
+  }
+
+  function cerrarSesionLocal() {
+    persona = null;
+    API.borrarSesion();
+    mostrarNav(false);
+  }
+
+  function pintarTicket() {
+    if (!persona) return;
+
+    const caja = el('ticketBox');
+    caja.innerHTML =
+      '<div class="ticket">' +
+        '<span class="ttag">' + esc(String(persona.tipo_ticket || 'general').toUpperCase()) + '</span>' +
+        '<div class="qrbox"><canvas id="qrCanvas"></canvas></div>' +
+        '<div class="tname">' + NM(persona) + '</div>' +
+        '<div class="tcode">' + esc(persona.codigo_ticket || '') + '</div>' +
+        '<div class="tsub">Country Fest</div>' +
+      '</div>';
+
+    // El QR lleva el token aleatorio del servidor, no el DNI: quien lo fotografie
+    // no obtiene ningun dato personal, y el token no se puede adivinar.
+    drawQR('CF|' + (persona.qr_token || ''), el('qrCanvas'), 5);
+
+    const ingresado = persona.estado === 'checkin';
+    el('ticketEstado').innerHTML = ingresado
+      ? '<span class="pill p-good">Ingreso validado</span>'
+      : '<span class="pill p-neutral">Pendiente de ingreso</span>';
+    el('ticketCodigo').textContent = persona.codigo_ticket || '';
+  }
+
+  function pintarPerfil() {
+    if (!persona) return;
+    el('perfilBox').innerHTML =
+      '<div class="between" style="margin-bottom:.6rem;"><b>' + NM(persona) + '</b>' +
+        '<span class="pill p-blue">' + esc(String(persona.tipo_ticket || 'general')) + '</span></div>' +
+      '<div class="kv"><span>Documento</span><span class="mono">' + esc(persona.dni || '') + '</span></div>' +
+      '<div class="kv"><span>Celular</span><span>' + esc(persona.celular || '—') + '</span></div>' +
+      '<div class="kv"><span>Correo</span><span style="word-break:break-all;">' + esc(persona.email || '—') + '</span></div>' +
+      '<div class="kv"><span>Entrada</span><span class="mono">' + esc(persona.codigo_ticket || '') + '</span></div>';
+  }
+
+  /* --------------------------------------------------------------------- */
+  /* registro                                                              */
+  /* --------------------------------------------------------------------- */
+  el('formReg').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    limpiar('regError');
+
+    const dni = el('rg-dni').value.trim();
+    const nombre = el('rg-nom').value.trim();
+    const pass = el('rg-pass').value;
+    const pass2 = el('rg-pass2').value;
+
+    if (!dni) return aviso('regError', 'bad', 'Escribe tu DNI o documento.');
+    if (!nombre) return aviso('regError', 'bad', 'Escribe tus nombres.');
+    if (pass.length < 6) return aviso('regError', 'bad', 'La contraseña debe tener al menos 6 caracteres.');
+    if (pass !== pass2) return aviso('regError', 'bad', 'Las dos contraseñas no coinciden.');
+
+    borrador = {
+      dni: dni,
+      nombre: nombre,
+      apellido: el('rg-ape').value.trim(),
+      celular: el('rg-cel').value.trim(),
+      email: el('rg-email').value.trim(),
+      password: pass
+    };
+    go('terminos');
+  });
+
+  // El boton de crear solo se habilita con el consentimiento obligatorio marcado.
+  el('cs-privacidad').addEventListener('change', function () {
+    el('btnFinishReg').disabled = !this.checked;
+  });
+
+  el('btnFinishReg').addEventListener('click', async function () {
+    if (!borrador) { go('registro'); return; }
+    if (!el('cs-privacidad').checked) return;
+    limpiar('regError2');
+
+    await conBoton(this, 'Creando tu entrada…', async function () {
+      try {
+        const datos = await API.registrar({
+          dni: borrador.dni,
+          nombre: borrador.nombre,
+          apellido: borrador.apellido,
+          celular: borrador.celular,
+          email: borrador.email,
+          password: borrador.password,
+          acepta_privacidad: true,
+          acepta_marketing: el('cs-marketing').checked,
+          device_id: deviceId()
+        });
+
+        API.guardarSesion(datos.token);
+        borrador = null;                       // se descarta la contrasena
+        el('formReg').reset();
+        establecerPersona(datos.attendee);
+        go('ticket');
+      } catch (e) {
+        if (e.datos && e.datos.ya_registrado) {
+          borrador = null;
+          el('lg-dni').value = el('rg-dni').value.trim();
+          go('login');
+          aviso('loginResult', 'warn', 'Ese documento ya está registrado. Ingresa con tu contraseña.');
+          return;
+        }
+        aviso('regError2', 'bad', e.message);
+      }
+    });
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* ingreso                                                               */
+  /* --------------------------------------------------------------------- */
+  el('formLogin').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    limpiar('loginResult');
+    const boton = this.querySelector('button[type="submit"]');
+
+    await conBoton(boton, 'Ingresando…', async function () {
+      try {
+        const datos = await API.ingresar({
+          dni: el('lg-dni').value.trim(),
+          password: el('lg-pass').value,
+          device_id: deviceId()
+        });
+
+        API.guardarSesion(datos.token);
+        el('lg-pass').value = '';
+        establecerPersona(datos.attendee);
+
+        if (datos.must_change_password) { go('cambiar-clave'); return; }
+        go('ticket');
+      } catch (e) {
+        aviso('loginResult', 'bad', e.message);
+      }
+    });
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* cambio de contrasena                                                  */
+  /* --------------------------------------------------------------------- */
+  // Un solo manejador para las dos pantallas: la obligatoria tras el
+  // restablecimiento y la voluntaria desde el perfil.
+  function conectarCambioClave(formId, ids, cajaResultado, alTerminar) {
+    el(formId).addEventListener('submit', async function (ev) {
+      ev.preventDefault();
+      limpiar(cajaResultado);
+
+      const actual = el(ids.actual).value;
+      const nueva = el(ids.nueva).value;
+      const nueva2 = el(ids.nueva2).value;
+
+      if (nueva.length < 6) return aviso(cajaResultado, 'bad', 'La contraseña debe tener al menos 6 caracteres.');
+      if (nueva !== nueva2) return aviso(cajaResultado, 'bad', 'Las dos contraseñas no coinciden.');
+
+      const boton = this.querySelector('button[type="submit"]');
+      await conBoton(boton, 'Guardando…', async function () {
+        try {
+          const datos = await API.cambiarClave({ password_actual: actual, password_nueva: nueva });
+          [ids.actual, ids.nueva, ids.nueva2].forEach(function (i) { el(i).value = ''; });
+          establecerPersona(datos.attendee);
+          aviso(cajaResultado, 'good', '✓ Contraseña actualizada');
+          setTimeout(alTerminar, 700);
+        } catch (e) {
+          aviso(cajaResultado, 'bad', e.message);
+        }
+      });
+    });
+  }
+
+  conectarCambioClave('formClave',
+    { actual: 'ck-actual', nueva: 'ck-nueva', nueva2: 'ck-nueva2' },
+    'clvResult', function () { go('ticket'); });
+
+  conectarCambioClave('formClave2',
+    { actual: 'cv-actual', nueva: 'cv-nueva', nueva2: 'cv-nueva2' },
+    'clv2Result', function () { go('perfil'); });
+
+  /* --------------------------------------------------------------------- */
+  /* salir                                                                 */
+  /* --------------------------------------------------------------------- */
+  el('btnSalir').addEventListener('click', async function () {
+    if (!confirm('¿Cerrar tu sesión en este celular?\n\nPara volver a entrar necesitarás tu DNI y tu contraseña.')) return;
+    try { await API.salir(); } catch (e) { /* aunque falle, se limpia el equipo */ }
+    cerrarSesionLocal();
+    go('landing');
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* nav inferior                                                          */
+  /* --------------------------------------------------------------------- */
+  document.addEventListener('cf:pantalla', function (ev) {
+    const p = ev.detail.pantalla;
+    document.querySelectorAll('#vnav button').forEach(function (b) {
+      b.classList.toggle('active', b.dataset.go === p);
+    });
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* arranque                                                              */
+  /* --------------------------------------------------------------------- */
+  (async function arrancar() {
+    // Si el navegador tiene el almacenamiento bloqueado, la entrada seguira
+    // funcionando durante la visita pero no sobrevivira al cierre de la
+    // pestana. Mejor decirlo que dejar que se pierda sin explicacion.
+    if (!API.almacenamientoPersistente()) {
+      const barra = el('offbar');
+      barra.textContent = 'Tu navegador bloquea el almacenamiento: si cierras esta pestaña tendrás que ingresar otra vez con tu DNI y contraseña.';
+      barra.classList.add('on');
+    }
+
+    // Nombre del evento. Si falla, se queda el del titulo.
+    API.evento()
+      .then(function (r) { if (r.event && r.event.nombre) el('evNombre').textContent = r.event.nombre; })
+      .catch(function () {});
+
+    if (!API.tieneSesion()) { go('landing'); return; }
+
+    try {
+      const datos = await API.yo();
+      establecerPersona(datos.attendee);
+      go('ticket');
+    } catch (e) {
+      // 403 con must_change_password: quedo pendiente el cambio tras un
+      // restablecimiento en el Punto de Ayuda.
+      if (e.status === 403 && e.datos && e.datos.must_change_password) {
+        mostrarNav(false);
+        go('cambiar-clave');
+        return;
+      }
+      // Sin red no se cierra la sesion: la persona puede estar en un sotano y
+      // borrarle el acceso ahi seria lo peor que podria pasarle.
+      if (e.sinRed) {
+        go('login');
+        aviso('loginResult', 'warn', 'No hay conexión. Vuelve a intentarlo cuando tengas señal.');
+        return;
+      }
+      cerrarSesionLocal();
+      go('landing');
+    }
+  })();
+})();
+</script>
+</body>
+</html>

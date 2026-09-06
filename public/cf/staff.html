@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#315CFF">
+<meta name="robots" content="noindex">
+<title>Country Fest · Punto de Ayuda</title>
+<link rel="icon" href="/assets/itera-mark.svg">
+<link rel="stylesheet" href="/cf/app.css">
+<style>
+  .apphead .dot{background:var(--accent);}
+  .staffbar{background:var(--ink);color:#fff;font-size:.7rem;font-weight:700;
+    padding:.35rem 1.1rem;display:flex;justify-content:space-between;gap:.6rem;}
+  .staffbar span{opacity:.7;font-weight:600;}
+  .bigbtn{padding:1.05rem;font-size:.95rem;}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="apphead">
+    <div class="ev"><span class="dot"></span><b id="evNombre">Country Fest</b></div>
+    <span class="pill p-blue">Punto de Ayuda</span>
+  </header>
+
+  <div class="staffbar">
+    <b id="staffNombreBar">Staff sin identificar</b>
+    <span id="staffContador">—</span>
+  </div>
+
+  <div class="offbar" id="offbar">Sin conexión con el servidor. No registres ingresos hasta que vuelva.</div>
+
+  <div class="vbody">
+
+    <!-- ================= sin token ================= -->
+    <section class="screen active" data-sc="sin-token">
+      <div class="schead"><h2>Acceso de staff</h2></div>
+      <div class="note n-warn tiny" style="margin-bottom:.9rem;">
+        Este equipo no tiene el token de staff. Pídele al organizador el enlace de acceso
+        y ábrelo en este mismo navegador.
+      </div>
+      <div class="card">
+        <p class="tiny muted" style="margin-bottom:.6rem;">
+          El enlace tiene la forma <span class="mono">/staff/country-fest?staff=…</span>
+          El token se guarda en este equipo y desaparece de la barra de direcciones.
+        </p>
+        <div class="field">
+          <label for="tk-manual">O pega el token aquí</label>
+          <input type="password" id="tk-manual" autocomplete="off">
+        </div>
+        <button class="btn btn-accent btn-block" id="btnGuardarToken">Guardar token</button>
+      </div>
+      <div id="tokenResult" style="margin-top:.8rem;"></div>
+    </section>
+
+    <!-- ================= identificarse ================= -->
+    <section class="screen" data-sc="quien">
+      <div class="schead"><h2>¿Quién está en este puesto?</h2></div>
+      <p class="tiny muted" style="margin-bottom:.9rem;">
+        Tu nombre queda registrado en cada ingreso que valides y en cada contraseña
+        que restablezcas. Es la trazabilidad del evento.
+      </p>
+      <form class="card" id="formQuien" novalidate>
+        <div class="field"><label for="q-nombre">Tu nombre</label><input type="text" id="q-nombre" maxlength="100" required autocomplete="name"></div>
+        <div class="field"><label for="q-puerta">Puesto o puerta</label><input type="text" id="q-puerta" maxlength="80" placeholder="Ej. Puerta Principal" autocomplete="off"></div>
+        <button class="btn btn-accent btn-block" type="submit">Empezar</button>
+      </form>
+      <div id="quienResult" style="margin-top:.8rem;"></div>
+    </section>
+
+    <!-- ================= menú ================= -->
+    <section class="screen" data-sc="home">
+      <div class="schead"><h2>Punto de Ayuda</h2></div>
+      <p class="tiny muted" style="margin-bottom:.9rem;">Una acción por pantalla. Todo en menos de veinte segundos.</p>
+      <div class="stack">
+        <button class="btn btn-accent btn-block bigbtn" data-go="validar">✅ Validar ingreso</button>
+        <button class="btn btn-line btn-block bigbtn" data-go="rapido">➕ Registro rápido</button>
+        <button class="btn btn-line btn-block bigbtn" data-go="buscar">🔎 Buscar por DNI</button>
+        <button class="btn btn-line btn-block bigbtn" data-go="reset">🔑 Olvidó su contraseña</button>
+      </div>
+      <div class="soft tiny muted" style="margin-top:.9rem;">
+        <b>Regla operativa:</b> nunca se bloquea el ingreso por un registro incompleto.
+        Se crea el mínimo, se deja entrar, y la persona completa después.
+      </div>
+      <button class="btn btn-ghost btn-block btn-sm" id="btnCambiarStaff" style="margin-top:.6rem;">Cambiar de persona en el puesto</button>
+    </section>
+
+    <!-- ================= validar ingreso ================= -->
+    <section class="screen" data-sc="validar">
+      <div class="schead"><button class="back" data-go="home" aria-label="Volver">‹</button><h2>Validar ingreso</h2></div>
+      <div class="cam" id="camValidar"></div>
+      <p class="tiny muted" style="margin:.6rem 0 .5rem;">Apunta al QR de la entrada. Si no lee, escribe el código impreso o el DNI.</p>
+      <div class="row">
+        <input type="search" id="val-manual" placeholder="Código o DNI" inputmode="text" autocomplete="off" style="flex:1;">
+        <button class="btn btn-accent" id="btnValManual">Validar</button>
+      </div>
+      <div id="valResult" style="margin-top:.8rem;"></div>
+    </section>
+
+    <!-- ================= registro rápido ================= -->
+    <section class="screen" data-sc="rapido">
+      <div class="schead"><button class="back" data-go="home" aria-label="Volver">‹</button><h2>Registro rápido</h2></div>
+      <p class="tiny muted" style="margin-bottom:.8rem;">Para quien llegó sin registrarse. Pide el documento físico.</p>
+      <form id="formRapido" novalidate>
+        <div class="field"><label for="rp-dni">DNI o documento</label><input type="text" id="rp-dni" inputmode="numeric" required autocomplete="off"></div>
+        <div class="g2">
+          <div class="field"><label for="rp-nom">Nombres</label><input type="text" id="rp-nom" required autocomplete="off"></div>
+          <div class="field"><label for="rp-ape">Apellidos</label><input type="text" id="rp-ape" autocomplete="off"></div>
+        </div>
+        <div class="field"><label for="rp-cel">Celular (opcional)</label><input type="tel" id="rp-cel" autocomplete="off"></div>
+
+        <label class="consent" for="rp-consent">
+          <input type="checkbox" id="rp-consent">
+          <span class="ct">
+            <b>Verifiqué el documento y expliqué el uso de los datos</b>
+            Le dije para qué se usan (acreditación e ingreso), quién es el responsable y que puede pedir su eliminación. Queda registrado con mi nombre.
+          </span>
+        </label>
+
+        <label class="consent" for="rp-validar" style="margin-top:.5rem;">
+          <input type="checkbox" id="rp-validar" checked>
+          <span class="ct"><b>Validar su ingreso ahora</b>Está en la puerta, entra en el mismo gesto.</span>
+        </label>
+
+        <button class="btn btn-accent btn-block" type="submit" style="margin-top:.9rem;">Crear y dejar pasar</button>
+      </form>
+      <div id="rapResult" style="margin-top:.8rem;"></div>
+    </section>
+
+    <!-- ================= buscar ================= -->
+    <section class="screen" data-sc="buscar">
+      <div class="schead"><button class="back" data-go="home" aria-label="Volver">‹</button><h2>Buscar por DNI</h2></div>
+      <form class="row" id="formBuscar" novalidate>
+        <input type="search" id="bs-dni" placeholder="DNI de la persona" inputmode="numeric" autocomplete="off" style="flex:1;">
+        <button class="btn btn-accent" type="submit">Buscar</button>
+      </form>
+      <div id="bsResult" style="margin-top:.8rem;"></div>
+    </section>
+
+    <!-- ================= restablecer contraseña ================= -->
+    <section class="screen" data-sc="reset">
+      <div class="schead"><button class="back" data-go="home" aria-label="Volver">‹</button><h2>Restablecer contraseña</h2></div>
+      <div class="note n-warn tiny" style="margin-bottom:.8rem;">
+        <b>Pide el documento físico y verifícalo.</b> Esta acción cierra todas las sesiones
+        de la persona y le da acceso a su entrada. Queda registrada con tu nombre.
+      </div>
+      <form id="formReset" novalidate>
+        <div class="field"><label for="rs-dni">DNI de la persona</label><input type="text" id="rs-dni" inputmode="numeric" required autocomplete="off"></div>
+        <label class="consent" for="rs-consent">
+          <input type="checkbox" id="rs-consent">
+          <span class="ct"><b>Verifiqué su documento físico</b>La foto y el número coinciden con quien tengo delante.</span>
+        </label>
+        <button class="btn btn-accent btn-block" type="submit" style="margin-top:.9rem;">Restablecer</button>
+      </form>
+      <div id="rsResult" style="margin-top:.8rem;"></div>
+    </section>
+
+  </div>
+</div>
+
+<script src="/cf/app.js"></script>
+<script>
+/* =============================================================================
+   Country Fest - Punto de Ayuda (staff)
+   ============================================================================= */
+(function () {
+  'use strict';
+
+  const CLAVE_STAFF_NOMBRE = 'cf_staff_nombre';
+  const CLAVE_STAFF_PUERTA = 'cf_staff_puerta';
+
+  let staffNombre = '';
+  let staffPuerta = '';
+  let validadosEnEsteTurno = 0;
+
+  const guardar = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+  const leer = k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
+
+  function aviso(caja, tipo, mensaje) {
+    const c = el(caja);
+    if (c) c.innerHTML = '<div class="flash ' + tipo + '">' + esc(mensaje) + '</div>';
+  }
+  function limpiar(caja) { const c = el(caja); if (c) c.innerHTML = ''; }
+
+  async function conBoton(btn, textoOcupado, fn) {
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = textoOcupado;
+    try { return await fn(); } finally { btn.disabled = false; btn.textContent = original; }
+  }
+
+  function pintarBarra() {
+    el('staffNombreBar').textContent = staffNombre
+      ? (staffNombre + (staffPuerta ? ' · ' + staffPuerta : ''))
+      : 'Staff sin identificar';
+    el('staffContador').textContent = validadosEnEsteTurno === 1
+      ? '1 ingreso validado'
+      : validadosEnEsteTurno + ' ingresos validados';
+  }
+
+  /* --------------------------------------------------------------------- */
+  /* token de staff                                                        */
+  /* --------------------------------------------------------------------- */
+  el('btnGuardarToken').addEventListener('click', function () {
+    const t = el('tk-manual').value.trim();
+    if (!t) return aviso('tokenResult', 'bad', 'Pega el token para continuar.');
+    API.guardarTokenStaff(t);
+    el('tk-manual').value = '';
+    arrancar();
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* identificación del staff                                              */
+  /* --------------------------------------------------------------------- */
+  el('formQuien').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    const n = el('q-nombre').value.trim();
+    if (!n) return aviso('quienResult', 'bad', 'Escribe tu nombre.');
+    staffNombre = n;
+    staffPuerta = el('q-puerta').value.trim();
+    guardar(CLAVE_STAFF_NOMBRE, staffNombre);
+    guardar(CLAVE_STAFF_PUERTA, staffPuerta);
+    pintarBarra();
+    go('home');
+  });
+
+  el('btnCambiarStaff').addEventListener('click', function () {
+    el('q-nombre').value = staffNombre;
+    el('q-puerta').value = staffPuerta;
+    go('quien');
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* validar ingreso                                                       */
+  /* --------------------------------------------------------------------- */
+  let validando = false;
+
+  // Lo que llega puede ser el QR completo ("CF|<token>"), el token suelto, un
+  // código de entrada o un DNI. Se resuelve aquí para que el staff no tenga que
+  // saber la diferencia.
+  async function validar(valor) {
+    const bruto = String(valor || '').trim();
+    if (!bruto || validando) return;
+    validando = true;
+    limpiar('valResult');
+
+    try {
+      let peticion = { puerta: staffPuerta || 'Puerta Principal', staff_nombre: staffNombre };
+
+      if (bruto.indexOf('CF|') === 0) {
+        peticion.token = bruto.slice(3);
+      } else if (/^\d{8}$/.test(bruto)) {
+        // Es un DNI: se traduce a su código mediante el buscador de soporte,
+        // porque el endpoint de check-in no acepta documentos.
+        const r = await API.buscarPorDni(bruto);
+        peticion.code = r.attendee.codigo_ticket;
+      } else if (/^CF-\d+$/i.test(bruto) || /^DEMO-\d+$/i.test(bruto)) {
+        peticion.code = bruto;
+      } else {
+        peticion.token = bruto;
+      }
+
+      const datos = await API.checkin(peticion);
+      const a = datos.attendee;
+
+      if (!datos.isDuplicate) validadosEnEsteTurno++;
+      pintarBarra();
+
+      el('valResult').innerHTML =
+        '<div class="flash ' + (datos.isDuplicate ? 'warn' : 'good') + '">' +
+          (datos.isDuplicate ? '⚠ Ya había ingresado' : '✓ Acceso concedido') +
+        '</div>' +
+        '<div class="card" style="margin-top:.6rem;">' +
+          '<div class="between" style="margin-bottom:.4rem;"><b style="font-size:1.05rem;">' + NM(a) + '</b>' +
+            '<span class="pill p-blue">' + esc(String(a.tipo_ticket || 'general').toUpperCase()) + '</span></div>' +
+          '<div class="kv"><span>Entrada</span><span class="mono">' + esc(a.codigo_ticket || '') + '</span></div>' +
+          '<div class="kv"><span>Hora</span><span class="mono">' + esc(fT(Date.now())) + '</span></div>' +
+        '</div>' +
+        (datos.isDuplicate
+          ? '<div class="soft tiny muted" style="margin-top:.6rem;">Esta entrada ya se había usado. Verifica el documento antes de dejar pasar.</div>'
+          : '');
+
+      el('val-manual').value = '';
+    } catch (e) {
+      if (e.status === 401 || e.status === 503) {
+        aviso('valResult', 'bad', 'Token de staff no válido. Pide el enlace de acceso al organizador.');
+      } else if (e.status === 404) {
+        aviso('valResult', 'bad', 'Entrada no encontrada. Usa "Buscar por DNI" o haz un registro rápido.');
+      } else {
+        aviso('valResult', 'bad', e.message);
+      }
+    } finally {
+      // Pausa antes de aceptar otra lectura: sin esto la cámara reenvía el
+      // mismo QR diez veces por segundo mientras la persona guarda el celular.
+      setTimeout(function () { validando = false; }, 1800);
+    }
+  }
+
+  el('btnValManual').addEventListener('click', function () { validar(el('val-manual').value); });
+  el('val-manual').addEventListener('keydown', function (ev) {
+    if (ev.key === 'Enter') { ev.preventDefault(); validar(this.value); }
+  });
+
+  // La cámara se enciende al entrar a la pantalla y se apaga al salir (de eso
+  // se encarga go() en app.js).
+  document.addEventListener('cf:pantalla', function (ev) {
+    if (ev.detail.pantalla === 'validar') startCam('camValidar', validar);
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* registro rápido                                                       */
+  /* --------------------------------------------------------------------- */
+  el('formRapido').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    limpiar('rapResult');
+
+    const dni = el('rp-dni').value.trim();
+    const nombre = el('rp-nom').value.trim();
+
+    if (!dni) return aviso('rapResult', 'bad', 'Escribe el documento.');
+    if (!nombre) return aviso('rapResult', 'bad', 'Escribe al menos el nombre.');
+    if (!el('rp-consent').checked) {
+      return aviso('rapResult', 'bad', 'Confirma que verificaste el documento y explicaste el uso de los datos.');
+    }
+
+    const boton = this.querySelector('button[type="submit"]');
+    await conBoton(boton, 'Creando…', async function () {
+      try {
+        const datos = await API.pedir('/api/soporte/registro-rapido', {
+          metodo: 'POST',
+          auth: 'staff',
+          cuerpo: {
+            dni: dni,
+            nombre: nombre,
+            apellido: el('rp-ape').value.trim(),
+            celular: el('rp-cel').value.trim(),
+            consentimiento_verificado: true,
+            validar_ingreso: el('rp-validar').checked,
+            staff_nombre: staffNombre,
+            puerta: staffPuerta || 'Punto de Ayuda'
+          }
+        });
+
+        const a = datos.attendee;
+        if (el('rp-validar').checked) { validadosEnEsteTurno++; pintarBarra(); }
+
+        el('rapResult').innerHTML =
+          '<div class="flash good">✓ Registro creado' + (el('rp-validar').checked ? ' · ingreso validado' : '') + '</div>' +
+          '<div class="card" style="margin-top:.6rem;">' +
+            '<div class="between" style="margin-bottom:.4rem;"><b>' + NM(a) + '</b>' +
+              '<span class="pill p-good">' + esc(a.codigo_ticket || '') + '</span></div>' +
+            '<div class="kv"><span>Contraseña temporal</span>' +
+              '<span class="mono" style="font-size:1.1rem;font-weight:700;">' + esc(datos.password_temporal || '') + '</span></div>' +
+            '<div class="kv"><span>Válida por</span><span>' + esc(String(datos.minutos_validez || 30)) + ' minutos</span></div>' +
+          '</div>' +
+          '<div class="note n-info tiny" style="margin-top:.6rem;">' +
+            'Dile que entre a <b>iteraperu.pe/e/country-fest</b> con su DNI y esta contraseña ' +
+            'para tener su entrada en el celular. Al entrar elegirá una propia.' +
+          '</div>';
+
+        el('formRapido').reset();
+        el('rp-validar').checked = true;
+      } catch (e) {
+        if (e.datos && e.datos.ya_registrado) {
+          aviso('rapResult', 'warn', 'Ese documento ya está registrado. Usa "Validar ingreso" o "Buscar por DNI".');
+          return;
+        }
+        aviso('rapResult', 'bad', e.message);
+      }
+    });
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* buscar por DNI                                                        */
+  /* --------------------------------------------------------------------- */
+  el('formBuscar').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    limpiar('bsResult');
+    const dni = el('bs-dni').value.trim();
+    if (!dni) return;
+
+    const boton = this.querySelector('button[type="submit"]');
+    await conBoton(boton, '…', async function () {
+      try {
+        const r = await API.buscarPorDni(dni);
+        const a = r.attendee;
+        const ingresado = a.estado === 'checkin';
+
+        el('bsResult').innerHTML =
+          '<div class="card">' +
+            '<div class="between" style="margin-bottom:.5rem;"><b style="font-size:1.02rem;">' + NM(a) + '</b>' +
+              (ingresado ? '<span class="pill p-good">Ingresó</span>' : '<span class="pill p-neutral">Sin ingresar</span>') +
+            '</div>' +
+            '<div class="kv"><span>Documento</span><span class="mono">' + esc(a.dni || '') + '</span></div>' +
+            '<div class="kv"><span>Entrada</span><span class="mono">' + esc(a.codigo_ticket || '') + '</span></div>' +
+            '<div class="kv"><span>Celular</span><span>' + esc(a.celular || '—') + '</span></div>' +
+            (a.ultimo_checkin
+              ? '<div class="kv"><span>Último ingreso</span><span class="mono">' + esc(fD(a.ultimo_checkin) + ' ' + fT(a.ultimo_checkin)) + '</span></div>'
+              : '') +
+            (a.must_change_password
+              ? '<div class="note n-warn tiny" style="margin-top:.6rem;">Tiene un restablecimiento pendiente: debe definir su contraseña al entrar.</div>'
+              : '') +
+            '<button class="btn btn-accent btn-block" id="bsValidar" style="margin-top:.7rem;">' +
+              (ingresado ? 'Registrar otro ingreso' : 'Validar su ingreso') +
+            '</button>' +
+          '</div>';
+
+        el('bsValidar').addEventListener('click', function () {
+          go('validar');
+          validar(a.codigo_ticket);
+        });
+      } catch (e) {
+        if (e.status === 404) {
+          el('bsResult').innerHTML =
+            '<div class="flash warn">No hay ningún registro con ese documento.</div>' +
+            '<button class="btn btn-accent btn-block" style="margin-top:.6rem;" data-go="rapido">Hacer registro rápido</button>';
+          return;
+        }
+        aviso('bsResult', 'bad', e.message);
+      }
+    });
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* restablecer contraseña                                                */
+  /* --------------------------------------------------------------------- */
+  el('formReset').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    limpiar('rsResult');
+
+    const dni = el('rs-dni').value.trim();
+    if (!dni) return aviso('rsResult', 'bad', 'Escribe el DNI de la persona.');
+    if (!el('rs-consent').checked) return aviso('rsResult', 'bad', 'Confirma que verificaste el documento físico.');
+
+    const boton = this.querySelector('button[type="submit"]');
+    await conBoton(boton, 'Restableciendo…', async function () {
+      try {
+        const datos = await API.resetClave({
+          dni: dni,
+          staff_nombre: staffNombre,
+          punto_ayuda: staffPuerta || 'Punto de Ayuda'
+        });
+
+        // Se muestra el nombre para que el staff confirme en voz alta que
+        // atiende a la persona correcta. Nunca el correo ni el celular.
+        el('rsResult').innerHTML =
+          '<div class="flash good">✓ Restablecida para ' + NM(datos.persona) + '</div>' +
+          '<div class="card" style="margin-top:.6rem;">' +
+            '<div class="kv"><span>Contraseña temporal</span>' +
+              '<span class="mono" style="font-size:1.25rem;font-weight:700;">' + esc(datos.password_temporal || '') + '</span></div>' +
+            '<div class="kv"><span>Válida por</span><span>' + esc(String(datos.minutos_validez || 30)) + ' minutos</span></div>' +
+          '</div>' +
+          '<div class="note n-warn tiny" style="margin-top:.6rem;">' +
+            'Dile que ingrese con su DNI y esta contraseña. Al entrar tendrá que elegir una propia. ' +
+            'Pasados los ' + esc(String(datos.minutos_validez || 30)) + ' minutos deja de funcionar y hay que repetir el trámite.' +
+          '</div>';
+
+        el('formReset').reset();
+      } catch (e) {
+        aviso('rsResult', 'bad', e.message);
+      }
+    });
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* arranque                                                              */
+  /* --------------------------------------------------------------------- */
+  function arrancar() {
+    // En un equipo de staff con almacenamiento bloqueado, el token y el nombre
+    // se pierden al cerrar la pestana. Se avisa para que nadie se quede
+    // atascado sin saber por que.
+    if (!API.almacenamientoPersistente()) {
+      const barra = el('offbar');
+      barra.textContent = 'Este navegador bloquea el almacenamiento: al cerrar la pestaña habrá que volver a cargar el token de staff.';
+      barra.classList.add('on');
+    }
+
+    API.evento()
+      .then(function (r) { if (r.event && r.event.nombre) el('evNombre').textContent = r.event.nombre; })
+      .catch(function () {});
+
+    if (!API.tieneTokenStaff()) { go('sin-token'); return; }
+
+    staffNombre = leer(CLAVE_STAFF_NOMBRE);
+    staffPuerta = leer(CLAVE_STAFF_PUERTA);
+    pintarBarra();
+
+    if (!staffNombre) { go('quien'); return; }
+    go('home');
+  }
+
+  arrancar();
+})();
+</script>
+</body>
+</html>

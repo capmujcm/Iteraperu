@@ -422,7 +422,17 @@
           </div>
           <div class="field"><label>Celular (WhatsApp)</label><input type="tel" id="rg-cel" required placeholder="9xx xxx xxx"></div>
           <div class="field"><label>Correo electrónico</label><input type="email" id="rg-email" required></div>
+          <div class="field">
+            <label>Crea tu contraseña</label>
+            <input type="password" id="rg-pass" required minlength="6" autocomplete="new-password" placeholder="Mínimo 6 caracteres">
+          </div>
+          <div class="field">
+            <label>Repite la contraseña</label>
+            <input type="password" id="rg-pass2" required minlength="6" autocomplete="new-password">
+          </div>
+          <p class="tiny muted" style="margin:-.3rem 0 .6rem;">Con tu DNI y esta contraseña entras desde cualquier equipo. Si la olvidas, en el Punto de Ayuda te la restablecen.</p>
           <div class="note n-info tiny"><b>Aviso previo.</b> Finalidad: acreditación, ticket de ingreso, dinámica de insignias y sorteo. Responsable: la empresa organizadora. Encargado del tratamiento: itera.</div>
+          <div id="regError" class="tiny" style="margin-top:.6rem;"></div>
           <button class="btn btn-event btn-block" type="submit" style="margin-top:.9rem;">Continuar</button>
         </form>
       </section>
@@ -588,7 +598,7 @@
         <div class="stack" style="margin-top:.8rem;">
           <button class="btn btn-line btn-block" data-go="as-completar">Completar mi registro</button>
           <button class="btn btn-line btn-block" data-go="as-privacidad">Privacidad y preferencias</button>
-          <button class="btn btn-line btn-block" data-go="as-recuperar">Abrir en otro dispositivo</button>
+          <button class="btn btn-line btn-block" data-go="as-recuperar">Ingresar en otro dispositivo</button>
           <button class="btn btn-ghost btn-block" data-go="as-ayuda">Ayuda</button>
         </div>
       </section>
@@ -606,18 +616,32 @@
         </form>
       </section>
 
-      <!-- 18 recuperar acceso -->
+      <!-- 18 ingresar (DNI + contraseña) -->
       <section class="screen" data-sc="as-recuperar">
-        <div class="schead"><button class="back" data-go="as-landing">‹</button><h2>Abrir en otro dispositivo</h2></div>
-        <div class="note n-info tiny" style="margin-bottom:.8rem;"><b>No hay contraseñas en la plataforma.</b> Te enviamos un enlace de un solo uso; lo tocas y quedas dentro en ese equipo.</div>
-        <div class="card">
-          <div class="field"><label>Tu DNI</label><input type="text" id="rec-dni" inputmode="numeric" placeholder="Ej. 30111222"></div>
-          <div class="row wrap">
-            <button class="btn btn-wa" id="btnRecWa" style="flex:1;">Enviar por WhatsApp</button>
-            <button class="btn btn-line" id="btnRecMail" style="flex:1;">Por correo</button>
-          </div>
-        </div>
+        <div class="schead"><button class="back" data-go="as-landing">‹</button><h2>Ingresar</h2></div>
+        <div class="note n-info tiny" style="margin-bottom:.8rem;">Entra con tu <b>DNI</b> y la contraseña que creaste al registrarte. La sesión queda abierta en este equipo.</div>
+        <form class="card" id="formLogin">
+          <div class="field"><label>Tu DNI</label><input type="text" id="lg-dni" inputmode="numeric" autocomplete="username" required placeholder="Ej. 30111222"></div>
+          <div class="field"><label>Contraseña</label><input type="password" id="lg-pass" autocomplete="current-password" required></div>
+          <button class="btn btn-event btn-block" type="submit">Ingresar</button>
+        </form>
         <div id="recResult" style="margin-top:.8rem;"></div>
+        <div class="soft tiny muted" style="margin-top:.8rem;">
+          <b>¿Olvidaste tu contraseña?</b> Acércate a un Punto de Ayuda con tu documento: te dan una contraseña temporal válida por 30 minutos y al entrar eliges una nueva.
+        </div>
+      </section>
+
+      <!-- 18b definir contraseña nueva (tras un restablecimiento) -->
+      <section class="screen" data-sc="as-cambiar-clave">
+        <div class="schead"><h2>Define tu contraseña</h2></div>
+        <div class="note n-warn tiny" style="margin-bottom:.8rem;">Entraste con la contraseña temporal del Punto de Ayuda. Elige una propia para continuar.</div>
+        <form class="card" id="formClave">
+          <div class="field"><label>Contraseña temporal</label><input type="password" id="ck-actual" autocomplete="current-password" required></div>
+          <div class="field"><label>Contraseña nueva</label><input type="password" id="ck-nueva" autocomplete="new-password" required minlength="6" placeholder="Mínimo 6 caracteres"></div>
+          <div class="field"><label>Repite la nueva</label><input type="password" id="ck-nueva2" autocomplete="new-password" required minlength="6"></div>
+          <button class="btn btn-event btn-block" type="submit">Guardar y continuar</button>
+        </form>
+        <div id="clvResult" style="margin-top:.8rem;"></div>
       </section>
 
       <!-- 19 ayuda -->
@@ -627,7 +651,8 @@
           <div class="soft"><b style="font-size:.87rem;">¿Cómo gano una insignia?</b><p class="tiny muted" style="margin-top:.2rem;">Consume en el puesto hasta cumplir su mínimo (cada puesto pone el suyo, lo ves en su ficha). El puesto te muestra su QR, tú lo escaneas. +1 insignia y +1 ticket de sorteo.</p></div>
           <div class="soft"><b style="font-size:.87rem;">Solo 1 insignia por puesto</b><p class="tiny muted" style="margin-top:.2rem;">Volver a escanear el mismo QR no suma tickets. Conviene recorrer puestos distintos.</p></div>
           <div class="soft"><b style="font-size:.87rem;">No puedo mostrar mi QR</b><p class="tiny muted" style="margin-top:.2rem;">Acércate a un Punto de Ayuda: te ubican por DNI.</p></div>
-          <div class="soft"><b style="font-size:.87rem;">Cambié de celular</b><p class="tiny muted" style="margin-top:.2rem;">Usa "Abrir en otro dispositivo" y recibes un enlace por WhatsApp.</p></div>
+          <div class="soft"><b style="font-size:.87rem;">Cambié de celular</b><p class="tiny muted" style="margin-top:.2rem;">Entra con tu DNI y tu contraseña desde el equipo nuevo. Si la olvidaste, en el Punto de Ayuda te la restablecen.</p></div>
+          <div class="soft"><b style="font-size:.87rem;">Olvidé mi contraseña</b><p class="tiny muted" style="margin-top:.2rem;">Acércate a un Punto de Ayuda con tu documento. Te dan una contraseña temporal válida por 30 minutos y al entrar eliges una nueva.</p></div>
           <button class="btn btn-line btn-block">Ubicar el Punto de Ayuda más cercano</button>
         </div>
       </section>
@@ -667,7 +692,7 @@
           <div class="item" data-go="as-perfil" style="cursor:pointer;"><div class="logo" style="background:var(--accent-soft);">👤</div><div class="gr"><b>Mi perfil</b><span>Datos y cuenta</span></div><span>›</span></div>
           <div class="item" data-go="as-privacidad" style="cursor:pointer;"><div class="logo" style="background:#E7ECFF;">🔒</div><div class="gr"><b>Privacidad</b><span>Consentimientos y derechos</span></div><span>›</span></div>
           <div class="item" data-go="as-completar" style="cursor:pointer;"><div class="logo" style="background:var(--gold-soft);">✏️</div><div class="gr"><b>Completar registro</b><span>Añadir datos faltantes</span></div><span>›</span></div>
-          <div class="item" data-go="as-recuperar" style="cursor:pointer;"><div class="logo" style="background:#E7FFDB;">📲</div><div class="gr"><b>Abrir en otro dispositivo</b><span>Enlace por WhatsApp</span></div><span>›</span></div>
+          <div class="item" data-go="as-recuperar" style="cursor:pointer;"><div class="logo" style="background:#E7FFDB;">📲</div><div class="gr"><b>Ingresar en otro dispositivo</b><span>Con tu DNI y contraseña</span></div><span>›</span></div>
           <div class="item" data-go="as-ayuda" style="cursor:pointer;"><div class="logo" style="background:var(--good-soft);">❓</div><div class="gr"><b>Ayuda</b><span>Cómo funciona la dinámica</span></div><span>›</span></div>
         </div>
       </section>
@@ -911,7 +936,7 @@
           <button class="btn btn-event btn-block" data-go="ay-rapido">➕ Registro rápido (no se registró antes)</button>
           <button class="btn btn-line btn-block" data-go="ay-validar">✅ Validar ingreso</button>
           <button class="btn btn-line btn-block" data-go="ay-buscar">🔎 Buscar persona por DNI</button>
-          <button class="btn btn-line btn-block" data-go="ay-revincular">📲 Perdió el acceso / cambió de celular</button>
+          <button class="btn btn-line btn-block" data-go="ay-revincular">🔑 Olvidó su contraseña</button>
           <button class="btn btn-line btn-block" data-go="ay-qr">🖼️ Problema con el QR</button>
           <button class="btn btn-line btn-block" data-go="ay-completar">✏️ Completar registro</button>
         </div>
@@ -945,10 +970,12 @@
       </section>
 
       <section class="screen" data-sc="ay-revincular">
-        <div class="schead"><button class="back" data-go="ay-home">‹</button><h2>Re-vincular dispositivo</h2></div>
-        <div class="note n-warn tiny" style="margin-bottom:.7rem;"><b>Verifica el DNI físico antes de continuar.</b> Esta acción da acceso a las insignias de la persona, que valen tickets del sorteo. Queda registrada con tu usuario de staff.</div>
-        <input type="search" id="ay-rev-q" placeholder="DNI de la persona" style="margin-bottom:.6rem;">
-        <div id="ayRevResult"></div>
+        <div class="schead"><button class="back" data-go="ay-home">‹</button><h2>Restablecer contraseña</h2></div>
+        <div class="note n-warn tiny" style="margin-bottom:.7rem;"><b>Pide el documento físico y verifícalo antes de continuar.</b> Esta acción cierra todas las sesiones de la persona y da acceso a sus insignias, que valen tickets del sorteo. Queda registrada con tu nombre.</div>
+        <input type="search" id="ay-rev-q" placeholder="DNI de la persona" style="margin-bottom:.6rem;" inputmode="numeric">
+        <input type="text" id="ay-rev-staff" placeholder="Tu nombre (staff)" style="margin-bottom:.6rem;" maxlength="100">
+        <button class="btn btn-event btn-block" id="btnResetClave">Restablecer contraseña</button>
+        <div id="ayRevResult" style="margin-top:.8rem;"></div>
       </section>
 
       <section class="screen" data-sc="ay-qr">
@@ -1887,7 +1914,7 @@ const INDEX=[
     [10,'Resultado del escaneo','as-escaneo-result'],[11,'Insignia desbloqueada','as-insignia'],
     [12,'Mis insignias','as-insignias'],[13,'Detalle de insignia','as-insignia-detalle'],
     [14,'Puestos participantes','as-empresas'],[15,'Perfil del puesto','as-empresa-perfil'],
-    [16,'Mi perfil','as-perfil'],[17,'Completar registro','as-completar'],[18,'Recuperar acceso','as-recuperar'],
+    [16,'Mi perfil','as-perfil'],[17,'Completar registro','as-completar'],[18,'Ingresar (DNI + contraseña)','as-recuperar'],[18,'Definir contraseña nueva','as-cambiar-clave'],
     [19,'Ayuda','as-ayuda'],['·','Privacidad y preferencias','as-privacidad']
   ]],
   ['Empresa participante',[
@@ -1905,7 +1932,7 @@ const INDEX=[
   ]],
   ['Punto de Ayuda · staff',[
     ['·','Inicio','ay-home'],['·','Registro rápido','ay-rapido'],['·','Validar ingreso','ay-validar'],
-    ['·','Buscar persona','ay-buscar'],['·','Re-vincular dispositivo','ay-revincular'],
+    ['·','Buscar persona','ay-buscar'],['·','Restablecer contraseña','ay-revincular'],
     ['·','Problema con el QR','ay-qr'],['·','Completar registro','ay-completar']
   ]]
 ];
@@ -2106,25 +2133,75 @@ el('btnSimVal').addEventListener('click',()=>{
 let draft=null;
 el('formReg').addEventListener('submit',ev=>{
   ev.preventDefault();
+  const box=el('regError');
+  box.innerHTML='';
+
   const dni=el('rg-dni').value.trim();
-  if(state.personas.some(x=>x.dni===dni)){
-    alert('Ese DNI ya está registrado. Usa "Ya me registré" para recuperar el acceso.'); return;}
+  const pass=el('rg-pass').value;
+  const pass2=el('rg-pass2').value;
+
+  if(pass.length<6){
+    box.innerHTML='<div class="flash bad">La contraseña debe tener al menos 6 caracteres.</div>'; return;}
+  if(pass!==pass2){
+    box.innerHTML='<div class="flash bad">Las dos contraseñas no coinciden.</div>'; return;}
+
+  // La contraseña vive solo en memoria hasta que se envía al servidor; no se
+  // guarda en localStorage ni en el estado persistido.
   draft={dni,nombre:el('rg-nom').value.trim(),apellido:el('rg-ape').value.trim(),
-    cel:el('rg-cel').value.trim(),email:el('rg-email').value.trim()};
+    cel:el('rg-cel').value.trim(),email:el('rg-email').value.trim(),password:pass};
   go('as-terminos');
 });
 function checkConsents(){
   const b=el('btnFinishReg'); if(b) b.disabled=!(el('cs-terminos').checked&&el('cs-privacidad').checked);
 }
 ['cs-terminos','cs-privacidad'].forEach(id=>el(id).addEventListener('change',checkConsents));
-el('btnFinishReg').addEventListener('click',()=>{
+el('btnFinishReg').addEventListener('click',async()=>{
   if(!draft){go('as-registro');return;}
-  const p={id:uid(),...draft,code:mkcode('TKT'),origen:'web',estado:'pendiente',validadoAt:null,perfilCompleto:true,
-    consents:{terminos:true,privacidad:true,marketing:el('cs-marketing').checked,compartir:el('cs-compartir').checked},
-    device:deviceId(),badges:[]};
-  state.personas.push(p); state.meId=p.id; save();
-  el('exitoTicket').innerHTML=''; el('exitoTicket').appendChild(ticketEl(p));
-  go('as-exito');
+  const btn=el('btnFinishReg');
+  const original=btn.textContent;
+  btn.disabled=true; btn.textContent='Creando tu registro…';
+
+  try{
+    const res=await window.iteraSesion.fetch('/api/auth/register',{
+      method:'POST',
+      body:JSON.stringify({
+        dni:draft.dni,
+        nombre:draft.nombre,
+        apellido:draft.apellido,
+        celular:draft.cel,
+        email:draft.email,
+        password:draft.password,
+        acepta_privacidad:true,
+        device_id:deviceId()
+      })
+    });
+    const data=await res.json().catch(()=>({}));
+
+    if(!res.ok){
+      // Documento ya registrado: se lleva a la pantalla de ingreso en lugar de
+      // dejar a la persona atascada en el formulario.
+      if(data.ya_registrado){
+        draft=null;
+        alert('Ese documento ya está registrado. Ingresa con tu contraseña.');
+        go('as-recuperar');
+        return;
+      }
+      alert(data.error||'No pudimos completar el registro. Intenta de nuevo.');
+      go('as-registro');
+      return;
+    }
+
+    window.iteraSesion.set(data.token);
+    const p=window.iteraSesion.sincronizar(data.attendee);
+    draft=null;   // se descarta la contraseña en claro de la memoria
+
+    el('exitoTicket').innerHTML=''; el('exitoTicket').appendChild(ticketEl(p));
+    go('as-exito');
+  }catch(e){
+    alert('Sin conexión con el servidor. Tu registro no se guardó; inténtalo de nuevo.');
+  }finally{
+    btn.disabled=false; btn.textContent=original;
+  }
 });
 el('formCompletar').addEventListener('submit',ev=>{
   ev.preventDefault(); const p=me(); if(!p){go('as-registro');return;}
@@ -2134,28 +2211,85 @@ el('formCompletar').addEventListener('submit',ev=>{
   p.perfilCompleto=true; save(); go('as-perfil');
 });
 
-/* ---- recuperar acceso: enlace de un solo uso, sin contraseñas ---- */
-function sendLink(canal){
-  const dni=el('rec-dni').value.trim(), box=el('recResult');
-  const p=state.personas.find(x=>x.dni===dni);
-  if(!p){ box.innerHTML='<div class="flash bad">No encontramos ese DNI. Acércate a un Punto de Ayuda con tu documento.</div>'; return; }
-  const dest = canal==='wa' ? ('WhatsApp ••• '+(p.cel||'').slice(-3)) : ((p.email||'tu correo').replace(/^(.{2}).*@/,'$1•••@'));
-  const token=mkcode('LNK');
-  box.innerHTML =
-    '<div class="wa"><div class="whead">'+(canal==='wa'?'💬 WhatsApp · Country Fest':'✉️ Correo · Country Fest')+'</div>'+
-    'Hola '+esc(p.nombre)+' 👋 Toca este enlace para abrir tu ticket en este equipo:<br>'+
-    '<a href="#">itera.pe/e/country-fest/a/'+token+'</a><br>'+
-    '<span style="opacity:.7;font-size:.72rem;">Vence en 15 minutos · un solo uso</span></div>'+
-    '<p class="tiny muted" style="margin:.6rem 0;">Enviado a <b>'+dest+'</b>. En la demo, tocar el botón simula que abriste el enlace.</p>'+
-    '<button class="btn btn-accent btn-block" id="recOpen">Simular que abro el enlace</button>';
-  el('recOpen').addEventListener('click',()=>{
-    state.meId=p.id; p.device=deviceId(); save();
-    box.innerHTML='<div class="flash good">✓ Sesión restaurada en este dispositivo</div>';
+/* ---- ingreso con DNI + contraseña ---- */
+el('formLogin').addEventListener('submit',async ev=>{
+  ev.preventDefault();
+  const dni=el('lg-dni').value.trim();
+  const pass=el('lg-pass').value;
+  const box=el('recResult');
+  const btn=ev.target.querySelector('button[type="submit"]');
+
+  btn.disabled=true; btn.textContent='Ingresando…';
+  box.innerHTML='';
+  try{
+    const res=await window.iteraSesion.fetch('/api/auth/login',{
+      method:'POST',
+      body:JSON.stringify({dni,password:pass,device_id:deviceId()})
+    });
+    const data=await res.json().catch(()=>({}));
+
+    if(!res.ok){
+      box.innerHTML='<div class="flash bad">'+esc(data.error||'No pudimos verificar tus datos.')+'</div>';
+      return;
+    }
+
+    window.iteraSesion.set(data.token);
+    window.iteraSesion.sincronizar(data.attendee);
+    el('lg-pass').value='';
+
+    // Contraseña temporal de soporte: hay que definir una propia antes de nada.
+    if(data.must_change_password){
+      go('as-cambiar-clave');
+      return;
+    }
+
+    box.innerHTML='<div class="flash good">✓ Sesión iniciada en este dispositivo</div>';
+    setTimeout(()=>go('as-ticket'),600);
+  }catch(e){
+    box.innerHTML='<div class="flash bad">Sin conexión con el servidor. Intenta de nuevo.</div>';
+  }finally{
+    btn.disabled=false; btn.textContent='Ingresar';
+  }
+});
+
+/* ---- definir contraseña nueva tras un restablecimiento ---- */
+el('formClave').addEventListener('submit',async ev=>{
+  ev.preventDefault();
+  const actual=el('ck-actual').value;
+  const nueva=el('ck-nueva').value;
+  const nueva2=el('ck-nueva2').value;
+  const box=el('clvResult');
+  const btn=ev.target.querySelector('button[type="submit"]');
+
+  if(nueva.length<6){
+    box.innerHTML='<div class="flash bad">La contraseña debe tener al menos 6 caracteres.</div>'; return;}
+  if(nueva!==nueva2){
+    box.innerHTML='<div class="flash bad">Las dos contraseñas no coinciden.</div>'; return;}
+
+  btn.disabled=true; btn.textContent='Guardando…';
+  box.innerHTML='';
+  try{
+    const res=await window.iteraSesion.fetch('/api/auth/change-password',{
+      method:'POST',
+      body:JSON.stringify({password_actual:actual,password_nueva:nueva})
+    });
+    const data=await res.json().catch(()=>({}));
+
+    if(!res.ok){
+      box.innerHTML='<div class="flash bad">'+esc(data.error||'No se pudo guardar.')+'</div>';
+      return;
+    }
+
+    window.iteraSesion.sincronizar(data.attendee);
+    ['ck-actual','ck-nueva','ck-nueva2'].forEach(id=>{el(id).value='';});
+    box.innerHTML='<div class="flash good">✓ Contraseña actualizada</div>';
     setTimeout(()=>go('as-ticket'),700);
-  });
-}
-el('btnRecWa').addEventListener('click',()=>sendLink('wa'));
-el('btnRecMail').addEventListener('click',()=>sendLink('mail'));
+  }catch(e){
+    box.innerHTML='<div class="flash bad">Sin conexión con el servidor. Intenta de nuevo.</div>';
+  }finally{
+    btn.disabled=false; btn.textContent='Guardar y continuar';
+  }
+});
 
 /* ---- escanear ---- */
 let scanFilter='all';
@@ -2600,26 +2734,49 @@ el('ay-val-q').addEventListener('input',function(){
     setTimeout(()=>{ el('ay-val-q').value=''; box.innerHTML=''; el('ay-val-q').focus(); },1600);
   });
 });
-el('ay-rev-q').addEventListener('input',function(){
-  const q=this.value.trim(), box=el('ayRevResult');
-  const p=state.personas.find(x=>x.dni===q);
-  if(!p){ box.innerHTML=q?'<p class="tiny muted">Sin coincidencias.</p>':''; return; }
-  box.innerHTML='<div class="card"><div class="between"><b>'+NM(p)+'</b>'+
-    '<span class="pill p-gold">'+p.badges.length+' insignias</span></div>'+
-    '<div class="kv"><span>DNI</span><span class="mono">'+esc(p.dni)+'</span></div>'+
-    '<div class="kv"><span>Ticket</span><span class="mono">'+esc(p.code)+'</span></div>'+
-    '<div class="kv"><span>Dispositivo actual</span><span class="mono">'+(p.device||'ninguno')+'</span></div>'+
-    '<label class="consent" style="margin-top:.6rem;"><input type="checkbox" id="revChk">'+
-    '<span class="ct"><b>Verifiqué el documento físico</b>Queda registrado con mi usuario de staff y la hora.</span></label>'+
-    '<button class="btn btn-event btn-block" id="revGo" style="margin-top:.6rem;" disabled>Enviar enlace de acceso</button></div>';
-  el('revChk').addEventListener('change',function(){ el('revGo').disabled=!this.checked; });
-  el('revGo').addEventListener('click',()=>{
-    save();
-    box.innerHTML='<div class="flash good">✓ Enlace enviado a ••• '+(p.cel||'000').slice(-3)+'</div>'+
-      '<div class="wa" style="margin-top:.6rem;"><div class="whead">💬 WhatsApp</div>Toca para recuperar tu ticket:<br>'+
-      '<a href="#">itera.pe/e/country-fest/a/'+mkcode('LNK')+'</a><br>'+
-      '<span style="opacity:.7;font-size:.72rem;">Vence en 15 min · un solo uso · re-vinculación autorizada por staff</span></div>';
-  });
+/* ---- soporte: restablecer contraseña a la temporal ---- */
+el('btnResetClave').addEventListener('click',async()=>{
+  const dni=el('ay-rev-q').value.trim();
+  const staff=el('ay-rev-staff').value.trim();
+  const box=el('ayRevResult');
+
+  if(!dni){ box.innerHTML='<div class="flash bad">Escribe el DNI de la persona.</div>'; return; }
+  if(!staff){ box.innerHTML='<div class="flash bad">Escribe tu nombre para dejar constancia de quién restableció.</div>'; return; }
+  if(!confirm('¿Verificaste el documento físico de la persona?\n\nEsto cerrará todas sus sesiones abiertas.')) return;
+
+  const btn=el('btnResetClave');
+  btn.disabled=true; btn.textContent='Restableciendo…';
+  try{
+    const res=await window.iteraAuthFetch('/api/soporte/reset-password',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({dni,staff_nombre:staff,punto_ayuda:'Punto de Ayuda'})
+    });
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok){
+      box.innerHTML='<div class="flash bad">'+esc(data.error||'No se pudo restablecer.')+'</div>';
+      return;
+    }
+    // Se dicta en voz alta a la persona. Se muestra el nombre para que el staff
+    // confirme que está atendiendo a quien corresponde; nunca el DNI completo,
+    // el correo ni el celular.
+    box.innerHTML=
+      '<div class="flash good">✓ Contraseña restablecida para '+esc((data.persona&&data.persona.nombre)||'')+' '+
+        esc((data.persona&&data.persona.apellido)||'')+'</div>'+
+      '<div class="card" style="margin-top:.6rem;">'+
+        '<div class="kv"><span>Contraseña temporal</span><span class="mono" style="font-size:1.15rem;font-weight:700;">'+
+          esc(data.password_temporal||'')+'</span></div>'+
+        '<div class="kv"><span>Válida por</span><span>'+esc(String(data.minutos_validez||30))+' minutos</span></div>'+
+      '</div>'+
+      '<div class="note n-warn tiny" style="margin-top:.6rem;">Dile que ingrese con su DNI y esta contraseña. '+
+        'Al entrar tendrá que elegir una propia; pasados los '+esc(String(data.minutos_validez||30))+
+        ' minutos esta deja de funcionar y hay que repetir el trámite.</div>';
+    el('ay-rev-q').value='';
+  }catch(e){
+    box.innerHTML='<div class="flash bad">Sin conexión con el servidor. Intenta de nuevo.</div>';
+  }finally{
+    btn.disabled=false; btn.textContent='Restablecer contraseña';
+  }
 });
 el('ay-cp-q').addEventListener('input',function(){
   const q=this.value.trim(), box=el('ayCpResult');
@@ -2940,134 +3097,235 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&el('proj').classLi
 })();
 
 /* ===================================================================
-   ITERA Real-Time API Synchronization Bridge (Railway Backend)
+   Simulación local de la API — SOLO PARA LA DEMO COMERCIAL
+   ===================================================================
+   Este archivo es el prototipo de venta. Antes llamaba de verdad a la API de
+   producción, lo que significaba que enseñar el producto a un cliente creaba
+   asistentes reales en la base de datos del evento.
+
+   Ahora todas las llamadas se resuelven aquí, contra el estado de este
+   navegador. La demo es autónoma: funciona sin servidor, sin base de datos y
+   sin token de staff, y no puede tocar datos reales.
+
+   La app funcional de Country Fest vive aparte, en /cf/ y usa la API de verdad.
    =================================================================== */
-(function initApiBridge() {
+(function initDemoBridge() {
   const badge = el('apiStatusBadge');
+  if (badge) {
+    badge.className = 'pill p-neutral';
+    badge.textContent = '● Demo local · sin servidor';
+  }
 
-  // --- Token de staff/organizador -------------------------------------------
-  // Los endpoints sensibles (lista de asistentes, analítica, check-in, seed)
-  // exigen el token que el servidor define en ADMIN_TOKEN. Se guarda solo en
-  // este navegador. Para cargarlo: abrir la app con ?staff=TU_TOKEN, o llamar
-  // a iteraSetStaffToken('TU_TOKEN') desde la consola.
-  const TK = 'itera_staff_token';
-  function staffToken() { try { return localStorage.getItem(TK) || ''; } catch (e) { return ''; } }
-  window.iteraSetStaffToken = function (t) {
-    try { t ? localStorage.setItem(TK, t) : localStorage.removeItem(TK); } catch (e) {}
-    return '✓ Token de staff guardado en este dispositivo.';
-  };
-  // Permite entregar el token por URL al staff y lo limpia de la barra al instante.
-  try {
-    const qs = new URLSearchParams(location.search);
-    const fromUrl = qs.get('staff');
-    if (fromUrl) {
-      window.iteraSetStaffToken(fromUrl);
-      qs.delete('staff');
-      history.replaceState(null, '', location.pathname + (qs.toString() ? '?' + qs : '') + location.hash);
+  const CLAVE_TEMPORAL = 'CF2026';
+  const MINUTOS_TEMPORAL = 30;
+
+  // Respuesta con la misma forma que da fetch, para que las pantallas no noten
+  // la diferencia.
+  const responder = (status, cuerpo) => ({
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => cuerpo
+  });
+
+  const buscarDni = dni => state.personas.find(p => p.dni === String(dni || '').trim());
+
+  // Las personas sembradas no tienen contraseña propia: se les asume la
+  // temporal con cambio pendiente, igual que en la app real.
+  function claveDe(p) { return p.pass || CLAVE_TEMPORAL; }
+  function debeCambiar(p) { return p.pass ? p.mustChange === true : true; }
+
+  // Traduce una persona de la demo a la forma que devuelve la API real.
+  function comoAttendee(p) {
+    return {
+      id: p.id, dni: p.dni, nombre: p.nombre, apellido: p.apellido,
+      celular: p.cel || '', email: p.email || '',
+      codigo_ticket: p.code, qr_token: 'demo-' + p.id,
+      tipo_ticket: p.tipo || 'general',
+      estado: p.estado === 'validado' ? 'checkin' : 'valido',
+      checkin_count: p.estado === 'validado' ? 1 : 0,
+      ultimo_checkin: p.validadoAt || null,
+      must_change_password: debeCambiar(p)
+    };
+  }
+
+  let sesionDe = null;   // id de la persona con sesión abierta en la demo
+
+  const ERROR_CREDENCIALES =
+    'DNI o contraseña incorrectos. Si soporte te restableció la clave hace más ' +
+    'de 30 minutos, pídela de nuevo en el Punto de Ayuda.';
+
+  // ---- enrutador de la API simulada ----------------------------------------
+  async function apiLocal(url, opciones) {
+    const cuerpo = opciones && opciones.body ? JSON.parse(opciones.body) : {};
+    const ruta = String(url).split('?')[0];
+
+    if (ruta === '/api/health') {
+      return responder(200, { status: 'ok', almacen: 'demo', persistente: false, auth: 'demo' });
     }
-  } catch (e) {}
-  // fetch con credenciales de staff adjuntas.
-  function authFetch(url, opts) {
-    const o = Object.assign({}, opts);
-    o.headers = Object.assign({}, o.headers);
-    const t = staffToken();
-    if (t) o.headers['X-Admin-Token'] = t;
-    return fetch(url, o);
+
+    if (ruta === '/api/events/current') {
+      return responder(200, { success: true, event: { slug: state.event.slug, nombre: state.event.name, aforo_max: 500 } });
+    }
+
+    if (ruta === '/api/auth/register') {
+      if (buscarDni(cuerpo.dni)) {
+        return responder(409, { error: 'Ya existe un registro con ese documento. Ingresa con tu contraseña.', ya_registrado: true });
+      }
+      const p = {
+        id: uid(), dni: String(cuerpo.dni || '').trim(),
+        nombre: cuerpo.nombre || '', apellido: cuerpo.apellido || '',
+        cel: cuerpo.celular || '', email: cuerpo.email || '',
+        code: mkcode('TKT'), origen: 'web', estado: 'pendiente', validadoAt: null,
+        perfilCompleto: true, device: deviceId(), badges: [],
+        pass: cuerpo.password, mustChange: false
+      };
+      state.personas.push(p);
+      state.meId = p.id; sesionDe = p.id; save();
+      return responder(201, { success: true, token: 'demo-' + p.id, attendee: comoAttendee(p) });
+    }
+
+    if (ruta === '/api/auth/login') {
+      const p = buscarDni(cuerpo.dni);
+      if (!p) return responder(401, { error: ERROR_CREDENCIALES });
+      if (p.tempExpira && Date.now() > p.tempExpira) {
+        delete p.pass; delete p.tempExpira; save();
+        return responder(401, { error: ERROR_CREDENCIALES });
+      }
+      if (String(cuerpo.password || '') !== claveDe(p)) {
+        return responder(401, { error: ERROR_CREDENCIALES });
+      }
+      state.meId = p.id; sesionDe = p.id; p.device = deviceId(); save();
+      return responder(200, {
+        success: true, token: 'demo-' + p.id,
+        must_change_password: debeCambiar(p), attendee: comoAttendee(p)
+      });
+    }
+
+    if (ruta === '/api/auth/me') {
+      const p = state.personas.find(x => x.id === (sesionDe || state.meId));
+      if (!p) return responder(401, { error: 'Sesión no iniciada.' });
+      if (debeCambiar(p)) return responder(403, { error: 'Debes definir una contraseña nueva.', must_change_password: true });
+      return responder(200, { success: true, attendee: comoAttendee(p) });
+    }
+
+    if (ruta === '/api/auth/change-password') {
+      const p = state.personas.find(x => x.id === (sesionDe || state.meId));
+      if (!p) return responder(401, { error: 'Sesión no iniciada.' });
+      if (String(cuerpo.password_actual || '') !== claveDe(p)) {
+        return responder(401, { error: 'La contraseña actual no coincide.' });
+      }
+      const nueva = String(cuerpo.password_nueva || '');
+      if (nueva.length < 6) return responder(400, { error: 'La contraseña debe tener al menos 6 caracteres.' });
+      if (nueva.toUpperCase() === CLAVE_TEMPORAL) {
+        return responder(400, { error: 'Esa es la contraseña temporal de soporte. Elige una distinta.' });
+      }
+      p.pass = nueva; p.mustChange = false; delete p.tempExpira; save();
+      return responder(200, { success: true, attendee: comoAttendee(p) });
+    }
+
+    if (ruta === '/api/auth/logout') {
+      sesionDe = null;
+      return responder(200, { success: true });
+    }
+
+    if (ruta === '/api/soporte/reset-password') {
+      const p = buscarDni(cuerpo.dni);
+      if (!p) return responder(404, { error: 'No hay ningún registro con ese documento.' });
+      p.pass = CLAVE_TEMPORAL;
+      p.mustChange = true;
+      p.tempExpira = Date.now() + MINUTOS_TEMPORAL * 60000;
+      save();
+      return responder(200, {
+        success: true, password_temporal: CLAVE_TEMPORAL,
+        minutos_validez: MINUTOS_TEMPORAL,
+        persona: { nombre: p.nombre, apellido: p.apellido }
+      });
+    }
+
+    if (ruta === '/api/soporte/buscar') {
+      const p = buscarDni(cuerpo.dni);
+      if (!p) return responder(404, { error: 'No hay ningún registro con ese documento.' });
+      return responder(200, { success: true, attendee: comoAttendee(p) });
+    }
+
+    if (ruta === '/api/tickets/checkin') {
+      const clave = String(cuerpo.code || cuerpo.token || '').toLowerCase();
+      const p = state.personas.find(x => String(x.code).toLowerCase() === clave || x.dni === cuerpo.code);
+      if (!p) return responder(404, { success: false, error: 'Ticket inválido' });
+      const yaEstaba = p.estado === 'validado';
+      p.estado = 'validado'; p.validadoAt = Date.now(); save();
+      return responder(200, {
+        success: true, isDuplicate: yaEstaba,
+        message: yaEstaba ? '⚠ Advertencia: Ingreso previo registrado.' : '✓ Acceso concedido.',
+        attendee: comoAttendee(p)
+      });
+    }
+
+    if (ruta === '/api/stands/scan-lead' || ruta === '/api/qa/ask') {
+      return responder(201, { success: true, simulado: true });
+    }
+
+    return responder(404, { error: 'Ruta no simulada en la demo: ' + ruta });
   }
-  window.iteraAuthFetch = authFetch;
 
-  // 1. Comprobar salud del servidor y memoria
-  fetch('/api/health')
-    .then(r => r.json())
-    .then(data => {
-      if (badge) {
-        badge.className = 'pill p-good';
-        badge.textContent = `● API Online (${Math.round(data.memory / 1024 / 1024)}MB RAM)`;
-      }
-    })
-    .catch(() => {
-      if (badge) {
-        badge.className = 'pill p-warn';
-        badge.textContent = '● Modo Offline (Local)';
-      }
-    });
-
-  // 2. Seeder Trigger Button (Cargar Demo con 1 clic)
-  const resetBtn = el('btnReset');
-  if (resetBtn) {
-    resetBtn.addEventListener('click', async (e) => {
-      resetBtn.disabled = true;
-      resetBtn.textContent = 'Cargando Demo...';
-      try {
-        const seedRes = await authFetch('/api/events/seed', { method: 'POST' });
-        if (seedRes.status === 401) {
-          if (badge) { badge.className = 'pill p-warn'; badge.textContent = '● Requiere token de staff'; }
-          resetBtn.disabled = false; resetBtn.textContent = 'Cargar Demo';
-          return;
-        }
-        localStorage.removeItem('itera_evt_v2');
-        if (badge) badge.textContent = '✓ Base de datos reinicializada';
-        setTimeout(() => location.reload(), 500);
-      } catch (err) {
-        localStorage.removeItem('itera_evt_v2');
-        location.reload();
-      }
-    });
+  // ---- superficie que consumen las pantallas del prototipo -----------------
+  function sincronizarPersona(attendee) {
+    if (!attendee) return null;
+    let p = state.personas.find(x => x.dni === attendee.dni);
+    if (!p) { p = { id: attendee.id, dni: attendee.dni, badges: [], origen: 'web' }; state.personas.push(p); }
+    p.nombre = attendee.nombre || '';
+    p.apellido = attendee.apellido || '';
+    p.cel = attendee.celular || '';
+    p.email = attendee.email || '';
+    p.code = attendee.codigo_ticket;
+    p.estado = attendee.estado === 'checkin' ? 'validado' : 'pendiente';
+    p.perfilCompleto = !!(p.apellido && p.cel);
+    p.device = deviceId();
+    if (!Array.isArray(p.badges)) p.badges = [];
+    state.meId = p.id; sesionDe = p.id; save();
+    return p;
   }
 
-  // 3. Check-in en Puerta en Vivo
+  window.iteraSesion = {
+    fetch: apiLocal,
+    set: function () { /* en la demo no hay token que guardar */ },
+    sincronizar: sincronizarPersona,
+    cerrarLocal: function () { sesionDe = null; state.meId = null; save(); }
+  };
+  window.iteraAuthFetch = apiLocal;
+
+  // En la demo el token de staff no hace falta: no hay servidor que lo valide.
+  window.iteraSetStaffToken = function () {
+    return 'La demo no usa token: todas las acciones de staff se simulan en este navegador.';
+  };
+
+  // Check-in en puerta desde el Punto de Ayuda de la demo.
   const valInput = el('ay-val-q');
   if (valInput) {
-    valInput.addEventListener('keydown', async (e) => {
-      if (e.key === 'Enter') {
-        const val = valInput.value.trim();
-        if (!val) return;
-        try {
-          const res = await authFetch('/api/tickets/checkin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code: val, dni: val })
-          });
-          const data = await res.json();
-          const box = el('ayValResult');
-          if (box) {
-            if (res.status === 401) {
-              box.innerHTML = '<div class="flash bad">✕ Sesión de staff no autorizada. Pide el enlace con token al organizador.</div>';
-            } else if (data.success) {
-              box.innerHTML = `<div class="flash ${data.isDuplicate ? 'warn' : 'good'}">${esc(data.message)} — ${NM(data.attendee)} (${esc(String(data.attendee.tipo_ticket||'General').toUpperCase())})</div>`;
-            } else {
-              box.innerHTML = `<div class="flash bad">✕ ${esc(data.error || 'Ticket no encontrado')}</div>`;
-            }
-          }
-        } catch (err) {}
-      }
+    valInput.addEventListener('keydown', async ev => {
+      if (ev.key !== 'Enter') return;
+      const val = valInput.value.trim();
+      if (!val) return;
+      const res = await apiLocal('/api/tickets/checkin', { body: JSON.stringify({ code: val }) });
+      const data = await res.json();
+      const box = el('ayValResult');
+      if (!box) return;
+      box.innerHTML = data.success
+        ? '<div class="flash ' + (data.isDuplicate ? 'warn' : 'good') + '">' + esc(data.message) + ' — ' +
+            NM(data.attendee) + ' (' + esc(String(data.attendee.tipo_ticket || 'general').toUpperCase()) + ')</div>'
+        : '<div class="flash bad">✕ ' + esc(data.error || 'Ticket no encontrado') + '</div>';
+      valInput.value = '';
     });
   }
 
-  // 4. Captura de Leads en Stand (Sincronización en vivo)
-  window.apiScanStandLead = async function(standId, attendeeCode, notas) {
-    try {
-      const res = await authFetch('/api/stands/scan-lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stand_id: standId, attendee_code: attendeeCode, notas })
-      });
-      return await res.json();
-    } catch (e) {
-      return { success: false };
-    }
-  };
-
-  // 5. Preguntas en Vivo & Upvotes
-  window.apiAskQuestion = async function(autor, pregunta) {
-    try {
-      const res = await fetch('/api/qa/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ autor, pregunta })
-      });
-      return await res.json();
-    } catch (e) {}
-  };
+  // Reinicio de la demo en este dispositivo.
+  const resetBtn = el('btnReset');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      if (!confirm('Se reinician los datos de la demo en este dispositivo. ¿Continuar?')) return;
+      try { localStorage.removeItem('itera_evt_v2'); } catch (e) {}
+      location.reload();
+    });
+  }
 })();
 </script>

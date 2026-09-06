@@ -1,10 +1,32 @@
 const path = require('path');
 const { Pool } = require('pg');
 
+const { pgDriver, memoryDriver, safeAttendee, publicAttendee, auth } = require('./lib/store');
+const registrarAuth = require('./lib/routes-auth');
+
+// Logger activado: durante el evento hay que poder reconstruir que paso en la
+// puerta. `disableRequestLogging` evita una linea por peticion de asset, que
+// solo genera ruido. Los handlers nunca registran DNI, correo, celular ni
+// tokens (checklist punto 2).
 const fastify = require('fastify')({
-  logger: false,
+  logger: { level: process.env.LOG_LEVEL || 'info' },
   disableRequestLogging: true
 });
+
+// -----------------------------------------------------------------------------
+// Configuracion del evento
+// -----------------------------------------------------------------------------
+const EVENTO = {
+  slug: process.env.EVENT_SLUG || 'country-fest',
+  nombre: process.env.EVENT_NAME || 'Country Fest 2026',
+  descripcion: process.env.EVENT_DESC || 'Feria gastronomica con dinamica de insignias.',
+  lugar: process.env.EVENT_PLACE || 'Por confirmar',
+  aforo_max: Number(process.env.EVENT_AFORO) || 500
+};
+
+// Datos ficticios de demostracion. Apagados por defecto: en una prueba real
+// contaminan el aforo, la analitica y la lista de asistentes.
+const SEED_DEMO = process.env.SEED_DEMO === 'true';
 
 // -----------------------------------------------------------------------------
 // Base de Datos PostgreSQL con Fallback Resiliente
@@ -32,20 +54,10 @@ if (connectionString) {
   }
 }
 
+// Contenido de catalogo y modulos que todavia no se han migrado a PostgreSQL.
+// Los asistentes, las sesiones y los check-ins YA no viven aqui: los gestiona
+// `lib/store.js` para que no vuelva a haber dos bases de datos distintas.
 const inMemoryStore = {
-  eventos: [
-    {
-      id: 'evt-itera-2026',
-      slug: 'itera-summit-2026',
-      nombre: 'ITERA Summit 2026 — Transformación & Procesos',
-      descripcion: 'El evento anual de innovación operativa, automatización y evolución empresarial.',
-      lugar: 'Centro de Convenciones de Lima / Transmisión Online',
-      aforo_max: 500,
-      activo: true
-    }
-  ],
-  asistentes: [],
-  checkins: [],
   stands: [
     { id: 'stand-01', nombre: 'ITERA Automation & AI', categoria: 'Automatización & IA', ubicacion: 'Stand A-01', color: '#315CFF' },
     { id: 'stand-02', nombre: 'Cloud Infrastructure Lab', categoria: 'Cloud & DevOps', ubicacion: 'Stand A-02', color: '#0055FF' },
@@ -61,81 +73,81 @@ const inMemoryStore = {
 };
 
 // -----------------------------------------------------------------------------
-// BBDD de prueba: 100 asistentes deterministas.
-// Mismos DNI / códigos / tokens que el front (evento-plataforma/prototipo.html)
-// para que el check-in en Puerta resuelva contra las mismas identidades.
+// Capa de datos: PostgreSQL cuando hay DATABASE_URL, RAM en caso contrario
 // -----------------------------------------------------------------------------
-const SEED_ATTENDEES_N = 100;
+const store = pool ? pgDriver(pool) : memoryDriver();
+let evento = null;      // fila del evento activo
+let eventoId = null;
+// Si el esquema no se puede aplicar, se guarda el motivo y la plataforma de
+// eventos queda deshabilitada, pero el servidor SIGUE EN PIE. La landing
+// comercial no tiene por que caerse por un problema de base de datos.
+let errorDeArranque = null;
 
-const FIRST_NAMES = ['María', 'José', 'Luis', 'Carlos', 'Ana', 'Rosa', 'Jorge', 'Miguel', 'Carmen', 'Juan', 'Pedro', 'Lucía', 'Elena', 'Sofía', 'Diego', 'Andrés', 'Fernando', 'Patricia', 'Gabriela', 'Ricardo', 'Manuel', 'Verónica', 'Daniela', 'Renato', 'Camila', 'Mateo', 'Valentina', 'Sebastián', 'Alejandra', 'Rodrigo', 'Paula', 'Bruno', 'Ximena', 'Álvaro', 'Fiorella', 'Gonzalo', 'Milagros', 'Óscar', 'Claudia', 'Héctor'];
-const LAST_NAMES = ['García', 'Rodríguez', 'Flores', 'Torres', 'Rojas', 'Ramírez', 'Castillo', 'Vargas', 'Chávez', 'Quispe', 'Mamani', 'Huamán', 'Sánchez', 'Díaz', 'Cruz', 'Gutiérrez', 'Reyes', 'Morales', 'Ríos', 'Salazar', 'Espinoza', 'Cáceres', 'Ponce', 'Valdivia', 'Meza', 'Ochoa', 'Bravo', 'Peralta', 'Vidal', 'Fernández', 'Salas', 'Ramos', 'Castro', 'Paredes', 'Zúñiga', 'Aguilar', 'Benites', 'Cabrera', 'Delgado', 'Rivas'];
-const SEED_EMPRESAS = ['Retail Group Perú', 'Fintech Andina', 'Logística Express', 'Banco Líder', 'Agroindustrias del Sur', 'Almacenes Centrales', 'Minera Los Andes', 'Textil Pacífico', 'Clínica San Rafael', 'Universidad Continental', 'Alicorp', 'Interbank', 'Rímac Seguros', 'Entel Perú', 'Cálidda', 'Ferreyros', 'Cencosud', 'Independiente'];
-const SEED_CARGOS = ['Analista de Procesos', 'Jefe de Operaciones', 'Gerente de TI', 'Coordinador de Proyectos', 'Director Comercial', 'Especialista en Automatización', 'Subgerente de Logística', 'Consultor Senior', 'Product Owner', 'Data Analyst', 'Jefe de Innovación', 'Ingeniero de Sistemas'];
-const SEED_ANCHORS = [
-  ['Carlos', 'Ponce'], ['Ana', 'Valenzuela'], ['Diego', 'Morales'], ['Lucía', 'Cárdenas'], ['Fernando', 'Ríos']
-];
+async function iniciarStore() {
+  evento = await store.init(EVENTO);
+  eventoId = evento.id;
 
-const _slug = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z]/g, '');
+  if (store.name === 'memory') {
+    console.warn(
+      '[DATOS] Sin DATABASE_URL: se esta usando el almacen en memoria. ' +
+      'Todo se pierde al reiniciar el servicio. No usar para una prueba real.'
+    );
+  }
 
-function buildSeedAttendees() {
-  const now = Date.now();
-  const list = [];
-  for (let i = 0; i < SEED_ATTENDEES_N; i++) {
-    const nombre = i < SEED_ANCHORS.length ? SEED_ANCHORS[i][0] : FIRST_NAMES[(i * 7) % FIRST_NAMES.length];
-    const apellido = i < SEED_ANCHORS.length ? SEED_ANCHORS[i][1] : LAST_NAMES[(i * 13 + 3) % LAST_NAMES.length];
-    const dni = String(40100000 + i * 98717).slice(0, 8);
-    const validado = (i % 20) < 13; // ~65% ya hizo check-in
-    const tipo = i < 3 ? 'organizador'
-      : (i % 17 === 0 ? 'speaker'
-        : (i % 9 === 0 ? 'vip'
-          : (i % 23 === 0 ? 'staff' : 'general')));
-    list.push({
-      id: `att-${i + 1}`,
-      nombre,
-      apellido,
-      dni,
-      cel: '9' + String(60000000 + i * 813467).slice(0, 8),
-      email: `${_slug(nombre)}.${_slug(apellido)}@correo.pe`,
-      empresa: SEED_EMPRESAS[(i * 5 + 1) % SEED_EMPRESAS.length],
-      cargo: SEED_CARGOS[(i * 3) % SEED_CARGOS.length],
-      tipo_ticket: tipo,
-      codigo_ticket: `ITR-${1000 + i}`,
-      qr_token: `tok-${dni}`,
-      estado: validado ? 'checkin' : 'valido',
-      checkin_count: validado ? 1 : 0,
-      ultimo_checkin: validado ? new Date(now - (((i * 37) % 560) + 5) * 60000).toISOString() : null,
-      badges: ['Bienvenida'].concat((i * 3 + (i % 4)) % 9 > 3 ? ['Networking'] : [])
+  if (SEED_DEMO) {
+    await sembrarDemo();
+  }
+}
+
+// Sembrado de demostracion. Se ejecuta solo con SEED_DEMO=true y crea las
+// personas a traves del store, de modo que la demo recorre exactamente el mismo
+// camino que el evento real. Los DNI son ficticios y el prefijo del codigo es
+// DEMO- para poder distinguirlos y borrarlos.
+const SEED_NOMBRES = ['María', 'José', 'Luis', 'Carlos', 'Ana', 'Rosa', 'Jorge', 'Miguel', 'Carmen', 'Juan', 'Pedro', 'Lucía', 'Elena', 'Sofía', 'Diego', 'Andrés', 'Fernando', 'Patricia', 'Gabriela', 'Ricardo'];
+const SEED_APELLIDOS = ['García', 'Rodríguez', 'Flores', 'Torres', 'Rojas', 'Ramírez', 'Castillo', 'Vargas', 'Chávez', 'Quispe', 'Mamani', 'Huamán', 'Sánchez', 'Díaz', 'Cruz', 'Gutiérrez', 'Reyes', 'Morales', 'Ríos', 'Salazar'];
+const SEED_N = 40;
+
+async function sembrarDemo() {
+  const yaHay = await store.countAttendees(eventoId);
+  if (yaHay.total > 0) {
+    console.warn(`[DEMO] Ya hay ${yaHay.total} asistentes; no se siembra de nuevo.`);
+    return;
+  }
+
+  // Todas las personas de demo comparten la contrasena temporal, con cambio
+  // obligatorio: asi ni siquiera los datos de prueba dejan cuentas con clave
+  // fija utilizable.
+  const { hash, salt, algo } = auth.hashPassword(auth.TEMP_PASSWORD);
+
+  for (let i = 0; i < SEED_N; i++) {
+    await store.createAttendee({
+      evento_id: eventoId,
+      codigo_ticket: `DEMO-${1000 + i}`,
+      qr_token: auth.newQrToken(),
+      dni: String(70100000 + i * 971).slice(0, 8),
+      nombre: SEED_NOMBRES[i % SEED_NOMBRES.length],
+      apellido: SEED_APELLIDOS[(i * 7 + 3) % SEED_APELLIDOS.length],
+      email: null,
+      celular: null,
+      empresa: 'Demo',
+      cargo: null,
+      tipo_ticket: i % 11 === 0 ? 'vip' : 'general',
+      estado: 'valido',
+      password_hash: hash,
+      password_salt: salt,
+      password_algo: algo,
+      password_updated_at: new Date().toISOString(),
+      must_change_password: true,
+      temp_password_expires_at: new Date(Date.now() + auth.TEMP_PASSWORD_TTL_MS).toISOString()
     });
   }
-  return list;
+  console.warn(`[DEMO] Sembrados ${SEED_N} asistentes ficticios (codigos DEMO-*).`);
 }
 
-function seedMemory() {
-  inMemoryStore.asistentes = buildSeedAttendees();
-  inMemoryStore.checkins = inMemoryStore.asistentes
-    .filter(a => a.estado === 'checkin')
-    .map(a => ({
-      id: `chk-seed-${a.id}`,
-      ticket_code: a.codigo_ticket,
-      nombre: `${a.nombre} ${a.apellido}`,
-      puerta: 'Puerta Principal',
-      staff: 'Seed',
-      timestamp: a.ultimo_checkin,
-      isDuplicate: false
-    }));
-}
-seedMemory();
-
-async function query(text, params = []) {
-  if (pool) {
-    try {
-      return await pool.query(text, params);
-    } catch (err) {
-      console.warn('[DB Error]:', err.message);
-    }
-  }
-  return { rows: [], rowCount: 0 };
-}
+// Nota: aquí vivía un helper `query()` que capturaba los errores de PostgreSQL
+// y devolvía `{ rows: [] }`. Eso hacía que un fallo de escritura pareciera un
+// éxito con cero resultados. Se retiró a propósito: los accesos a la base van
+// por `lib/store.js` o por `pool.query` directo, y los errores se propagan.
 
 // -----------------------------------------------------------------------------
 // Seguridad: autenticación de staff/admin y limitación de tasa
@@ -165,8 +177,10 @@ function safeEqual(a, b) {
 async function requireAdmin(req, reply) {
   // Cerrado por defecto: sin ADMIN_TOKEN configurado NADIE accede a los datos
   // personales. Se prefiere denegar el servicio a filtrar PII por un despiste
-  // de configuración. El flujo de puerta del staff sigue funcionando porque el
-  // front valida el ingreso contra su almacenamiento local.
+  // de configuración. Ojo: ahora el check-in de puerta y el restablecimiento de
+  // contraseñas también pasan por aquí, así que sin ADMIN_TOKEN el Punto de
+  // Ayuda queda inoperativo. Es deliberado: configurar el token es requisito
+  // para operar el evento.
   if (!AUTH_ENABLED) {
     reply.code(503).send({
       error: 'Servicio de datos no disponible: falta configurar ADMIN_TOKEN en el servidor.',
@@ -237,156 +251,209 @@ fastify.register(require('@fastify/static'), {
 });
 
 // -----------------------------------------------------------------------------
+// Guardia de arranque
+// -----------------------------------------------------------------------------
+// Si la base no quedó lista, la plataforma de eventos responde 503 en vez de
+// operar a ciegas: se prefiere una puerta parada a una puerta que dice "adelante"
+// sin registrar nada. La landing y los archivos estáticos siguen sirviéndose.
+fastify.addHook('onRequest', async (req, reply) => {
+  if (!errorDeArranque) return;
+  const url = req.raw.url || '';
+  const esApi = url.startsWith('/api/') && url !== '/api/health';
+  const esAppEvento = url.startsWith('/e/') || url.startsWith('/staff/') ||
+                      url === '/e' || url === '/entrada';
+  if (esApi || esAppEvento) {
+    reply.code(503).send({
+      error: 'La plataforma de eventos no está disponible: la base de datos no quedó lista al arrancar.',
+      hint: 'Revisa los logs del servicio y la variable DATABASE_URL.'
+    });
+    return reply;
+  }
+});
+
+// -----------------------------------------------------------------------------
 // Rutas API
 // -----------------------------------------------------------------------------
-fastify.get('/api/health', async () => {
+// Sonda de salud. No expone conteos de asistentes ni nada derivado de datos
+// personales: solo el estado operativo del servicio.
+fastify.get('/api/health', async (req, reply) => {
+  if (errorDeArranque) {
+    // 503 para que cualquier monitor lo vea como caído, con el motivo a la
+    // vista pero sin filtrar la cadena de conexión ni credenciales.
+    return reply.code(503).send({
+      status: 'degradado',
+      uptime: process.uptime(),
+      eventos: 'no disponible',
+      motivo: errorDeArranque,
+      auth: AUTH_ENABLED ? 'enabled' : 'DISABLED'
+    });
+  }
   return {
     status: 'ok',
     uptime: process.uptime(),
-    memory: process.memoryUsage().rss,
-    db: pool ? 'connected' : 'memory_ready',
-    attendeesCount: inMemoryStore.asistentes.length,
+    almacen: store.name,
+    persistente: store.name === 'pg',
+    evento: evento ? evento.slug : null,
     // Diagnóstico operativo: indica si la protección de endpoints está activa.
     // Solo expone un booleano; nunca el token ni su longitud.
     auth: AUTH_ENABLED ? 'enabled' : 'DISABLED'
   };
 });
 
+// Datos publicos del evento: nombre, lugar y aforo. Sin informacion de personas.
 fastify.get('/api/events/current', async () => {
-  return { success: true, event: inMemoryStore.eventos[0] };
+  return {
+    success: true,
+    event: {
+      slug: evento.slug,
+      nombre: evento.nombre,
+      descripcion: evento.descripcion,
+      lugar: evento.lugar,
+      aforo_max: evento.aforo_max,
+      activo: evento.activo
+    }
+  };
 });
 
+// Analitica agregada. Son cifras de conjunto, no fichas de personas, pero
+// siguen exigiendo token de staff porque revelan el pulso del evento.
 fastify.get('/api/events/analytics', { preHandler: requireAdmin }, async () => {
-  const attendees = inMemoryStore.asistentes;
-  const totalRegistrados = attendees.length;
-  const ingresados = attendees.filter(a => a.estado === 'checkin');
-  const totalIngresados = ingresados.length;
-  const aforoMax = inMemoryStore.eventos[0]?.aforo_max || 500;
-  const aforoPct = Math.round((totalIngresados / aforoMax) * 100);
+  const conteo = await store.countAttendees(eventoId);
+  const porTipoFilas = await store.countByTipo(eventoId);
+  const timeline = await store.checkinTimeline(eventoId);
 
-  // Timeline real: acumulado de check-ins por hora del día.
+  const aforoMax = evento.aforo_max || 500;
+  const porTipo = porTipoFilas.reduce((acc, f) => {
+    acc[f.tipo_ticket || 'general'] = f.n;
+    return acc;
+  }, {});
+
+  // Acumulado sobre la franja horaria del evento.
   const horas = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
-  const porHora = {};
-  ingresados.forEach(a => {
-    if (!a.ultimo_checkin) return;
-    const h = new Date(a.ultimo_checkin).getHours();
-    const key = String(h).padStart(2, '0') + ':00';
-    porHora[key] = (porHora[key] || 0) + 1;
-  });
+  const mapa = timeline.reduce((acc, f) => { acc[f.hora] = f.ingresos; return acc; }, {});
   let acumulado = 0;
   const timelineHoras = horas.map(hora => {
-    acumulado += porHora[hora] || 0;
+    acumulado += mapa[hora] || 0;
     return { hora, ingresos: acumulado };
   });
 
   return {
     success: true,
     metrics: {
-      totalRegistrados,
-      totalIngresados,
+      totalRegistrados: conteo.total,
+      totalIngresados: conteo.ingresados,
       aforoMax,
-      aforoPct,
-      tasaIngreso: totalRegistrados ? Math.round((totalIngresados / totalRegistrados) * 100) : 0,
+      aforoPct: aforoMax ? Math.round((conteo.ingresados / aforoMax) * 100) : 0,
+      tasaIngreso: conteo.total ? Math.round((conteo.ingresados / conteo.total) * 100) : 0,
       standsLeadsCount: inMemoryStore.standsLeads.length,
       preguntasCount: inMemoryStore.preguntas.length,
-      porTipo: {
-        vip: attendees.filter(a => a.tipo_ticket === 'vip').length,
-        general: attendees.filter(a => a.tipo_ticket === 'general').length,
-        speaker: attendees.filter(a => a.tipo_ticket === 'speaker').length,
-        staff: attendees.filter(a => a.tipo_ticket === 'staff').length,
-        organizador: attendees.filter(a => a.tipo_ticket === 'organizador').length
-      },
+      porTipo,
       timelineHoras
     }
   };
 });
 
-fastify.post('/api/events/seed', { preHandler: requireAdmin }, async () => {
-  seedMemory();
-  return { success: true, message: 'Datos demo inicializados con éxito', count: inMemoryStore.asistentes.length };
-});
-
-fastify.get('/api/attendees', { preHandler: requireAdmin }, async () => {
-  return { success: true, count: inMemoryStore.asistentes.length, attendees: inMemoryStore.asistentes };
-});
-
-fastify.post('/api/attendees/register', { preHandler: rateLimit(20, 60000) }, async (req, reply) => {
-  const { nombre, apellido, email, dni, cel, empresa, cargo, tipo_ticket } = req.body || {};
-  if (!nombre) return reply.status(400).send({ error: 'Nombre es requerido' });
-
-  // Códigos nuevos por encima del rango sembrado (ITR-1000..ITR-1099) para evitar colisiones.
-  let seq = 1100;
-  while (inMemoryStore.asistentes.some(a => a.codigo_ticket === `ITR-${seq}`)) seq++;
-  const randomCode = `ITR-${seq}`;
-  const randomToken = `tok-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 7)}`;
-
-  const newAttendee = {
-    id: `att-${Date.now()}`,
-    nombre: nombre.trim(),
-    apellido: (apellido || '').trim(),
-    dni: (dni || '').trim(),
-    cel: (cel || '').trim(),
-    email: (email || '').trim(),
-    empresa: (empresa || 'Empresa Independiente').trim(),
-    cargo: (cargo || 'Profesional').trim(),
-    tipo_ticket: tipo_ticket || 'general',
-    codigo_ticket: randomCode,
-    qr_token: randomToken,
-    estado: 'valido',
-    checkin_count: 0,
-    ultimo_checkin: null,
-    badges: ['Bienvenida']
+// Listado de asistentes: PII completa, siempre paginado. Sin paginacion, un
+// unico GET se llevaba la base entera de DNI, correos y celulares.
+fastify.get('/api/attendees', { preHandler: requireAdmin }, async (req) => {
+  const limit = Math.min(Math.max(Number(req.query.limit) || 100, 1), 200);
+  const offset = Math.max(Number(req.query.offset) || 0, 0);
+  const { rows, total } = await store.listAttendees(eventoId, { limit, offset });
+  return {
+    success: true,
+    total,
+    limit,
+    offset,
+    attendees: rows.map(safeAttendee)
   };
-
-  inMemoryStore.asistentes.unshift(newAttendee);
-  return reply.status(201).send({ success: true, attendee: newAttendee });
 });
 
+// Ultimos check-ins registrados, para el panel de puerta.
+fastify.get('/api/checkins', { preHandler: requireAdmin }, async (req) => {
+  const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 200);
+  return { success: true, checkins: await store.listCheckins(eventoId, limit) };
+});
+
+// -----------------------------------------------------------------------------
+// Tickets: verificacion y check-in en puerta
+// -----------------------------------------------------------------------------
+// Se busca SOLO por token de QR o por codigo de ticket. La busqueda por DNI se
+// retiro de este endpoint publico: permitia recorrer documentos ajenos y
+// obtener la ficha completa de cada persona. Para el Punto de Ayuda existe
+// /api/soporte/buscar, que exige token de staff.
+async function buscarPorTicket({ token, code }) {
+  if (token && typeof token === 'string') {
+    const p = await store.findByQrToken(eventoId, token.trim().slice(0, 64));
+    if (p) return p;
+  }
+  if (code && typeof code === 'string') {
+    const p = await store.findByCodigo(eventoId, code.trim().slice(0, 30));
+    if (p) return p;
+  }
+  return null;
+}
+
+// Verificacion publica: responde lo justo para saber a quien se deja pasar.
+// Nunca devuelve DNI, correo ni celular.
 fastify.post('/api/tickets/verify', { preHandler: rateLimit(20, 60000) }, async (req, reply) => {
-  const { token, code, dni } = req.body || {};
-  const attendee = inMemoryStore.asistentes.find(
-    a => (token && a.qr_token === token) || 
-         (code && a.codigo_ticket.toLowerCase() === code.toLowerCase()) ||
-         (dni && a.dni === dni)
-  );
-
-  if (!attendee) return reply.status(404).send({ valid: false, message: 'Ticket no encontrado' });
-  return { valid: true, attendee, alreadyCheckedIn: attendee.estado === 'checkin' };
+  const { token, code } = req.body || {};
+  const persona = await buscarPorTicket({ token, code });
+  if (!persona) {
+    return reply.status(404).send({ valid: false, message: 'Ticket no encontrado' });
+  }
+  return {
+    valid: true,
+    attendee: publicAttendee(persona),
+    alreadyCheckedIn: persona.estado === 'checkin'
+  };
 });
 
+// Check-in: escribe en la base y deja rastro en checkins_log.
 fastify.post('/api/tickets/checkin', { preHandler: requireAdmin }, async (req, reply) => {
-  const { token, code, dni, puerta, staff_nombre } = req.body || {};
-  const attendee = inMemoryStore.asistentes.find(
-    a => (token && a.qr_token === token) || 
-         (code && a.codigo_ticket.toLowerCase() === code.toLowerCase()) ||
-         (dni && a.dni === dni)
+  const { token, code, puerta, staff_nombre } = req.body || {};
+  const persona = await buscarPorTicket({ token, code });
+  if (!persona) {
+    return reply.status(404).send({ success: false, error: 'Ticket inválido' });
+  }
+
+  const yaHabiaIngresado = persona.estado === 'checkin';
+  const ahora = new Date().toISOString();
+
+  const actualizada = await store.updateAttendee(persona.id, {
+    estado: 'checkin',
+    checkin_count: (persona.checkin_count || 0) + 1,
+    ultimo_checkin: ahora
+  });
+
+  const registro = await store.createCheckin(
+    persona.id,
+    String(puerta || 'Puerta Principal').slice(0, 80),
+    String(staff_nombre || 'Staff').slice(0, 100),
+    yaHabiaIngresado ? 'duplicado' : 'exitoso'
   );
-
-  if (!attendee) return reply.status(404).send({ success: false, error: 'Ticket inválido' });
-
-  const wasCheckedIn = attendee.estado === 'checkin';
-  attendee.estado = 'checkin';
-  attendee.checkin_count = (attendee.checkin_count || 0) + 1;
-  attendee.ultimo_checkin = new Date().toISOString();
-
-  const logEntry = {
-    id: `chk-${Date.now()}`,
-    ticket_code: attendee.codigo_ticket,
-    nombre: `${attendee.nombre} ${attendee.apellido}`,
-    puerta: puerta || 'Puerta Principal',
-    staff: staff_nombre || 'Staff',
-    timestamp: attendee.ultimo_checkin,
-    isDuplicate: wasCheckedIn
-  };
-  inMemoryStore.checkins.unshift(logEntry);
 
   return {
     success: true,
-    isDuplicate: wasCheckedIn,
-    message: wasCheckedIn ? '⚠ Advertencia: Ingreso previo registrado.' : '✓ Acceso concedido.',
-    attendee,
-    checkin: logEntry
+    isDuplicate: yaHabiaIngresado,
+    message: yaHabiaIngresado ? '⚠ Advertencia: Ingreso previo registrado.' : '✓ Acceso concedido.',
+    attendee: publicAttendee(actualizada),
+    checkin: registro
   };
+});
+
+// Punto de Ayuda: ubicar a una persona por su documento. Exige token de staff
+// y devuelve la ficha sin hash de contrasena.
+fastify.post('/api/soporte/buscar', {
+  preHandler: [requireAdmin, rateLimit(60, 60000)]
+}, async (req, reply) => {
+  const dni = auth.normalizeDni((req.body || {}).dni);
+  if (!dni) return reply.status(400).send({ error: 'Documento invalido.' });
+
+  const persona = await store.findByDni(eventoId, dni);
+  if (!persona) {
+    return reply.status(404).send({ error: 'No hay ningun registro con ese documento.' });
+  }
+  return { success: true, attendee: safeAttendee(persona) };
 });
 
 fastify.get('/api/stands', async () => {
@@ -395,19 +462,19 @@ fastify.get('/api/stands', async () => {
 
 fastify.post('/api/stands/scan-lead', { preHandler: requireAdmin }, async (req, reply) => {
   const { stand_id, attendee_code, attendee_token, interes, notas } = req.body || {};
-  const attendee = inMemoryStore.asistentes.find(
-    a => (attendee_token && a.qr_token === attendee_token) || 
-         (attendee_code && a.codigo_ticket.toLowerCase() === attendee_code.toLowerCase())
-  );
+  const persona = await buscarPorTicket({ token: attendee_token, code: attendee_code });
 
-  if (!attendee) return reply.status(404).send({ error: 'Asistente no encontrado' });
+  if (!persona) return reply.status(404).send({ error: 'Asistente no encontrado' });
 
+  // El expositor recibe el ticket y el nombre, no la ficha de datos personales.
+  // Compartir DNI, correo o celular con un tercero exige un consentimiento
+  // especifico que todavia no esta implementado (Ley 29733).
   const newLead = {
     id: `lead-${Date.now()}`,
     stand_id: stand_id || 'stand-01',
-    attendee,
-    interes: interes || 'Alto',
-    notas: notas || 'Contacto en stand.',
+    attendee: publicAttendee(persona),
+    interes: String(interes || 'Alto').slice(0, 30),
+    notas: String(notas || 'Contacto en stand.').slice(0, 500),
     captured_at: new Date().toISOString()
   };
   inMemoryStore.standsLeads.unshift(newLead);
@@ -442,21 +509,82 @@ fastify.post('/api/qa/:id/upvote', { preHandler: rateLimit(60, 60000) }, async (
   return { success: true, votos: q.votos };
 });
 
+// Texto exacto de la casilla de consentimiento de la landing. Se guarda junto
+// al lead: si mañana cambia la redaccion, hay que poder demostrar cual acepto
+// cada persona.
+const TEXTO_CONSENTIMIENTO_LEAD =
+  'Autorizo a ITERA a tratar mis datos (nombre, empresa y correo) para responder ' +
+  'a esta solicitud de diagnostico y contactarme al respecto.';
+
+// Captacion de leads de la landing. Escribe en `leads_diagnostico`.
+//
+// Este endpoint mentia dos veces: `query()` se tragaba el error de base de
+// datos devolviendo filas vacias, y el `catch` respondia 200 con
+// `success: true, simulated: true`. Es decir, la persona veia "Solicitud
+// recibida" aunque el lead no se hubiera guardado en ningun sitio. Ahora un
+// fallo de escritura devuelve 503 y el front lo dice.
 fastify.post('/api/leads', { preHandler: rateLimit(15, 60000) }, async (request, reply) => {
-  const { nombre, empresa, cargo, email, telefono, tamano_empresa, desafio, horas_semanales_perdidas, ahorro_estimado_usd, mensaje } = request.body || {};
-  if (!nombre || !email || !empresa) return reply.status(400).send({ error: 'Nombre, email y empresa son requeridos' });
+  const b = request.body || {};
+
+  const recorta = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : null);
+  const nombre = recorta(b.nombre, 120);
+  const empresa = recorta(b.empresa, 150);
+  const email = recorta(b.email, 150);
+
+  if (!nombre || !email || !empresa) {
+    return reply.status(400).send({ error: 'Nombre, email y empresa son requeridos' });
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return reply.status(400).send({ error: 'El correo electrónico no es válido' });
+  }
+
+  // Ley 29733: sin consentimiento expreso no se almacena el dato.
+  if (b.consentimiento !== true) {
+    return reply.status(400).send({
+      error: 'Falta la autorización para tratar los datos personales.'
+    });
+  }
+
+  if (!pool) {
+    // Sin base de datos no hay dónde guardar el lead. Decirlo es preferible a
+    // aceptar un contacto comercial que nadie va a recibir.
+    request.log.error('lead recibido sin DATABASE_URL configurada');
+    return reply.status(503).send({
+      error: 'No pudimos registrar tu solicitud en este momento. Escríbenos a hola@iteraperu.pe.'
+    });
+  }
 
   try {
-    const queryStr = `
-      INSERT INTO leads_diagnostico (nombre, empresa, cargo, email, telefono, tamano_empresa, desafio, horas_semanales_perdidas, ahorro_estimado_usd, mensaje)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-      RETURNING id, created_at
-    `;
-    const values = [nombre, empresa, cargo, email, telefono, tamano_empresa, desafio, horas_semanales_perdidas || 0, ahorro_estimado_usd || 0, mensaje];
-    const res = await query(queryStr, values);
-    return reply.status(201).send({ success: true, lead: res.rows[0] || { id: `lead-${Date.now()}` } });
+    const res = await pool.query(
+      `INSERT INTO leads_diagnostico
+         (nombre, empresa, cargo, email, telefono, tamano_empresa, desafio,
+          horas_semanales_perdidas, ahorro_estimado_usd, mensaje, origen,
+          consentimiento, consentimiento_at, consentimiento_texto)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,true,NOW(),$12)
+       RETURNING id, created_at`,
+      [
+        nombre,
+        empresa,
+        recorta(b.cargo, 100),
+        email,
+        recorta(b.telefono, 50),
+        recorta(b.tamano_empresa, 50),
+        recorta(b.desafio, 100),
+        Number(b.horas_semanales_perdidas) || 0,
+        Number(b.ahorro_estimado_usd) || 0,
+        recorta(b.mensaje, 2000),
+        recorta(b.origen, 50) || 'web_itera',
+        TEXTO_CONSENTIMIENTO_LEAD
+      ]
+    );
+    // No se registra el contenido del lead: lleva nombre y correo (checklist 2).
+    request.log.info({ leadId: res.rows[0].id }, 'lead de diagnostico registrado');
+    return reply.status(201).send({ success: true, lead: res.rows[0] });
   } catch (err) {
-    return reply.status(200).send({ success: true, simulated: true });
+    request.log.error({ err: err.message }, 'fallo al guardar el lead de diagnostico');
+    return reply.status(503).send({
+      error: 'No pudimos registrar tu solicitud en este momento. Escríbenos a hola@iteraperu.pe.'
+    });
   }
 });
 
@@ -464,6 +592,31 @@ fastify.post('/api/leads', { preHandler: rateLimit(15, 60000) }, async (request,
 // Rutas de Páginas & Roles Directos
 // -----------------------------------------------------------------------------
 fastify.get('/brand', async (req, reply) => reply.sendFile('brand-deck.html'));
+
+// -----------------------------------------------------------------------------
+// App real de Country Fest
+// -----------------------------------------------------------------------------
+// Las rutas llevan el slug del evento para que la plataforma pueda alojar mas
+// de uno sin cambiar de forma. Hoy solo hay uno activo, asi que el slug se
+// valida contra el configurado y cualquier otro devuelve 404: es preferible un
+// 404 claro a servir la app de un evento que no existe.
+function appDeEvento(archivo) {
+  return async (req, reply) => {
+    if (req.params.slug !== evento.slug) {
+      return reply.code(404).send({ error: 'Evento no encontrado.' });
+    }
+    return reply.sendFile('cf/' + archivo);
+  };
+}
+
+fastify.get('/e/:slug', appDeEvento('asistente.html'));       // asistente
+fastify.get('/staff/:slug', appDeEvento('staff.html'));       // Punto de Ayuda
+
+// Atajos sin slug, para carteles y enlaces cortos.
+fastify.get('/e', async (req, reply) => reply.redirect(302, '/e/' + evento.slug));
+fastify.get('/entrada', async (req, reply) => reply.redirect(302, '/e/' + evento.slug));
+
+// Demo comercial: datos ficticios, autonoma, sin tocar la base real.
 fastify.get('/evento', async (req, reply) => reply.sendFile('evento/prototipo.html'));
 
 // URLs dedicadas por rol
@@ -479,11 +632,37 @@ fastify.get('/ayuda', async (req, reply) => reply.sendFile('evento/prototipo.htm
 // Arranque
 // -----------------------------------------------------------------------------
 const start = async () => {
+  // La base se prepara ANTES de aceptar trafico. Si el esquema no se puede
+  // aplicar, NO se tumba el proceso: la landing comercial no tiene por que
+  // caerse por un problema de base de datos. Lo que se hace es marcar el
+  // arranque como degradado; la guardia de arriba devuelve 503 en todo lo que
+  // dependa de la base, y /api/health lo reporta.
   try {
+    await iniciarStore();
+  } catch (err) {
+    errorDeArranque = err && err.message ? err.message : 'error desconocido';
+    console.error('[ARRANQUE] No se pudo preparar la base de datos:', errorDeArranque);
+    console.error('[ARRANQUE] La plataforma de eventos queda DESHABILITADA (503). La landing sigue activa.');
+  }
+
+  try {
+    // Las rutas de autenticacion necesitan el id del evento, que solo se conoce
+    // despues de iniciar el store. Si el arranque fallo no se registran: la
+    // guardia ya devuelve 503 antes de llegar aqui.
+    if (!errorDeArranque) {
+      registrarAuth(fastify, { store, eventoId, rateLimit, requireAdmin });
+    }
+
     const port = Number(process.env.PORT) || 3000;
     const address = await fastify.listen({ port, host: '0.0.0.0' });
-    console.log(`[ITERA Engine] Servidor en ${address}`);
+
+    if (errorDeArranque) {
+      console.warn(`[ITERA Engine] Servidor en ${address} · MODO DEGRADADO (sin base de datos)`);
+    } else {
+      console.log(`[ITERA Engine] Servidor en ${address} · evento "${evento.nombre}" · almacen ${store.name}`);
+    }
   } catch (err) {
+    // Aqui si es fatal: no se pudo abrir el puerto.
     console.error('[Error de arranque]:', err);
     process.exit(1);
   }
