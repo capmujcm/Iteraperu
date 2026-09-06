@@ -18,6 +18,7 @@ public/                   Todo lo que se sirve al navegador (static root)
     app.js                Núcleo: QR, cámara, navegación, cliente de la API
     asistente.html        App del asistente         →  /e/country-fest
     staff.html            Punto de Ayuda            →  /staff/country-fest
+    negocio.html          Panel del puesto          →  /negocios/country-fest
   evento/
     prototipo.html        Prototipo comercial       →  /evento  (autónomo, sin API)
     qr-test.html          Banco de pruebas del motor QR
@@ -27,6 +28,7 @@ lib/
   store.js                Capa de datos: driver PostgreSQL y driver en memoria
   routes-auth.js          Rutas de registro, ingreso y soporte
   routes-insignias.js     Puestos, insignias y tickets de sorteo
+  routes-empresa.js       Rol Empresa: acceso, ficha, logo y panel
 db/
   schema.sql              Esquema de PostgreSQL. Idempotente: se aplica en cada arranque
 automation/
@@ -44,6 +46,7 @@ Nada fuera de `public/` es accesible por HTTP.
 | `/brand` | Brand deck |
 | `/e/country-fest` | **App real del asistente** (`/e`, `/entrada` redirigen aquí) |
 | `/staff/country-fest` | **App real del Punto de Ayuda** (requiere `?staff=TOKEN`) |
+| `/negocios/country-fest` | **Panel del puesto participante** |
 | `/evento` | Prototipo comercial, con datos ficticios |
 | `/api/*` | API del evento |
 
@@ -147,6 +150,57 @@ rotativo por puesto, que exige una pantalla en cada stand: **está pendiente**.
 Punto de Ayuda → **Puestos y sus QR**. Cada puesto genera su ficha imprimible
 con el QR y un código corto de respaldo (`P-4K7Q`) para cuando la cámara no lee
 por sol directo o pantalla sucia.
+
+Al crearlo se devuelve **una sola vez** la clave temporal de acceso del puesto.
+Anótala: no se guarda en claro. Si se pierde, hay un botón en la ficha para
+generar otra.
+
+## El puesto como usuario: `/negocios/country-fest`
+
+El responsable del puesto entra con su código (`P-4K7Q`) y la clave que le dio
+la organización. Caduca a los 7 días y le obliga a definir la suya al entrar.
+
+| Endpoint | Acceso |
+|---|---|
+| `POST /api/negocio/login` | Público (15/min) |
+| `GET /api/negocio/me` | Sesión del puesto |
+| `POST /api/negocio/change-password` | Sesión del puesto |
+| `PATCH /api/negocio/perfil` | Sesión del puesto |
+| `POST /api/negocio/logo` | Sesión del puesto |
+| `DELETE /api/negocio/logo` | Sesión del puesto |
+| `GET /api/negocio/stats` | Sesión del puesto |
+| `GET /api/empresas/:id/logo` | Público — la imagen |
+| `POST /api/soporte/empresas/:id/acceso` | Token de staff — repone la clave |
+
+Las sesiones de puesto viven en `sesiones_empresa`, tabla aparte de la de los
+asistentes: un token de una **no sirve** como token de la otra.
+
+### El logo es la insignia
+
+Lo que sube el puesto es la imagen que se queda en el celular de cada asistente
+que lo visitó. Sin logo, la insignia muestra el emoji del puesto.
+
+Se guarda en PostgreSQL (`bytea`), no en disco: el sistema de archivos de
+Railway es efímero y cada redespliegue borraría los logos. Los listados
+devuelven solo `tiene_logo`; los bytes se piden por `/api/empresas/:id/logo`.
+
+**Reglas de la subida** — es la superficie de ataque más expuesta del proyecto:
+
+- El tipo se decide por los **bytes reales** del archivo, nunca por el `mime`
+  que declare el cliente.
+- Solo PNG, JPG y WebP. **SVG rechazado**: puede contener `<script>` y se
+  ejecutaría en el navegador de cada asistente que viera la insignia — un XSS
+  almacenado con alcance a todo el evento.
+- Máximo 400 KB, con `bodyLimit` propio en la ruta.
+- Al servirla: `X-Content-Type-Options: nosniff` y `Content-Type` explícito.
+
+### Qué NO ve el puesto
+
+Solo cifras agregadas: insignias entregadas, escaneos, repetidos y curva por
+hora. **No ve quién le escaneó.** Compartir datos identificables de los
+asistentes con un tercero exigiría un consentimiento específico que no se pide
+en el registro, y el aviso de privacidad dice lo contrario. Ofrecer captación de
+leads a los puestos no es un ajuste de código: es un cambio legal.
 
 ## Desarrollo local
 
