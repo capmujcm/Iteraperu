@@ -295,12 +295,38 @@
   /* --------------------------------------------------------------------- */
   /* token de staff                                                        */
   /* --------------------------------------------------------------------- */
-  el('btnGuardarToken').addEventListener('click', function () {
+  el('btnGuardarToken').addEventListener('click', async function () {
     const t = el('tk-manual').value.trim();
     if (!t) return aviso('tokenResult', 'bad', 'Pega el token para continuar.');
-    API.guardarTokenStaff(t);
-    el('tk-manual').value = '';
-    arrancar();
+
+    // Se comprueba contra el servidor ANTES de dar por buena la entrada. Sin
+    // esto la app mostraba el menú de organizador y solo fallaba al intentar
+    // la primera acción, que es la peor forma de enterarse.
+    await conBoton(this, 'Comprobando…', async function () {
+      API.guardarTokenStaff(t);
+      try {
+        await API.staffUsuarios();
+        el('tk-manual').value = '';
+        limpiar('tokenResult');
+        establecerActor({ nombre: 'Token de emergencia', rol: 'organizador' });
+        go('home');
+      } catch (e) {
+        API.guardarTokenStaff('');
+        if (e.sinRed) {
+          aviso('tokenResult', 'bad', 'Sin conexión con el servidor. Revisa tu señal.');
+        } else if (e.status === 503) {
+          aviso('tokenResult', 'bad', 'El servidor no tiene ADMIN_TOKEN configurado.');
+        } else {
+          el('tokenResult').innerHTML =
+            '<div class="flash bad">Ese token no coincide con el del servidor.</div>' +
+            '<div class="soft tiny muted" style="margin-top:.6rem;">' +
+              'Cópialo de <b>Railway → tu servicio → Variables → ADMIN_TOKEN</b>. ' +
+              'Ojo con las comillas: si en Railway aparece entre <span class="mono">"</span>, ' +
+              'esas comillas forman parte del valor y hay que quitarlas allí.' +
+            '</div>';
+        }
+      }
+    });
   });
 
   /* --------------------------------------------------------------------- */
@@ -912,10 +938,24 @@
       return;
     }
 
-    // Token de emergencia: entra como organizador, sin nombre propio.
+    // Token de emergencia guardado de antes: se revalida contra el servidor en
+    // vez de confiar en que sigue siendo bueno. Puede haber cambiado en Railway.
     if (API.tieneTokenStaff()) {
-      establecerActor({ nombre: 'Token de emergencia', rol: 'organizador' });
-      go('home');
+      API.staffUsuarios()
+        .then(function () {
+          establecerActor({ nombre: 'Token de emergencia', rol: 'organizador' });
+          go('home');
+        })
+        .catch(function (e) {
+          if (e.sinRed) {
+            go('sin-token');
+            aviso('tokenResult', 'warn', 'No hay conexión. Inténtalo cuando tengas señal.');
+            return;
+          }
+          API.guardarTokenStaff('');
+          go('sin-token');
+          aviso('tokenResult', 'bad', 'El token guardado ya no es válido. Vuelve a ingresar.');
+        });
       return;
     }
 
