@@ -369,3 +369,19 @@ CREATE TABLE IF NOT EXISTS acciones_staff (
 );
 
 CREATE INDEX IF NOT EXISTS idx_acciones_staff_created ON acciones_staff (created_at DESC);
+
+-- =============================================================================
+-- 20. Usuario propio de cada puesto
+-- =============================================================================
+-- El login de la empresa usaba `codigo_corto`, que es el codigo IMPRESO bajo el
+-- QR del stand para que los asistentes lo tecleen cuando la camara no lee. Es
+-- decir: el nombre de usuario de cada puesto estaba expuesto en su propio
+-- cartel, regalando a cualquiera la lista de usuarios validos.
+--
+-- Ahora son dos cosas separadas:
+--   codigo_corto -> publico, impreso, para canjear la insignia
+--   usuario      -> identificador de acceso del responsable del puesto
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS usuario VARCHAR(40);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_empresas_evento_usuario
+  ON empresas (evento_id, LOWER(usuario)) WHERE usuario IS NOT NULL;

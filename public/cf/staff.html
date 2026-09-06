@@ -242,6 +242,11 @@
 
       <form class="card" id="formPuesto" hidden style="margin-bottom:.8rem;">
         <div class="field"><label for="pu-nombre">Nombre del puesto</label><input type="text" id="pu-nombre" maxlength="150" required autocomplete="off"></div>
+        <div class="field">
+          <label for="pu-usuario">Usuario de acceso</label>
+          <input type="text" id="pu-usuario" maxlength="40" required autocomplete="off" placeholder="ej. sazon.nona" style="text-transform:lowercase;">
+          <p class="tiny muted" style="margin-top:.25rem;">Con esto entra el responsable del puesto. Es distinto del código que se imprime bajo el QR.</p>
+        </div>
         <div class="g2">
           <div class="field"><label for="pu-rubro">Rubro</label><input type="text" id="pu-rubro" maxlength="60" placeholder="Comida, Bebidas…" autocomplete="off"></div>
           <div class="field"><label for="pu-stand">Stand</label><input type="text" id="pu-stand" maxlength="30" placeholder="A-10" autocomplete="off"></div>
@@ -685,6 +690,7 @@
       try {
         const r = await API.crearPuesto({
           nombre: nombre,
+          usuario: el('pu-usuario').value.trim().toLowerCase(),
           rubro: el('pu-rubro').value.trim(),
           stand: el('pu-stand').value.trim(),
           emoji: el('pu-emoji').value.trim(),
@@ -701,8 +707,8 @@
           '<div class="card" style="margin-top:.6rem;">' +
             '<h4 style="font-size:.9rem;margin-bottom:.5rem;">Acceso para el responsable del puesto</h4>' +
             '<div class="kv"><span>Entra en</span><span class="mono">/negocios/' + esc(slugEvento) + '</span></div>' +
-            '<div class="kv"><span>Código</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' +
-              esc(r.acceso.codigo) + '</span></div>' +
+            '<div class="kv"><span>Usuario</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' +
+              esc(r.acceso.usuario) + '</span></div>' +
             '<div class="kv"><span>Clave temporal</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' +
               esc(r.acceso.password_temporal) + '</span></div>' +
             '<div class="kv"><span>Válida</span><span>' + esc(String(r.acceso.dias_validez)) + ' días</span></div>' +
@@ -742,7 +748,9 @@
           '<div class="center" style="background:#fff;padding:10px;border-radius:12px;">' +
             '<canvas id="qrPuesto' + i + '" style="width:150px;height:150px;image-rendering:pixelated;"></canvas>' +
           '</div>' +
-          '<div class="kv" style="margin-top:.5rem;"><span>Código impreso</span>' +
+          '<div class="kv" style="margin-top:.5rem;"><span>Usuario de acceso</span>' +
+            '<span class="mono">' + esc(p.usuario || '—') + '</span></div>' +
+          '<div class="kv"><span>Código impreso</span>' +
             '<span class="mono" style="font-size:1.05rem;font-weight:700;">' + esc(p.codigo_corto) + '</span></div>' +
           (p.stand ? '<div class="kv"><span>Stand</span><span>' + esc(p.stand) + '</span></div>' : '') +
           (p.condicion ? '<div class="kv"><span>Condición</span><span>' + esc(p.condicion) + '</span></div>' : '') +
@@ -779,8 +787,8 @@
         '<div class="flash good">✓ Clave nueva para ' + esc(r.empresa.nombre) + '</div>' +
         '<div class="card" style="margin-top:.6rem;">' +
           '<div class="kv"><span>Entra en</span><span class="mono">/negocios/' + esc(slugEvento) + '</span></div>' +
-          '<div class="kv"><span>Código</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' +
-            esc(r.codigo) + '</span></div>' +
+          '<div class="kv"><span>Usuario</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' +
+            esc(r.usuario) + '</span></div>' +
           '<div class="kv"><span>Clave temporal</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' +
             esc(r.password_temporal) + '</span></div>' +
           '<div class="kv"><span>Válida</span><span>' + esc(String(r.dias_validez)) + ' días</span></div>' +

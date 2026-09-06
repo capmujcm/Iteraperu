@@ -55,13 +55,13 @@
       <p class="eyebrow blue">Puestos participantes</p>
       <h2 style="font-size:1.45rem;margin:.3rem 0 .5rem;">Panel de mi puesto</h2>
       <p class="muted tiny" style="margin-bottom:1.1rem;">
-        Entra con el código de tu puesto y la contraseña que te dio la organización.
+        Entra con el usuario y la contraseña que te dio la organización.
       </p>
 
       <form class="card" id="formLogin" novalidate>
         <div class="field">
-          <label for="lg-codigo">Código del puesto</label>
-          <input type="text" id="lg-codigo" autocomplete="username" required placeholder="Ej. P-4K7Q" style="text-transform:uppercase;">
+          <label for="lg-codigo">Usuario del puesto</label>
+          <input type="text" id="lg-codigo" autocomplete="username" required placeholder="Ej. sazon.nona" style="text-transform:lowercase;">
         </div>
         <div class="field">
           <label for="lg-pass">Contraseña</label>
@@ -71,7 +71,7 @@
       </form>
       <div id="loginResult" style="margin-top:.8rem;"></div>
       <div class="soft tiny muted" style="margin-top:.9rem;">
-        ¿No tienes tu código o se te venció la clave? Escríbele a la organización del evento.
+        ¿No tienes tu usuario o se te venció la clave? Escríbele a la organización del evento.
       </div>
     </section>
 
@@ -301,7 +301,7 @@
         const datos = await API.pedir('/api/negocio/login', {
           metodo: 'POST',
           cuerpo: {
-            codigo: el('lg-codigo').value.trim().toUpperCase(),
+            usuario: el('lg-codigo').value.trim().toLowerCase(),
             password: el('lg-pass').value,
             device_id: deviceId()
           }
