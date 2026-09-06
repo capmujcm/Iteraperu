@@ -26,6 +26,7 @@ lib/
   auth.js                 Contraseñas (scrypt), tokens de sesión y de QR
   store.js                Capa de datos: driver PostgreSQL y driver en memoria
   routes-auth.js          Rutas de registro, ingreso y soporte
+  routes-insignias.js     Puestos, insignias y tickets de sorteo
 db/
   schema.sql              Esquema de PostgreSQL. Idempotente: se aplica en cada arranque
 automation/
@@ -106,6 +107,46 @@ repetir el trámite en el Punto de Ayuda.
 `POST /api/tickets/verify` es público pero **solo resuelve por token de QR o
 código de ticket**, y devuelve nombre, código, tipo y estado. Nunca DNI, correo
 ni celular.
+
+## Dinámica de insignias y sorteo
+
+Cada puesto participante tiene un QR impreso. El asistente lo escanea y gana
+**una** insignia de ese puesto, que vale un ticket para el sorteo.
+
+| Endpoint | Acceso |
+|---|---|
+| `GET /api/empresas` | Público — catálogo **sin** los tokens de QR |
+| `POST /api/insignias/scan` | Sesión de la persona |
+| `GET /api/insignias/mias` | Sesión de la persona |
+| `POST /api/soporte/empresas` | Token de staff — alta de puesto |
+| `GET /api/soporte/empresas` | Token de staff — puestos con su QR para imprimir |
+
+### Cómo está protegido el sorteo
+
+- **Una insignia por persona y puesto** es un índice único en PostgreSQL
+  (`insignia_unica_por_puesto`). El duplicado lo decide la base de datos, no el
+  navegador. Antes esto se comprobaba en `localStorage`, así que cualquiera con
+  la consola se daba tickets.
+- **El número de ticket lo asigna el servidor** dentro del mismo `INSERT`. En
+  dos pasos daría números repetidos cuando dos personas escanean a la vez.
+- **Hay que haber validado el ingreso** para poder escanear
+  (`EXIGIR_INGRESO_PARA_ESCANEAR`, activo por defecto).
+- **Todo intento queda en `scans_log`** con su dispositivo y resultado.
+
+### Límite conocido
+
+El QR del puesto es **estático e impreso**. Si alguien lo fotografía y lo
+comparte, quien reciba la foto puede ganar la insignia sin pasar por el stand.
+Exigir el ingreso validado acota el daño a quienes sí están en el evento, y
+`scans_log` permite detectar el patrón (cientos de escaneos del mismo puesto en
+pocos minutos desde dispositivos dispersos). La solución completa es un QR
+rotativo por puesto, que exige una pantalla en cada stand: **está pendiente**.
+
+### Dar de alta los puestos
+
+Punto de Ayuda → **Puestos y sus QR**. Cada puesto genera su ficha imprimible
+con el QR y un código corto de respaldo (`P-4K7Q`) para cuando la cámara no lee
+por sol directo o pantalla sucia.
 
 ## Desarrollo local
 
