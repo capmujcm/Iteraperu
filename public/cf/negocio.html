@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0F9B6C">
+<meta name="robots" content="noindex">
+<title>Country Fest · Mi puesto</title>
+<link rel="icon" href="/assets/itera-mark.svg">
+<link rel="stylesheet" href="/cf/app.css">
+<style>
+  .apphead .dot{background:var(--good);}
+  .logo-preview{
+    width:120px;height:120px;object-fit:contain;background:#fff;border-radius:14px;
+    border:1px solid var(--line);padding:6px;display:block;margin:0 auto;}
+  .logo-vacio{
+    width:120px;height:120px;border-radius:14px;border:2px dashed #CFD5E0;
+    display:grid;place-items:center;margin:0 auto;color:var(--ink-mut);font-size:2rem;}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.8rem;text-align:center;}
+  .stat .n{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;line-height:1;}
+  .stat .l{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-top:.25rem;}
+  .barras{display:flex;align-items:flex-end;gap:3px;height:90px;margin-top:.6rem;}
+  .barras div{flex:1;background:var(--good);border-radius:3px 3px 0 0;min-height:2px;}
+  .barras-x{display:flex;gap:3px;margin-top:.25rem;}
+  .barras-x span{flex:1;font-size:.55rem;color:var(--ink-mut);text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="apphead">
+    <div class="ev"><span class="dot"></span><b id="evNombre">Country Fest</b></div>
+    <button class="btn btn-line btn-sm" id="btnSalir" hidden>Salir</button>
+  </header>
+
+  <div class="offbar" id="offbar">Sin conexión con el servidor.</div>
+
+  <div class="vbody">
+
+    <section class="screen active" data-sc="cargando">
+      <div class="loading">Cargando…</div>
+    </section>
+
+    <!-- ================= ingreso ================= -->
+    <section class="screen" data-sc="login">
+      <p class="eyebrow blue">Puestos participantes</p>
+      <h2 style="font-size:1.45rem;margin:.3rem 0 .5rem;">Panel de mi puesto</h2>
+      <p class="muted tiny" style="margin-bottom:1.1rem;">
+        Entra con el código de tu puesto y la contraseña que te dio la organización.
+      </p>
+
+      <form class="card" id="formLogin" novalidate>
+        <div class="field">
+          <label for="lg-codigo">Código del puesto</label>
+          <input type="text" id="lg-codigo" autocomplete="username" required placeholder="Ej. P-4K7Q" style="text-transform:uppercase;">
+        </div>
+        <div class="field">
+          <label for="lg-pass">Contraseña</label>
+          <input type="password" id="lg-pass" autocomplete="current-password" required>
+        </div>
+        <button class="btn btn-good btn-block" type="submit">Ingresar</button>
+      </form>
+      <div id="loginResult" style="margin-top:.8rem;"></div>
+      <div class="soft tiny muted" style="margin-top:.9rem;">
+        ¿No tienes tu código o se te venció la clave? Escríbele a la organización del evento.
+      </div>
+    </section>
+
+    <!-- ================= contraseña obligatoria ================= -->
+    <section class="screen" data-sc="cambiar-clave">
+      <div class="schead"><h2>Define tu contraseña</h2></div>
+      <div class="note n-warn tiny" style="margin-bottom:.9rem;">
+        Entraste con la clave temporal de la organización. Elige una propia para continuar.
+      </div>
+      <form class="card" id="formClave" novalidate>
+        <div class="field"><label for="ck-actual">Clave temporal</label><input type="password" id="ck-actual" autocomplete="current-password" required></div>
+        <div class="field"><label for="ck-nueva">Contraseña nueva</label><input type="password" id="ck-nueva" autocomplete="new-password" required placeholder="Mínimo 6 caracteres"></div>
+        <div class="field"><label for="ck-nueva2">Repite la nueva</label><input type="password" id="ck-nueva2" autocomplete="new-password" required></div>
+        <button class="btn btn-good btn-block" type="submit">Guardar y continuar</button>
+      </form>
+      <div id="clvResult" style="margin-top:.8rem;"></div>
+    </section>
+
+    <!-- ================= panel ================= -->
+    <section class="screen" data-sc="panel">
+      <div class="schead"><h2 id="panelNombre">Mi puesto</h2></div>
+
+      <div class="g2" style="margin-bottom:.6rem;">
+        <div class="stat"><div class="n" id="stInsignias">0</div><div class="l">Insignias entregadas</div></div>
+        <div class="stat"><div class="n" id="stEscaneos">0</div><div class="l">Escaneos totales</div></div>
+      </div>
+
+      <div class="card">
+        <h4 style="font-size:.92rem;margin-bottom:.3rem;">Insignias por hora</h4>
+        <div id="grafico"></div>
+      </div>
+
+      <div class="soft tiny muted" style="margin-top:.7rem;">
+        <b>Insignias entregadas</b> es cuánta gente distinta cumplió tu condición.
+        <b>Escaneos</b> incluye los repetidos de quien ya la tenía (<span id="stRepetidos">0</span>).
+      </div>
+
+      <div class="note n-info tiny" style="margin-top:.7rem;">
+        Por protección de datos personales, aquí solo se ven cifras agregadas.
+        La organización no comparte contigo la identidad de los asistentes.
+      </div>
+    </section>
+
+    <!-- ================= logo ================= -->
+    <section class="screen" data-sc="logo">
+      <div class="schead"><h2>Mi logo</h2></div>
+      <p class="tiny muted" style="margin-bottom:.9rem;">
+        <b>Tu logo es la insignia.</b> Es la imagen que se queda en el celular de cada
+        persona que visita tu puesto, así que conviene que se vea bien en pequeño.
+      </p>
+
+      <div class="card center">
+        <div id="logoActual"></div>
+        <input type="file" id="logoInput" accept="image/png,image/jpeg,image/webp" hidden>
+        <button class="btn btn-good btn-block" id="btnSubirLogo" style="margin-top:.9rem;">Subir una imagen</button>
+        <button class="btn btn-line btn-block btn-sm" id="btnQuitarLogo" style="margin-top:.5rem;" hidden>Quitar el logo</button>
+      </div>
+
+      <div id="logoResult" style="margin-top:.8rem;"></div>
+
+      <div class="soft tiny muted" style="margin-top:.8rem;">
+        <b>Formatos:</b> PNG, JPG o WebP, hasta 400 KB. Cuadrada se ve mejor.<br>
+        Los SVG no se aceptan por seguridad.
+      </div>
+    </section>
+
+    <!-- ================= ficha ================= -->
+    <section class="screen" data-sc="ficha">
+      <div class="schead"><h2>Mi ficha</h2></div>
+      <p class="tiny muted" style="margin-bottom:.8rem;">Esto es lo que ven los asistentes en el listado de puestos.</p>
+
+      <form id="formFicha" novalidate>
+        <div class="field"><label for="fi-nombre">Nombre del puesto</label><input type="text" id="fi-nombre" maxlength="150" required autocomplete="off"></div>
+        <div class="g2">
+          <div class="field"><label for="fi-rubro">Rubro</label><input type="text" id="fi-rubro" maxlength="60" autocomplete="off"></div>
+          <div class="field"><label for="fi-emoji">Emoji</label><input type="text" id="fi-emoji" maxlength="4" autocomplete="off"></div>
+        </div>
+        <div class="field"><label for="fi-descripcion">Descripción</label><textarea id="fi-descripcion" rows="3" maxlength="1000"></textarea></div>
+        <div class="field"><label for="fi-condicion">Condición para ganar la insignia</label><input type="text" id="fi-condicion" maxlength="500" placeholder="Compra mínima S/ 30" autocomplete="off"></div>
+
+        <h4 style="font-size:.88rem;margin:1rem 0 .5rem;">Contacto (no se publica)</h4>
+        <div class="g2">
+          <div class="field"><label for="fi-responsable">Responsable</label><input type="text" id="fi-responsable" maxlength="120" autocomplete="off"></div>
+          <div class="field"><label for="fi-telefono">Teléfono</label><input type="tel" id="fi-telefono" maxlength="30" autocomplete="off"></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label for="fi-email">Correo</label><input type="email" id="fi-email" maxlength="150" autocomplete="off"></div>
+          <div class="field"><label for="fi-instagram">Instagram</label><input type="text" id="fi-instagram" maxlength="80" placeholder="@tupuesto" autocomplete="off"></div>
+        </div>
+
+        <button class="btn btn-good btn-block" type="submit" style="margin-top:.6rem;">Guardar</button>
+      </form>
+      <div id="fichaResult" style="margin-top:.8rem;"></div>
+
+      <div class="card" style="margin-top:.9rem;">
+        <h4 style="font-size:.9rem;margin-bottom:.5rem;">Seguridad</h4>
+        <button class="btn btn-line btn-block btn-sm" data-go="cambiar-clave-voluntario">Cambiar mi contraseña</button>
+      </div>
+    </section>
+
+    <!-- ================= cambio voluntario ================= -->
+    <section class="screen" data-sc="cambiar-clave-voluntario">
+      <div class="schead"><button class="back" data-go="ficha" aria-label="Volver">‹</button><h2>Cambiar contraseña</h2></div>
+      <form class="card" id="formClave2" novalidate>
+        <div class="field"><label for="cv-actual">Contraseña actual</label><input type="password" id="cv-actual" autocomplete="current-password" required></div>
+        <div class="field"><label for="cv-nueva">Contraseña nueva</label><input type="password" id="cv-nueva" autocomplete="new-password" required placeholder="Mínimo 6 caracteres"></div>
+        <div class="field"><label for="cv-nueva2">Repite la nueva</label><input type="password" id="cv-nueva2" autocomplete="new-password" required></div>
+        <button class="btn btn-good btn-block" type="submit">Guardar</button>
+      </form>
+      <div id="clv2Result" style="margin-top:.8rem;"></div>
+    </section>
+
+  </div>
+
+  <nav class="vnav" id="vnav" hidden>
+    <button data-go="panel"><span class="i">📊</span>Panel</button>
+    <button data-go="logo"><span class="i">🏅</span>Mi logo</button>
+    <button data-go="ficha"><span class="i">🏪</span>Mi ficha</button>
+  </nav>
+</div>
+
+<script src="/cf/app.js"></script>
+<script>
+/* =============================================================================
+   Country Fest - panel del puesto participante
+   ============================================================================= */
+(function () {
+  'use strict';
+
+  let empresa = null;
+
+  function aviso(caja, tipo, mensaje) {
+    const c = el(caja);
+    if (c) c.innerHTML = '<div class="flash ' + tipo + '">' + esc(mensaje) + '</div>';
+  }
+  function limpiar(caja) { const c = el(caja); if (c) c.innerHTML = ''; }
+
+  async function conBoton(btn, textoOcupado, fn) {
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = textoOcupado;
+    try { return await fn(); } finally { btn.disabled = false; btn.textContent = original; }
+  }
+
+  function mostrarNav(v) {
+    el('vnav').hidden = !v;
+    el('btnSalir').hidden = !v;
+  }
+
+  /* --------------------------------------------------------------------- */
+  /* sesión y pintado                                                      */
+  /* --------------------------------------------------------------------- */
+  function establecerEmpresa(e) {
+    empresa = e;
+    mostrarNav(true);
+    el('panelNombre').textContent = e.nombre || 'Mi puesto';
+    pintarLogo();
+    rellenarFicha();
+  }
+
+  function pintarLogo() {
+    if (!empresa) return;
+    const caja = el('logoActual');
+    if (empresa.tiene_logo) {
+      // El parámetro de versión fuerza al navegador a recargar la imagen tras
+      // subir una nueva; si no, mostraría la anterior desde su caché.
+      const v = encodeURIComponent(empresa.logo_actualizado_at || Date.now());
+      caja.innerHTML = '<img class="logo-preview" src="/api/empresas/' +
+        encodeURIComponent(empresa.id) + '/logo?v=' + v + '" alt="Logo de tu puesto">';
+      el('btnQuitarLogo').hidden = false;
+      el('btnSubirLogo').textContent = 'Cambiar la imagen';
+    } else {
+      caja.innerHTML = '<div class="logo-vacio">' + esc(empresa.emoji || '🎪') + '</div>' +
+        '<p class="tiny muted" style="margin-top:.5rem;">Sin logo. Ahora la insignia muestra tu emoji.</p>';
+      el('btnQuitarLogo').hidden = true;
+      el('btnSubirLogo').textContent = 'Subir una imagen';
+    }
+  }
+
+  function rellenarFicha() {
+    if (!empresa) return;
+    const campos = {
+      'fi-nombre': 'nombre', 'fi-rubro': 'rubro', 'fi-emoji': 'emoji',
+      'fi-descripcion': 'descripcion', 'fi-condicion': 'condicion',
+      'fi-responsable': 'responsable', 'fi-telefono': 'telefono',
+      'fi-email': 'email', 'fi-instagram': 'instagram'
+    };
+    Object.keys(campos).forEach(function (id) {
+      el(id).value = empresa[campos[id]] || '';
+    });
+  }
+
+  async function cargarPanel() {
+    try {
+      const s = await API.pedir('/api/negocio/stats', { auth: 'empresa' });
+      el('stInsignias').textContent = s.insignias;
+      el('stEscaneos').textContent = s.escaneos;
+      el('stRepetidos').textContent = s.repetidos;
+
+      const horas = s.porHora || [];
+      if (!horas.length) {
+        el('grafico').innerHTML = '<p class="tiny muted" style="padding:.8rem 0;">Todavía no hay insignias entregadas.</p>';
+        return;
+      }
+      const max = Math.max.apply(null, horas.map(function (h) { return h.n; }));
+      el('grafico').innerHTML =
+        '<div class="barras">' + horas.map(function (h) {
+          return '<div style="height:' + Math.round((h.n / max) * 100) + '%" title="' +
+            esc(h.hora) + ': ' + h.n + '"></div>';
+        }).join('') + '</div>' +
+        '<div class="barras-x">' + horas.map(function (h) {
+          return '<span>' + esc(h.hora.slice(0, 2)) + '</span>';
+        }).join('') + '</div>';
+    } catch (e) { /* se reintenta al volver a entrar */ }
+  }
+
+  /* --------------------------------------------------------------------- */
+  /* ingreso                                                               */
+  /* --------------------------------------------------------------------- */
+  el('formLogin').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    limpiar('loginResult');
+    const boton = this.querySelector('button[type="submit"]');
+
+    await conBoton(boton, 'Ingresando…', async function () {
+      try {
+        const datos = await API.pedir('/api/negocio/login', {
+          metodo: 'POST',
+          cuerpo: {
+            codigo: el('lg-codigo').value.trim().toUpperCase(),
+            password: el('lg-pass').value,
+            device_id: deviceId()
+          }
+        });
+        API.guardarSesionEmpresa(datos.token);
+        el('lg-pass').value = '';
+        establecerEmpresa(datos.empresa);
+        if (datos.must_change_password) { mostrarNav(false); go('cambiar-clave'); return; }
+        go('panel');
+        cargarPanel();
+      } catch (e) {
+        aviso('loginResult', 'bad', e.message);
+      }
+    });
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* cambio de contraseña                                                  */
+  /* --------------------------------------------------------------------- */
+  function conectarCambio(formId, ids, caja, alTerminar) {
+    el(formId).addEventListener('submit', async function (ev) {
+      ev.preventDefault();
+      limpiar(caja);
+      const nueva = el(ids.nueva).value;
+      if (nueva.length < 6) return aviso(caja, 'bad', 'La contraseña debe tener al menos 6 caracteres.');
+      if (nueva !== el(ids.nueva2).value) return aviso(caja, 'bad', 'Las dos contraseñas no coinciden.');
+
+      const boton = this.querySelector('button[type="submit"]');
+      await conBoton(boton, 'Guardando…', async function () {
+        try {
+          const datos = await API.pedir('/api/negocio/change-password', {
+            metodo: 'POST', auth: 'empresa',
+            cuerpo: { password_actual: el(ids.actual).value, password_nueva: nueva }
+          });
+          [ids.actual, ids.nueva, ids.nueva2].forEach(function (i) { el(i).value = ''; });
+          establecerEmpresa(datos.empresa);
+          aviso(caja, 'good', '✓ Contraseña actualizada');
+          setTimeout(alTerminar, 700);
+        } catch (e) {
+          aviso(caja, 'bad', e.message);
+        }
+      });
+    });
+  }
+
+  conectarCambio('formClave', { actual: 'ck-actual', nueva: 'ck-nueva', nueva2: 'ck-nueva2' },
+    'clvResult', function () { go('panel'); cargarPanel(); });
+  conectarCambio('formClave2', { actual: 'cv-actual', nueva: 'cv-nueva', nueva2: 'cv-nueva2' },
+    'clv2Result', function () { go('ficha'); });
+
+  /* --------------------------------------------------------------------- */
+  /* logo                                                                  */
+  /* --------------------------------------------------------------------- */
+  const LOGO_MAX = 400 * 1024;
+
+  el('btnSubirLogo').addEventListener('click', function () { el('logoInput').click(); });
+
+  el('logoInput').addEventListener('change', async function () {
+    const archivo = this.files && this.files[0];
+    this.value = '';                       // permite volver a elegir el mismo archivo
+    if (!archivo) return;
+    limpiar('logoResult');
+
+    // Se comprueba aquí para dar una respuesta inmediata, pero el servidor
+    // vuelve a validar tipo y tamaño: esta comprobación es una cortesía, no
+    // una defensa.
+    if (archivo.size > LOGO_MAX) {
+      return aviso('logoResult', 'bad',
+        'La imagen pesa ' + Math.round(archivo.size / 1024) + ' KB. El máximo son 400 KB.');
+    }
+    if (['image/png', 'image/jpeg', 'image/webp'].indexOf(archivo.type) < 0) {
+      return aviso('logoResult', 'bad', 'Sube un PNG, JPG o WebP.');
+    }
+
+    aviso('logoResult', 'warn', 'Subiendo…');
+    try {
+      const base64 = await new Promise(function (resolve, reject) {
+        const r = new FileReader();
+        r.onload = function () { resolve(String(r.result)); };
+        r.onerror = function () { reject(new Error('No se pudo leer el archivo.')); };
+        r.readAsDataURL(archivo);
+      });
+
+      const datos = await API.pedir('/api/negocio/logo', {
+        metodo: 'POST', auth: 'empresa', cuerpo: { datos: base64 }
+      });
+      empresa = datos.empresa;
+      pintarLogo();
+      aviso('logoResult', 'good', '✓ Logo actualizado. Ya es la cara de tu insignia.');
+    } catch (e) {
+      aviso('logoResult', 'bad', e.message);
+    }
+  });
+
+  el('btnQuitarLogo').addEventListener('click', async function () {
+    if (!confirm('¿Quitar tu logo?\n\nLa insignia volverá a mostrar tu emoji.')) return;
+    try {
+      const datos = await API.pedir('/api/negocio/logo', { metodo: 'DELETE', auth: 'empresa' });
+      empresa = datos.empresa;
+      pintarLogo();
+      aviso('logoResult', 'good', '✓ Logo quitado.');
+    } catch (e) {
+      aviso('logoResult', 'bad', e.message);
+    }
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* ficha                                                                 */
+  /* --------------------------------------------------------------------- */
+  el('formFicha').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    limpiar('fichaResult');
+    const nombre = el('fi-nombre').value.trim();
+    if (!nombre) return aviso('fichaResult', 'bad', 'El nombre del puesto no puede quedar vacío.');
+
+    const boton = this.querySelector('button[type="submit"]');
+    await conBoton(boton, 'Guardando…', async function () {
+      try {
+        const datos = await API.pedir('/api/negocio/perfil', {
+          metodo: 'PATCH', auth: 'empresa',
+          cuerpo: {
+            nombre: nombre,
+            rubro: el('fi-rubro').value,
+            emoji: el('fi-emoji').value,
+            descripcion: el('fi-descripcion').value,
+            condicion: el('fi-condicion').value,
+            responsable: el('fi-responsable').value,
+            telefono: el('fi-telefono').value,
+            email: el('fi-email').value,
+            instagram: el('fi-instagram').value
+          }
+        });
+        establecerEmpresa(datos.empresa);
+        aviso('fichaResult', 'good', '✓ Ficha actualizada');
+      } catch (e) {
+        aviso('fichaResult', 'bad', e.message);
+      }
+    });
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* salir y navegación                                                    */
+  /* --------------------------------------------------------------------- */
+  el('btnSalir').addEventListener('click', async function () {
+    if (!confirm('¿Cerrar la sesión de tu puesto en este equipo?')) return;
+    try { await API.pedir('/api/negocio/logout', { metodo: 'POST', auth: 'empresa' }); } catch (e) {}
+    API.borrarSesionEmpresa();
+    empresa = null;
+    mostrarNav(false);
+    go('login');
+  });
+
+  document.addEventListener('cf:pantalla', function (ev) {
+    const p = ev.detail.pantalla;
+    document.querySelectorAll('#vnav button').forEach(function (b) {
+      b.classList.toggle('active', b.dataset.go === p);
+    });
+    if (p === 'panel') cargarPanel();
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* arranque                                                              */
+  /* --------------------------------------------------------------------- */
+  (async function arrancar() {
+    if (!API.almacenamientoPersistente()) {
+      const barra = el('offbar');
+      barra.textContent = 'Este navegador bloquea el almacenamiento: al cerrar la pestaña habrá que ingresar otra vez.';
+      barra.classList.add('on');
+    }
+
+    API.evento()
+      .then(function (r) { if (r.event && r.event.nombre) el('evNombre').textContent = r.event.nombre; })
+      .catch(function () {});
+
+    if (!API.tieneSesionEmpresa()) { go('login'); return; }
+
+    try {
+      const datos = await API.pedir('/api/negocio/me', { auth: 'empresa' });
+      establecerEmpresa(datos.empresa);
+      go('panel');
+      cargarPanel();
+    } catch (e) {
+      if (e.status === 403 && e.datos && e.datos.must_change_password) {
+        mostrarNav(false);
+        go('cambiar-clave');
+        return;
+      }
+      if (e.sinRed) {
+        go('login');
+        aviso('loginResult', 'warn', 'No hay conexión. Inténtalo cuando tengas señal.');
+        return;
+      }
+      API.borrarSesionEmpresa();
+      go('login');
+    }
+  })();
+})();
+</script>
+</body>
+</html>

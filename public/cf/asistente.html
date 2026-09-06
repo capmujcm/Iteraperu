@@ -533,12 +533,19 @@
     } catch (e) { /* se reintenta al volver a entrar a la pantalla */ }
   }
 
+  // La cara de la insignia es el logo del puesto cuando lo ha subido; si no,
+  // su emoji. El logo se pide por su URL propia: nunca viaja incrustado en el
+  // JSON, que multiplicaría el peso de la respuesta por cada insignia.
   function medalla(i, ganada) {
     const fondo = ganada
       ? 'background:linear-gradient(135deg,' + esc(i.color || '#FF5A1F') + ',#111);'
       : '';
+    const cara = i.tiene_logo
+      ? '<img class="logo-insignia" src="/api/empresas/' + encodeURIComponent(i.empresa_id) + '/logo"' +
+        ' alt="" loading="lazy">'
+      : '<span class="em">' + esc(i.emoji || '🎪') + '</span>';
     return '<div class="medal' + (ganada ? '' : ' locked') + '" style="' + fondo + '">' +
-             '<span class="em">' + esc(i.emoji || '🎪') + '</span>' +
+             cara +
              '<span class="mn">' + esc(i.nombre || '') + '</span>' +
            '</div>';
   }

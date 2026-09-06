@@ -4,6 +4,7 @@ const { Pool } = require('pg');
 const { pgDriver, memoryDriver, safeAttendee, publicAttendee, auth } = require('./lib/store');
 const registrarAuth = require('./lib/routes-auth');
 const registrarInsignias = require('./lib/routes-insignias');
+const registrarEmpresa = require('./lib/routes-empresa');
 
 // Logger activado: durante el evento hay que poder reconstruir que paso en la
 // puerta. `disableRequestLogging` evita una linea por peticion de asset, que
@@ -269,6 +270,7 @@ fastify.addHook('onRequest', async (req, reply) => {
   const url = req.raw.url || '';
   const esApi = url.startsWith('/api/') && url !== '/api/health';
   const esAppEvento = url.startsWith('/e/') || url.startsWith('/staff/') ||
+                      url.startsWith('/negocios/') ||
                       url === '/e' || url === '/entrada';
   if (esApi || esAppEvento) {
     reply.code(503).send({
@@ -624,6 +626,7 @@ function appDeEvento(archivo) {
 
 fastify.get('/e/:slug', appDeEvento('asistente.html'));       // asistente
 fastify.get('/staff/:slug', appDeEvento('staff.html'));       // Punto de Ayuda
+fastify.get('/negocios/:slug', appDeEvento('negocio.html'));  // puesto participante
 
 // Atajos sin slug, para carteles y enlaces cortos.
 fastify.get('/e', async (req, reply) => reply.redirect(302, '/e/' + evento.slug));
@@ -668,6 +671,7 @@ const start = async () => {
         store, eventoId, rateLimit, requireAdmin, requireSession,
         exigirIngreso: EXIGIR_INGRESO_PARA_ESCANEAR
       });
+      registrarEmpresa(fastify, { store, eventoId, rateLimit, requireAdmin });
     }
 
     const port = Number(process.env.PORT) || 3000;

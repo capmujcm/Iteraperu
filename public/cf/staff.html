@@ -200,6 +200,10 @@
   const CLAVE_STAFF_NOMBRE = 'cf_staff_nombre';
   const CLAVE_STAFF_PUERTA = 'cf_staff_puerta';
 
+  // Slug del evento, tomado de la propia URL (/staff/country-fest). Se usa para
+  // decirle al puesto en qué dirección entrar.
+  const slugEvento = (location.pathname.split('/')[2] || 'country-fest');
+
   let staffNombre = '';
   let staffPuerta = '';
   let validadosEnEsteTurno = 0;
@@ -514,7 +518,7 @@
     const boton = this.querySelector('button[type="submit"]');
     await conBoton(boton, 'Creando…', async function () {
       try {
-        await API.crearPuesto({
+        const r = await API.crearPuesto({
           nombre: nombre,
           rubro: el('pu-rubro').value.trim(),
           stand: el('pu-stand').value.trim(),
@@ -524,7 +528,25 @@
         });
         el('formPuesto').reset();
         el('formPuesto').hidden = true;
-        aviso('puestosResult', 'good', '✓ Puesto creado. Imprime su QR y colócalo visible.');
+
+        // La clave se muestra UNA sola vez: no se guarda en claro en ningún
+        // sitio, así que si se pierde hay que reponerla desde la ficha.
+        el('puestosResult').innerHTML =
+          '<div class="flash good">✓ Puesto creado</div>' +
+          '<div class="card" style="margin-top:.6rem;">' +
+            '<h4 style="font-size:.9rem;margin-bottom:.5rem;">Acceso para el responsable del puesto</h4>' +
+            '<div class="kv"><span>Entra en</span><span class="mono">/negocios/' + esc(slugEvento) + '</span></div>' +
+            '<div class="kv"><span>Código</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' +
+              esc(r.acceso.codigo) + '</span></div>' +
+            '<div class="kv"><span>Clave temporal</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' +
+              esc(r.acceso.password_temporal) + '</span></div>' +
+            '<div class="kv"><span>Válida</span><span>' + esc(String(r.acceso.dias_validez)) + ' días</span></div>' +
+          '</div>' +
+          '<div class="note n-warn tiny" style="margin-top:.6rem;">' +
+            '<b>Anótala ahora.</b> Esta clave no se vuelve a mostrar. Si se pierde, ' +
+            'genera una nueva desde la ficha del puesto. Con ella el puesto sube su logo, ' +
+            'que es la imagen de la insignia.</div>';
+
         await pintarPuestos();
       } catch (e) {
         aviso('puestosResult', 'bad', e.message);
@@ -559,14 +581,50 @@
             '<span class="mono" style="font-size:1.05rem;font-weight:700;">' + esc(p.codigo_corto) + '</span></div>' +
           (p.stand ? '<div class="kv"><span>Stand</span><span>' + esc(p.stand) + '</span></div>' : '') +
           (p.condicion ? '<div class="kv"><span>Condición</span><span>' + esc(p.condicion) + '</span></div>' : '') +
+          '<div class="kv"><span>Logo subido</span><span>' + (p.tiene_logo ? '✓ sí' : '— todavía no') + '</span></div>' +
+          '<button class="btn btn-line btn-block btn-sm" data-acceso="' + esc(p.id) + '" style="margin-top:.6rem;">' +
+            (p.tiene_acceso ? 'Reponer su clave de acceso' : 'Generar su clave de acceso') +
+          '</button>' +
         '</div>';
       }).join('');
 
       lista.forEach(function (p, i) {
         drawQR(p.qr_contenido, el('qrPuesto' + i), 4);
       });
+
+      caja.querySelectorAll('[data-acceso]').forEach(function (b) {
+        b.addEventListener('click', function () { reponerAcceso(this.dataset.acceso); });
+      });
     } catch (e) {
       caja.innerHTML = '<div class="flash bad">' + esc(e.message) + '</div>';
+    }
+  }
+
+  // Repone la clave del puesto. Cierra sus sesiones abiertas: se hace cuando
+  // cambia el responsable o se perdió la clave, y en ambos casos conviene
+  // expulsar a quien la tuviera.
+  async function reponerAcceso(id) {
+    if (!confirm('Se generará una clave nueva y se cerrarán las sesiones abiertas de ese puesto.\n\n¿Continuar?')) return;
+    limpiar('puestosResult');
+    try {
+      const r = await API.pedir('/api/soporte/empresas/' + encodeURIComponent(id) + '/acceso', {
+        metodo: 'POST', auth: 'staff'
+      });
+      el('puestosResult').innerHTML =
+        '<div class="flash good">✓ Clave nueva para ' + esc(r.empresa.nombre) + '</div>' +
+        '<div class="card" style="margin-top:.6rem;">' +
+          '<div class="kv"><span>Entra en</span><span class="mono">/negocios/' + esc(slugEvento) + '</span></div>' +
+          '<div class="kv"><span>Código</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' +
+            esc(r.codigo) + '</span></div>' +
+          '<div class="kv"><span>Clave temporal</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' +
+            esc(r.password_temporal) + '</span></div>' +
+          '<div class="kv"><span>Válida</span><span>' + esc(String(r.dias_validez)) + ' días</span></div>' +
+        '</div>' +
+        '<div class="note n-warn tiny" style="margin-top:.6rem;"><b>Anótala ahora.</b> No se vuelve a mostrar.</div>';
+      window.scrollTo(0, 0);
+      await pintarPuestos();
+    } catch (e) {
+      aviso('puestosResult', 'bad', e.message);
     }
   }
 

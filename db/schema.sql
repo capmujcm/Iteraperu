@@ -253,3 +253,49 @@ CREATE TABLE IF NOT EXISTS scans_log (
 
 CREATE INDEX IF NOT EXISTS idx_scans_created ON scans_log (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_scans_empresa ON scans_log (empresa_id, created_at DESC);
+
+-- =============================================================================
+-- 15. La empresa como usuaria: acceso propio, perfil y logo
+-- =============================================================================
+-- Datos de contacto y ficha publica del puesto.
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS ruc VARCHAR(20);
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS responsable VARCHAR(120);
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS telefono VARCHAR(30);
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS email VARCHAR(150);
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS instagram VARCHAR(80);
+
+-- Logo del puesto. Se guarda EN LA BASE DE DATOS, no en disco: el sistema de
+-- archivos de Railway es efimero y cada redespliegue borraria los logos. Son
+-- pocas decenas de imagenes pequenas, asi que el coste es despreciable frente
+-- a montar almacenamiento de objetos.
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS logo_mime VARCHAR(40);
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS logo_datos BYTEA;
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS logo_actualizado_at TIMESTAMP WITH TIME ZONE;
+
+-- Acceso del responsable del puesto. Mismo modelo que el de los asistentes:
+-- credencial temporal que caduca y obliga a definir una propia.
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS password_hash TEXT;
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS password_salt TEXT;
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS password_algo VARCHAR(20) DEFAULT 'scrypt';
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS password_updated_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN DEFAULT false;
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS temp_password_expires_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS failed_login_count INT DEFAULT 0;
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS locked_until TIMESTAMP WITH TIME ZONE;
+
+-- 16. Sesiones de los puestos
+-- Tabla aparte de `sesiones` porque apunta a otra entidad. Mezclarlas obligaria
+-- a una clave foranea condicional, que es justo donde se cuelan los errores de
+-- autorizacion: una sesion de puesto pasando por sesion de asistente.
+CREATE TABLE IF NOT EXISTS sesiones_empresa (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  empresa_id UUID NOT NULL REFERENCES empresas(id) ON DELETE CASCADE,
+  token_hash CHAR(64) UNIQUE NOT NULL,
+  device_id VARCHAR(60),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  last_seen_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  revoked_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX IF NOT EXISTS idx_sesiones_emp_token ON sesiones_empresa (token_hash);

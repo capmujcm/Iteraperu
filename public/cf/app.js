@@ -486,6 +486,10 @@ async function startCam(boxId, onCode) {
 const API = (function () {
   const CLAVE_SESION = 'cf_sesion';
   const CLAVE_STAFF = 'cf_staff_token';
+  // Clave distinta de la del asistente: en el mismo navegador puede haber una
+  // sesion de persona y una de puesto sin pisarse, y sobre todo el token de una
+  // no debe poder usarse como el de la otra.
+  const CLAVE_EMPRESA = 'cf_sesion_empresa';
 
   // localStorage no siempre esta disponible: navegacion privada en algunos
   // Safari, politicas corporativas, o el usuario bloqueando el almacenamiento.
@@ -550,6 +554,9 @@ const API = (function () {
     if (auth === 'sesion') {
       const t = leer(CLAVE_SESION);
       if (t) opciones.headers['Authorization'] = 'Bearer ' + t;
+    } else if (auth === 'empresa') {
+      const t = leer(CLAVE_EMPRESA);
+      if (t) opciones.headers['Authorization'] = 'Bearer ' + t;
     } else if (auth === 'staff') {
       const t = leer(CLAVE_STAFF);
       if (t) opciones.headers['X-Admin-Token'] = t;
@@ -586,6 +593,9 @@ const API = (function () {
     tieneTokenStaff: () => !!leer(CLAVE_STAFF),
     guardarSesion: t => guardar(CLAVE_SESION, t),
     borrarSesion: () => guardar(CLAVE_SESION, ''),
+    tieneSesionEmpresa: () => !!leer(CLAVE_EMPRESA),
+    guardarSesionEmpresa: t => guardar(CLAVE_EMPRESA, t),
+    borrarSesionEmpresa: () => guardar(CLAVE_EMPRESA, ''),
     guardarTokenStaff: t => guardar(CLAVE_STAFF, t),
     pedir: pedir,
 
