@@ -39,6 +39,19 @@ const SEED_DEMO = process.env.SEED_DEMO === 'true';
 const EXIGIR_INGRESO_PARA_ESCANEAR = process.env.EXIGIR_INGRESO_PARA_ESCANEAR !== 'false';
 
 // -----------------------------------------------------------------------------
+// Primer organizador
+// -----------------------------------------------------------------------------
+// Sin esto, la unica forma de entrar la primera vez era el token de emergencia,
+// que resultaba confuso: hay que pegarlo en un desplegable escondido antes de
+// poder crear a nadie. Con estas variables la cuenta existe desde el primer
+// arranque y se entra como en cualquier sitio: usuario y contrasena.
+//
+// La contrasena NO va en el codigo: el repositorio termina en GitHub y una
+// contrasena ahi es una contrasena filtrada.
+const ADMIN_USUARIO = (process.env.ADMIN_USUARIO || '').trim();
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+
+// -----------------------------------------------------------------------------
 // Base de Datos PostgreSQL con Fallback Resiliente
 // -----------------------------------------------------------------------------
 const connectionString = process.env.DATABASE_URL || '';
@@ -92,9 +105,62 @@ async function iniciarStore() {
     );
   }
 
+  await asegurarOrganizador();
+
   if (SEED_DEMO) {
     await sembrarDemo();
   }
+}
+
+// Crea el primer organizador si no existe. Es idempotente y NUNCA pisa una
+// cuenta ya creada: si mañana alguien cambia ADMIN_PASSWORD en Railway, no se
+// le reescribe la contraseña por la espalda a quien ya está usando la cuenta.
+// Para cambiarla se usa la pantalla de cambio de contraseña, o se repone desde
+// la gestión de usuarios.
+async function asegurarOrganizador() {
+  if (!ADMIN_USUARIO || !ADMIN_PASSWORD) {
+    console.warn(
+      '[STAFF] Sin ADMIN_USUARIO/ADMIN_PASSWORD no hay cuenta inicial. ' +
+      'La primera entrada tendrá que hacerse con el token de emergencia.'
+    );
+    return;
+  }
+
+  const usuario = ADMIN_USUARIO.toLowerCase();
+
+  const existente = await store.findUsuarioStaff(eventoId, usuario);
+  if (existente) return;
+
+  if (ADMIN_PASSWORD.length < 6) {
+    console.error('[STAFF] ADMIN_PASSWORD es demasiado corta (mínimo 6). No se creó la cuenta inicial.');
+    return;
+  }
+  if (ADMIN_PASSWORD.length < 12) {
+    // Se crea igualmente: es una decisión del operador. Pero queda dicho.
+    console.warn(
+      '[STAFF] ADMIN_PASSWORD es corta para una cuenta que puede exportar ' +
+      'datos personales. Conviene cambiarla desde la app tras el primer ingreso.'
+    );
+  }
+
+  const { hash, salt, algo } = auth.hashPassword(ADMIN_PASSWORD);
+  await store.createUsuarioStaff({
+    evento_id: eventoId,
+    usuario,
+    nombre: process.env.ADMIN_NOMBRE || 'Organización',
+    rol: 'organizador',
+    password_hash: hash,
+    password_salt: salt,
+    password_algo: algo,
+    password_updated_at: new Date().toISOString(),
+    // La eligió el operador, así que no se le obliga a cambiarla al entrar.
+    must_change_password: false,
+    temp_password_expires_at: null,
+    creado_por: 'arranque del servidor'
+  });
+
+  // Nunca se registra la contraseña, solo el hecho.
+  console.warn(`[STAFF] Cuenta de organizador "${usuario}" creada en el arranque.`);
 }
 
 // Sembrado de demostracion. Se ejecuta solo con SEED_DEMO=true y crea las

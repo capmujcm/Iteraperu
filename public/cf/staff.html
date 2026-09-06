@@ -98,6 +98,19 @@
       <div id="staffClaveResult" style="margin-top:.8rem;"></div>
     </section>
 
+    <!-- ================= cambiar mi contraseña ================= -->
+    <section class="screen" data-sc="mi-clave">
+      <div class="schead"><button class="back" data-go="home" aria-label="Volver">‹</button><h2>Cambiar mi contraseña</h2></div>
+      <form class="card" id="formMiClave" novalidate>
+        <div class="field"><label for="mc-actual">Contraseña actual</label><input type="password" id="mc-actual" autocomplete="current-password" required></div>
+        <div class="field"><label for="mc-nueva">Contraseña nueva</label><input type="password" id="mc-nueva" autocomplete="new-password" required placeholder="Mínimo 6 caracteres"></div>
+        <div class="field"><label for="mc-nueva2">Repite la nueva</label><input type="password" id="mc-nueva2" autocomplete="new-password" required></div>
+        <button class="btn btn-accent btn-block" type="submit">Guardar</button>
+      </form>
+      <p class="tiny muted" style="margin-top:.6rem;">Al cambiarla se cierran tus sesiones en otros equipos.</p>
+      <div id="miClaveResult" style="margin-top:.8rem;"></div>
+    </section>
+
     <!-- ================= usuarios (solo organizador) ================= -->
     <section class="screen" data-sc="usuarios">
       <div class="schead"><button class="back" data-go="home" aria-label="Volver">‹</button><h2>Usuarios de staff</h2></div>
@@ -143,7 +156,10 @@
         <b>Regla operativa:</b> nunca se bloquea el ingreso por un registro incompleto.
         Se crea el mínimo, se deja entrar, y la persona completa después.
       </div>
-      <button class="btn btn-ghost btn-block btn-sm" id="btnCambiarStaff" style="margin-top:.6rem;">Cerrar sesión</button>
+      <div class="row" style="margin-top:.6rem;">
+        <button class="btn btn-ghost btn-sm" data-go="mi-clave" style="flex:1;">Cambiar mi contraseña</button>
+        <button class="btn btn-ghost btn-sm" id="btnCambiarStaff" style="flex:1;">Cerrar sesión</button>
+      </div>
     </section>
 
     <!-- ================= validar ingreso ================= -->
@@ -785,6 +801,33 @@
     limpiar('puestosResult');
     el('formPuesto').hidden = true;
     pintarPuestos();
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* cambiar mi propia contraseña                                          */
+  /* --------------------------------------------------------------------- */
+  el('formMiClave').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    limpiar('miClaveResult');
+    const nueva = el('mc-nueva').value;
+    if (nueva.length < 6) return aviso('miClaveResult', 'bad', 'La contraseña debe tener al menos 6 caracteres.');
+    if (nueva !== el('mc-nueva2').value) return aviso('miClaveResult', 'bad', 'Las dos contraseñas no coinciden.');
+
+    const boton = this.querySelector('button[type="submit"]');
+    await conBoton(boton, 'Guardando…', async function () {
+      try {
+        const datos = await API.staffCambiarClave({
+          password_actual: el('mc-actual').value,
+          password_nueva: nueva
+        });
+        ['mc-actual', 'mc-nueva', 'mc-nueva2'].forEach(function (i) { el(i).value = ''; });
+        establecerActor(datos.actor);
+        aviso('miClaveResult', 'good', '✓ Contraseña actualizada');
+        setTimeout(function () { go('home'); }, 800);
+      } catch (e) {
+        aviso('miClaveResult', 'bad', e.message);
+      }
+    });
   });
 
   /* --------------------------------------------------------------------- */
