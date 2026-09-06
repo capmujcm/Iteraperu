@@ -447,11 +447,11 @@ fastify.post('/api/soporte/buscar', {
   preHandler: [requireAdmin, rateLimit(60, 60000)]
 }, async (req, reply) => {
   const dni = auth.normalizeDni((req.body || {}).dni);
-  if (!dni) return reply.status(400).send({ error: 'Documento invalido.' });
+  if (!dni) return reply.status(400).send({ error: 'Documento inválido.' });
 
   const persona = await store.findByDni(eventoId, dni);
   if (!persona) {
-    return reply.status(404).send({ error: 'No hay ningun registro con ese documento.' });
+    return reply.status(404).send({ error: 'No hay ningún registro con ese documento.' });
   }
   return { success: true, attendee: safeAttendee(persona) };
 });
