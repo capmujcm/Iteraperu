@@ -216,6 +216,13 @@
     text-align:center;padding:.45rem .8rem;border-bottom:1px solid #EBD9AE;}
   .offbar.on{display:block;}
 
+  /* ============ ocultar de verdad ============ */
+  /* El atributo `hidden` del navegador es `display:none`, pero cualquier regla
+     propia con `display:flex` o `inline-flex` lo pisa por especificidad. Sin
+     esto, la barra inferior y el boton de Salir se veian antes de iniciar
+     sesion y llevaban a pantallas vacias. */
+  [hidden]{display:none !important;}
+
   /* ============ estado de carga ============ */
   .loading{padding:2.5rem 1rem;text-align:center;color:var(--ink-mut);font-size:.84rem;}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
