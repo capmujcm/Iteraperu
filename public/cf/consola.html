@@ -57,21 +57,40 @@
       <div class="loading">Cargando…</div>
     </section>
 
-    <!-- ================= sin token ================= -->
+    <!-- ================= ingreso ================= -->
     <section class="screen" data-sc="sin-token">
       <div class="schead"><h2>Consola del organizador</h2></div>
-      <div class="note n-warn tiny" style="margin-bottom:.9rem;">
-        Este equipo no tiene el token de organización. Abre la consola con el enlace
-        que incluye el token, o pégalo aquí.
-      </div>
-      <div class="card">
+      <p class="tiny muted" style="margin-bottom:.9rem;">
+        Entra con tu usuario de organizador. Si tu cuenta es de staff de puerta,
+        usa el Punto de Ayuda: esta consola no te corresponde.
+      </p>
+
+      <form class="card" id="formLogin" novalidate>
         <div class="field">
-          <label for="tk-manual">Token de organización</label>
-          <input type="password" id="tk-manual" autocomplete="off">
+          <label for="lg-usuario">Usuario</label>
+          <input type="text" id="lg-usuario" autocomplete="username" required style="text-transform:lowercase;">
         </div>
-        <button class="btn btn-dark btn-block" id="btnGuardarToken">Entrar</button>
-      </div>
+        <div class="field">
+          <label for="lg-pass">Contraseña</label>
+          <input type="password" id="lg-pass" autocomplete="current-password" required>
+        </div>
+        <button class="btn btn-dark btn-block" type="submit">Entrar</button>
+      </form>
       <div id="tokenResult" style="margin-top:.8rem;"></div>
+
+      <details style="margin-top:1rem;">
+        <summary class="tiny muted" style="cursor:pointer;">Usar el token de emergencia</summary>
+        <div class="card" style="margin-top:.6rem;">
+          <p class="tiny muted" style="margin-bottom:.6rem;">
+            Solo para crear el primer organizador o recuperar el acceso.
+          </p>
+          <div class="field">
+            <label for="tk-manual">Token</label>
+            <input type="password" id="tk-manual" autocomplete="off">
+          </div>
+          <button class="btn btn-line btn-block btn-sm" id="btnGuardarToken">Usar token</button>
+        </div>
+      </details>
     </section>
 
     <!-- ================= panel ================= -->
@@ -158,6 +177,7 @@
   'use strict';
 
   const REFRESCO_MS = 20000;
+  const slugEvento = (location.pathname.split('/')[2] || 'country-fest');
   let temporizador = null;
 
   function aviso(caja, tipo, mensaje) {
@@ -174,6 +194,42 @@
     API.guardarTokenStaff(t);
     el('tk-manual').value = '';
     arrancar();
+  });
+
+  el('formLogin').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    const boton = this.querySelector('button[type="submit"]');
+    const original = boton.textContent;
+    boton.disabled = true; boton.textContent = 'Entrando…';
+    try {
+      const datos = await API.staffLogin({
+        usuario: el('lg-usuario').value.trim().toLowerCase(),
+        password: el('lg-pass').value,
+        device_id: deviceId()
+      });
+      API.guardarSesionStaff(datos.token);
+      el('lg-pass').value = '';
+
+      if (datos.must_change_password) {
+        aviso('tokenResult', 'warn',
+          'Primero define tu contraseña en el Punto de Ayuda (/staff/' + slugEvento + ') y vuelve aquí.');
+        return;
+      }
+      // El rol se comprueba igualmente en el servidor; esto es para dar un
+      // mensaje claro en vez de una pantalla de datos vacía.
+      if (datos.usuario.rol !== 'organizador') {
+        API.borrarSesionStaff();
+        aviso('tokenResult', 'bad',
+          'Tu usuario es de staff de puerta. Esta consola es solo para organizadores.');
+        return;
+      }
+      go('panel');
+      arrancarRefresco();
+    } catch (e) {
+      aviso('tokenResult', 'bad', e.message);
+    } finally {
+      boton.disabled = false; boton.textContent = original;
+    }
   });
 
   /* --------------------------------------------------------------------- */
@@ -270,7 +326,9 @@
       this.textContent = 'Preparando…';
       try {
         const res = await fetch('/api/export/' + encodeURIComponent(que), {
-          headers: { 'X-Admin-Token': API.tokenStaff() }
+          headers: API.tieneSesionStaff()
+            ? { 'Authorization': 'Bearer ' + API.credencialStaff() }
+            : { 'X-Admin-Token': API.tokenStaff() }
         });
         if (!res.ok) throw new Error('No se pudo generar el archivo.');
         const blob = await res.blob();
@@ -320,7 +378,11 @@
       .then(function (r) { if (r.event && r.event.nombre) el('evNombre').textContent = r.event.nombre; })
       .catch(function () {});
 
-    if (!API.tieneTokenStaff()) { detener(); go('sin-token'); return; }
+    if (!API.tieneSesionStaff() && !API.tieneTokenStaff()) {
+      detener();
+      go('sin-token');
+      return;
+    }
     go('panel');
     arrancarRefresco();
   }

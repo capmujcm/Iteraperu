@@ -5,6 +5,7 @@ const { pgDriver, memoryDriver, safeAttendee, publicAttendee, auth } = require('
 const registrarAuth = require('./lib/routes-auth');
 const registrarInsignias = require('./lib/routes-insignias');
 const registrarEmpresa = require('./lib/routes-empresa');
+const registrarStaff = require('./lib/routes-staff');
 
 // Logger activado: durante el evento hay que poder reconstruir que paso en la
 // puerta. `disableRequestLogging` evita una linea por peticion de asset, que
@@ -170,7 +171,37 @@ function safeEqual(a, b) {
   return crypto.timingSafeEqual(ba, bb);
 }
 
-// preHandler: exige token de admin en endpoints sensibles (si AUTH_ENABLED).
+// Comprobación del token de emergencia, en tiempo constante.
+function adminTokenValido(valor) {
+  return AUTH_ENABLED && safeEqual(valor, ADMIN_TOKEN);
+}
+
+// Guardias por rol. Las rutas se registran al cargar el módulo, pero las
+// guardias solo existen después de iniciar el store (necesitan el id del
+// evento). Estos envoltorios se resuelven en el momento de la petición, no en
+// el del registro.
+let _requireStaff = null;
+let _requireOrganizador = null;
+let registrarAccion = async () => {};
+
+async function requireStaff(req, reply) {
+  if (!_requireStaff) {
+    reply.code(503).send({ error: 'El servicio todavía está arrancando.' });
+    return reply;
+  }
+  return _requireStaff(req, reply);
+}
+
+async function requireOrganizador(req, reply) {
+  if (!_requireOrganizador) {
+    reply.code(503).send({ error: 'El servicio todavía está arrancando.' });
+    return reply;
+  }
+  return _requireOrganizador(req, reply);
+}
+
+// preHandler heredado: solo token de emergencia. Se mantiene para los endpoints
+// que aún no distinguen rol; los demás usan requireStaff / requireOrganizador.
 async function requireAdmin(req, reply) {
   // Cerrado por defecto: sin ADMIN_TOKEN configurado NADIE accede a los datos
   // personales. Se prefiere denegar el servicio a filtrar PII por un despiste
@@ -365,7 +396,7 @@ fastify.get('/api/events/current', async () => {
 
 // Analitica agregada. Son cifras de conjunto, no fichas de personas, pero
 // siguen exigiendo token de staff porque revelan el pulso del evento.
-fastify.get('/api/events/analytics', { preHandler: requireAdmin }, async () => {
+fastify.get('/api/events/analytics', { preHandler: requireOrganizador }, async () => {
   const conteo = await store.countAttendees(eventoId);
   const porTipoFilas = await store.countByTipo(eventoId);
   const timeline = await store.checkinTimeline(eventoId);
@@ -407,7 +438,7 @@ fastify.get('/api/events/analytics', { preHandler: requireAdmin }, async () => {
 
 // Listado de asistentes: PII completa, siempre paginado. Sin paginacion, un
 // unico GET se llevaba la base entera de DNI, correos y celulares.
-fastify.get('/api/attendees', { preHandler: requireAdmin }, async (req) => {
+fastify.get('/api/attendees', { preHandler: requireOrganizador }, async (req) => {
   const limit = Math.min(Math.max(Number(req.query.limit) || 100, 1), 200);
   const offset = Math.max(Number(req.query.offset) || 0, 0);
   const { rows, total } = await store.listAttendees(eventoId, { limit, offset });
@@ -446,7 +477,7 @@ function aCSV(filas) {
 
 // Descarga de asistentes, check-ins o insignias. Lleva DNI, correo y celular:
 // exige token de staff y se registra quién lo pidió.
-fastify.get('/api/export/:que', { preHandler: requireAdmin }, async (req, reply) => {
+fastify.get('/api/export/:que', { preHandler: requireOrganizador }, async (req, reply) => {
   const que = String(req.params.que || '').toLowerCase();
   const fuentes = {
     asistentes: () => store.exportarAsistentes(eventoId),
@@ -476,7 +507,7 @@ fastify.get('/api/export/:que', { preHandler: requireAdmin }, async (req, reply)
 });
 
 // Ultimos check-ins registrados, para el panel de puerta.
-fastify.get('/api/checkins', { preHandler: requireAdmin }, async (req) => {
+fastify.get('/api/checkins', { preHandler: requireStaff }, async (req) => {
   const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 200);
   return { success: true, checkins: await store.listCheckins(eventoId, limit) };
 });
@@ -516,12 +547,17 @@ fastify.post('/api/tickets/verify', { preHandler: rateLimit(20, 60000) }, async 
 });
 
 // Check-in: escribe en la base y deja rastro en checkins_log.
-fastify.post('/api/tickets/checkin', { preHandler: requireAdmin }, async (req, reply) => {
-  const { token, code, puerta, staff_nombre } = req.body || {};
+fastify.post('/api/tickets/checkin', { preHandler: requireStaff }, async (req, reply) => {
+  const { token, code, puerta } = req.body || {};
   const persona = await buscarPorTicket({ token, code });
   if (!persona) {
     return reply.status(404).send({ success: false, error: 'Ticket inválido' });
   }
+
+  // El autor sale de la sesión, no del cuerpo de la petición. Antes el staff
+  // escribía su nombre a mano: quedaba registrado, pero cualquiera podía poner
+  // el de otro. Ahora es el usuario que inició sesión.
+  const autor = (req.actor && req.actor.nombre) || 'Staff';
 
   const yaHabiaIngresado = persona.estado === 'checkin';
   const ahora = new Date().toISOString();
@@ -535,7 +571,7 @@ fastify.post('/api/tickets/checkin', { preHandler: requireAdmin }, async (req, r
   const registro = await store.createCheckin(
     persona.id,
     String(puerta || 'Puerta Principal').slice(0, 80),
-    String(staff_nombre || 'Staff').slice(0, 100),
+    autor,
     yaHabiaIngresado ? 'duplicado' : 'exitoso'
   );
 
@@ -551,7 +587,7 @@ fastify.post('/api/tickets/checkin', { preHandler: requireAdmin }, async (req, r
 // Punto de Ayuda: ubicar a una persona por su documento. Exige token de staff
 // y devuelve la ficha sin hash de contrasena.
 fastify.post('/api/soporte/buscar', {
-  preHandler: [requireAdmin, rateLimit(60, 60000)]
+  preHandler: [requireStaff, rateLimit(60, 60000)]
 }, async (req, reply) => {
   const dni = auth.normalizeDni((req.body || {}).dni);
   if (!dni) return reply.status(400).send({ error: 'Documento inválido.' });
@@ -707,12 +743,35 @@ const start = async () => {
     // despues de iniciar el store. Si el arranque fallo no se registran: la
     // guardia ya devuelve 503 antes de llegar aqui.
     if (!errorDeArranque) {
-      const { requireSession } = registrarAuth(fastify, { store, eventoId, rateLimit, requireAdmin });
+      // Las cuentas de staff se registran primero: el resto de módulos usa sus
+      // guardias por rol.
+      const staff = registrarStaff(fastify, {
+        store, eventoId, rateLimit,
+        adminTokenValido,
+        authEnabled: () => AUTH_ENABLED
+      });
+      _requireStaff = staff.requireStaff();
+      _requireOrganizador = staff.requireOrganizador();
+      registrarAccion = staff.registrar;
+
+      // Cada módulo recibe la guardia que le corresponde:
+      //   requireStaff        -> acciones de puerta
+      //   requireOrganizador  -> puestos, exportaciones y datos del evento
+      const { requireSession } = registrarAuth(fastify, {
+        store, eventoId, rateLimit,
+        requireAdmin: requireStaff,        // reset y registro rápido: puerta
+        registrarAccion
+      });
       registrarInsignias(fastify, {
-        store, eventoId, rateLimit, requireAdmin, requireSession,
+        store, eventoId, rateLimit,
+        requireAdmin: requireOrganizador,  // alta de puestos y sus QR
+        requireSession,
         exigirIngreso: EXIGIR_INGRESO_PARA_ESCANEAR
       });
-      registrarEmpresa(fastify, { store, eventoId, rateLimit, requireAdmin });
+      registrarEmpresa(fastify, {
+        store, eventoId, rateLimit,
+        requireAdmin: requireOrganizador   // reponer el acceso de un puesto
+      });
     }
 
     const port = Number(process.env.PORT) || 3000;

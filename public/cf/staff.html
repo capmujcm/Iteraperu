@@ -41,40 +41,89 @@
 
   <div class="vbody">
 
-    <!-- ================= sin token ================= -->
+    <!-- ================= ingreso ================= -->
     <section class="screen active" data-sc="sin-token">
       <div class="schead"><h2>Acceso de staff</h2></div>
-      <div class="note n-warn tiny" style="margin-bottom:.9rem;">
-        Este equipo no tiene el token de staff. Pídele al organizador el enlace de acceso
-        y ábrelo en este mismo navegador.
-      </div>
-      <div class="card">
-        <p class="tiny muted" style="margin-bottom:.6rem;">
-          El enlace tiene la forma <span class="mono">/staff/country-fest?staff=…</span>
-          El token se guarda en este equipo y desaparece de la barra de direcciones.
-        </p>
+      <p class="tiny muted" style="margin-bottom:.9rem;">
+        Entra con el usuario y la contraseña que te dio la organización. Tu nombre
+        queda registrado en cada ingreso que valides y en cada contraseña que
+        restablezcas.
+      </p>
+
+      <form class="card" id="formStaffLogin" novalidate>
         <div class="field">
-          <label for="tk-manual">O pega el token aquí</label>
-          <input type="password" id="tk-manual" autocomplete="off">
+          <label for="st-usuario">Usuario</label>
+          <input type="text" id="st-usuario" autocomplete="username" required style="text-transform:lowercase;">
         </div>
-        <button class="btn btn-accent btn-block" id="btnGuardarToken">Guardar token</button>
-      </div>
+        <div class="field">
+          <label for="st-pass">Contraseña</label>
+          <input type="password" id="st-pass" autocomplete="current-password" required>
+        </div>
+        <div class="field">
+          <label for="q-puerta">Puerta o punto donde estás</label>
+          <input type="text" id="q-puerta" maxlength="80" placeholder="Ej. Puerta Principal" autocomplete="off">
+        </div>
+        <button class="btn btn-accent btn-block" type="submit">Ingresar</button>
+      </form>
       <div id="tokenResult" style="margin-top:.8rem;"></div>
+
+      <details style="margin-top:1rem;">
+        <summary class="tiny muted" style="cursor:pointer;">Usar el token de emergencia</summary>
+        <div class="card" style="margin-top:.6rem;">
+          <p class="tiny muted" style="margin-bottom:.6rem;">
+            Solo para crear el primer organizador o recuperar el acceso. Las acciones
+            hechas con él quedan registradas como «Token de emergencia», sin nombre.
+          </p>
+          <div class="field">
+            <label for="tk-manual">Token</label>
+            <input type="password" id="tk-manual" autocomplete="off">
+          </div>
+          <button class="btn btn-line btn-block btn-sm" id="btnGuardarToken">Usar token</button>
+        </div>
+      </details>
     </section>
 
-    <!-- ================= identificarse ================= -->
-    <section class="screen" data-sc="quien">
-      <div class="schead"><h2>¿Quién está en este puesto?</h2></div>
-      <p class="tiny muted" style="margin-bottom:.9rem;">
-        Tu nombre queda registrado en cada ingreso que valides y en cada contraseña
-        que restablezcas. Es la trazabilidad del evento.
-      </p>
-      <form class="card" id="formQuien" novalidate>
-        <div class="field"><label for="q-nombre">Tu nombre</label><input type="text" id="q-nombre" maxlength="100" required autocomplete="name"></div>
-        <div class="field"><label for="q-puerta">Puesto o puerta</label><input type="text" id="q-puerta" maxlength="80" placeholder="Ej. Puerta Principal" autocomplete="off"></div>
-        <button class="btn btn-accent btn-block" type="submit">Empezar</button>
+    <!-- ================= contraseña obligatoria ================= -->
+    <section class="screen" data-sc="staff-clave">
+      <div class="schead"><h2>Define tu contraseña</h2></div>
+      <div class="note n-warn tiny" style="margin-bottom:.9rem;">
+        Entraste con la clave temporal de la organización. Elige una propia para continuar.
+      </div>
+      <form class="card" id="formStaffClave" novalidate>
+        <div class="field"><label for="sc-actual">Clave temporal</label><input type="password" id="sc-actual" autocomplete="current-password" required></div>
+        <div class="field"><label for="sc-nueva">Contraseña nueva</label><input type="password" id="sc-nueva" autocomplete="new-password" required placeholder="Mínimo 6 caracteres"></div>
+        <div class="field"><label for="sc-nueva2">Repite la nueva</label><input type="password" id="sc-nueva2" autocomplete="new-password" required></div>
+        <button class="btn btn-accent btn-block" type="submit">Guardar y continuar</button>
       </form>
-      <div id="quienResult" style="margin-top:.8rem;"></div>
+      <div id="staffClaveResult" style="margin-top:.8rem;"></div>
+    </section>
+
+    <!-- ================= usuarios (solo organizador) ================= -->
+    <section class="screen" data-sc="usuarios">
+      <div class="schead"><button class="back" data-go="home" aria-label="Volver">‹</button><h2>Usuarios de staff</h2></div>
+      <p class="tiny muted" style="margin-bottom:.8rem;">
+        Cada persona con su cuenta. Así puedes revocar a una sola y saber quién hizo qué.
+      </p>
+      <button class="btn btn-accent btn-block" id="btnNuevoUsuario" style="margin-bottom:.8rem;">➕ Crear usuario</button>
+
+      <form class="card" id="formUsuario" hidden style="margin-bottom:.8rem;">
+        <div class="field"><label for="us-nombre">Nombre completo</label><input type="text" id="us-nombre" maxlength="120" required autocomplete="off"></div>
+        <div class="field"><label for="us-usuario">Usuario</label><input type="text" id="us-usuario" maxlength="40" required autocomplete="off" placeholder="ej. maria.puerta" style="text-transform:lowercase;"></div>
+        <div class="field">
+          <label for="us-rol">Rol</label>
+          <select id="us-rol">
+            <option value="staff">Staff — solo puerta</option>
+            <option value="organizador">Organizador — todo</option>
+          </select>
+        </div>
+        <div class="row">
+          <button class="btn btn-accent" type="submit" style="flex:1;">Crear</button>
+          <button class="btn btn-line" type="button" id="btnCancelarUsuario">Cancelar</button>
+        </div>
+      </form>
+
+      <div id="usuariosResult" style="margin-bottom:.8rem;"></div>
+      <div id="usuariosLista"><div class="loading">Cargando…</div></div>
     </section>
 
     <!-- ================= menú ================= -->
@@ -86,13 +135,15 @@
         <button class="btn btn-line btn-block bigbtn" data-go="rapido">➕ Registro rápido</button>
         <button class="btn btn-line btn-block bigbtn" data-go="buscar">🔎 Buscar por DNI</button>
         <button class="btn btn-line btn-block bigbtn" data-go="reset">🔑 Olvidó su contraseña</button>
-        <button class="btn btn-line btn-block bigbtn" data-go="puestos">🎪 Puestos y sus QR</button>
+        <button class="btn btn-line btn-block bigbtn" data-go="puestos" data-solo-org hidden>🎪 Puestos y sus QR</button>
+
+        <button class="btn btn-line btn-block bigbtn" data-go="usuarios" data-solo-org hidden>👥 Usuarios de staff</button>
       </div>
       <div class="soft tiny muted" style="margin-top:.9rem;">
         <b>Regla operativa:</b> nunca se bloquea el ingreso por un registro incompleto.
         Se crea el mínimo, se deja entrar, y la persona completa después.
       </div>
-      <button class="btn btn-ghost btn-block btn-sm" id="btnCambiarStaff" style="margin-top:.6rem;">Cambiar de persona en el puesto</button>
+      <button class="btn btn-ghost btn-block btn-sm" id="btnCambiarStaff" style="margin-top:.6rem;">Cerrar sesión</button>
     </section>
 
     <!-- ================= validar ingreso ================= -->
@@ -205,7 +256,6 @@
 (function () {
   'use strict';
 
-  const CLAVE_STAFF_NOMBRE = 'cf_staff_nombre';
   const CLAVE_STAFF_PUERTA = 'cf_staff_puerta';
 
   // Slug del evento, tomado de la propia URL (/staff/country-fest). Se usa para
@@ -213,6 +263,7 @@
   const slugEvento = (location.pathname.split('/')[2] || 'country-fest');
 
   let staffNombre = '';
+  let staffRol = 'staff';
   let staffPuerta = '';
   let validadosEnEsteTurno = 0;
 
@@ -253,24 +304,88 @@
   });
 
   /* --------------------------------------------------------------------- */
-  /* identificación del staff                                              */
+  /* ingreso con usuario y contraseña                                      */
   /* --------------------------------------------------------------------- */
-  el('formQuien').addEventListener('submit', function (ev) {
+  el('formStaffLogin').addEventListener('submit', async function (ev) {
     ev.preventDefault();
-    const n = el('q-nombre').value.trim();
-    if (!n) return aviso('quienResult', 'bad', 'Escribe tu nombre.');
-    staffNombre = n;
-    staffPuerta = el('q-puerta').value.trim();
-    guardar(CLAVE_STAFF_NOMBRE, staffNombre);
-    guardar(CLAVE_STAFF_PUERTA, staffPuerta);
-    pintarBarra();
-    go('home');
+    limpiar('tokenResult');
+    const boton = this.querySelector('button[type="submit"]');
+
+    await conBoton(boton, 'Ingresando…', async function () {
+      try {
+        const datos = await API.staffLogin({
+          usuario: el('st-usuario').value.trim().toLowerCase(),
+          password: el('st-pass').value,
+          device_id: deviceId()
+        });
+        API.guardarSesionStaff(datos.token);
+        el('st-pass').value = '';
+
+        staffPuerta = el('q-puerta').value.trim();
+        guardar(CLAVE_STAFF_PUERTA, staffPuerta);
+
+        if (datos.must_change_password) { go('staff-clave'); return; }
+        establecerActor({ nombre: datos.usuario.nombre, rol: datos.usuario.rol });
+        go('home');
+      } catch (e) {
+        aviso('tokenResult', 'bad', e.message);
+      }
+    });
   });
 
-  el('btnCambiarStaff').addEventListener('click', function () {
-    el('q-nombre').value = staffNombre;
-    el('q-puerta').value = staffPuerta;
-    go('quien');
+  el('formStaffClave').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    limpiar('staffClaveResult');
+    const nueva = el('sc-nueva').value;
+    if (nueva.length < 6) return aviso('staffClaveResult', 'bad', 'La contraseña debe tener al menos 6 caracteres.');
+    if (nueva !== el('sc-nueva2').value) return aviso('staffClaveResult', 'bad', 'Las dos contraseñas no coinciden.');
+
+    const boton = this.querySelector('button[type="submit"]');
+    await conBoton(boton, 'Guardando…', async function () {
+      try {
+        const datos = await API.staffCambiarClave({
+          password_actual: el('sc-actual').value,
+          password_nueva: nueva
+        });
+        ['sc-actual', 'sc-nueva', 'sc-nueva2'].forEach(function (i) { el(i).value = ''; });
+        establecerActor(datos.actor);
+        aviso('staffClaveResult', 'good', '✓ Contraseña actualizada');
+        setTimeout(function () { go('home'); }, 700);
+      } catch (e) {
+        aviso('staffClaveResult', 'bad', e.message);
+      }
+    });
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* identificación del staff                                              */
+  /* --------------------------------------------------------------------- */
+  // Identidad verificada por la sesión, no escrita a mano.
+  function establecerActor(actor) {
+    staffNombre = (actor && actor.nombre) || '';
+    staffRol = (actor && actor.rol) || 'staff';
+    pintarBarra();
+    aplicarPermisos();
+  }
+
+  // La consola, los puestos y los usuarios son solo para el organizador. Se
+  // ocultan sus botones; el servidor los rechaza igualmente, esto es para que
+  // el staff de puerta no vea opciones que no le van a funcionar.
+  function aplicarPermisos() {
+    const esOrg = staffRol === 'organizador';
+    document.querySelectorAll('[data-solo-org]').forEach(function (b) {
+      b.hidden = !esOrg;
+    });
+  }
+
+  el('btnCambiarStaff').addEventListener('click', async function () {
+    if (!confirm('¿Cerrar tu sesión en este equipo?')) return;
+    try { await API.staffSalir(); } catch (e) {}
+    API.borrarSesionStaff();
+    staffNombre = ''; staffRol = 'staff';
+    validadosEnEsteTurno = 0;
+    pintarBarra();
+    go('sin-token');
   });
 
   /* --------------------------------------------------------------------- */
@@ -288,7 +403,9 @@
     limpiar('valResult');
 
     try {
-      let peticion = { puerta: staffPuerta || 'Puerta Principal', staff_nombre: staffNombre };
+      // El nombre ya no viaja en la petición: el servidor lo toma de la sesión,
+      // así el autor del check-in es verificado y no declarado.
+      let peticion = { puerta: staffPuerta || 'Puerta Principal' };
 
       if (bruto.indexOf('CF|') === 0) {
         peticion.token = bruto.slice(3);
@@ -379,7 +496,6 @@
             celular: el('rp-cel').value.trim(),
             consentimiento_verificado: true,
             validar_ingreso: el('rp-validar').checked,
-            staff_nombre: staffNombre,
             puerta: staffPuerta || 'Punto de Ayuda'
           }
         });
@@ -480,7 +596,6 @@
       try {
         const datos = await API.resetClave({
           dni: dni,
-          staff_nombre: staffNombre,
           punto_ayuda: staffPuerta || 'Punto de Ayuda'
         });
 
@@ -647,6 +762,117 @@
   });
 
   /* --------------------------------------------------------------------- */
+  /* usuarios de staff (solo organizador)                                  */
+  /* --------------------------------------------------------------------- */
+  el('btnNuevoUsuario').addEventListener('click', function () {
+    el('formUsuario').hidden = false;
+    el('us-nombre').focus();
+  });
+  el('btnCancelarUsuario').addEventListener('click', function () {
+    el('formUsuario').hidden = true;
+    el('formUsuario').reset();
+  });
+
+  el('formUsuario').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    limpiar('usuariosResult');
+    const nombre = el('us-nombre').value.trim();
+    const usuario = el('us-usuario').value.trim().toLowerCase();
+    if (!nombre) return aviso('usuariosResult', 'bad', 'Escribe el nombre completo.');
+    if (!usuario) return aviso('usuariosResult', 'bad', 'Escribe el usuario.');
+
+    const boton = this.querySelector('button[type="submit"]');
+    await conBoton(boton, 'Creando…', async function () {
+      try {
+        const r = await API.staffCrearUsuario({ nombre, usuario, rol: el('us-rol').value });
+        el('formUsuario').reset();
+        el('formUsuario').hidden = true;
+        mostrarCredencial(r.usuario.usuario, r.password_temporal, r.dias_validez);
+        await pintarUsuarios();
+      } catch (e) {
+        aviso('usuariosResult', 'bad', e.message);
+      }
+    });
+  });
+
+  // La clave se muestra una sola vez; no se guarda en claro en ninguna parte.
+  function mostrarCredencial(usuario, clave, dias) {
+    el('usuariosResult').innerHTML =
+      '<div class="flash good">✓ Credenciales generadas</div>' +
+      '<div class="card" style="margin-top:.6rem;">' +
+        '<div class="kv"><span>Entra en</span><span class="mono">/staff/' + esc(slugEvento) + '</span></div>' +
+        '<div class="kv"><span>Usuario</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' + esc(usuario) + '</span></div>' +
+        '<div class="kv"><span>Contraseña</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' + esc(clave) + '</span></div>' +
+        '<div class="kv"><span>Válida</span><span>' + esc(String(dias)) + ' días</span></div>' +
+      '</div>' +
+      '<div class="note n-warn tiny" style="margin-top:.6rem;"><b>Anótala ahora.</b> No se vuelve a mostrar. ' +
+        'Al entrar, esa persona tendrá que elegir su propia contraseña.</div>';
+    window.scrollTo(0, 0);
+  }
+
+  async function pintarUsuarios() {
+    const caja = el('usuariosLista');
+    try {
+      const r = await API.staffUsuarios();
+      const lista = r.usuarios || [];
+      if (!lista.length) {
+        caja.innerHTML = '<div class="soft center tiny muted" style="padding:1.4rem;">Todavía no hay usuarios.</div>';
+        return;
+      }
+      caja.innerHTML = '<div class="list">' + lista.map(function (u) {
+        return '<div class="item">' +
+          '<div class="logo" style="background:' + (u.rol === 'organizador' ? 'var(--accent-soft)' : '#EBEEF4') + ';">' +
+            (u.rol === 'organizador' ? '★' : '👤') + '</div>' +
+          '<div class="gr"><b>' + esc(u.nombre) + '</b>' +
+            '<span class="mono">' + esc(u.usuario) + ' · ' + esc(u.rol) +
+            (u.must_change_password ? ' · clave pendiente' : '') + '</span></div>' +
+          (u.activo === false
+            ? '<span class="pill p-bad">inactivo</span>'
+            : '<span class="pill p-good">activo</span>') +
+        '</div>' +
+        '<div class="row" style="margin:-.2rem 0 .5rem;">' +
+          '<button class="btn btn-line btn-sm" data-clave="' + esc(u.id) + '" style="flex:1;">Reponer clave</button>' +
+          '<button class="btn btn-line btn-sm" data-activo="' + esc(u.id) + '" data-valor="' +
+            (u.activo === false ? 'true' : 'false') + '" style="flex:1;">' +
+            (u.activo === false ? 'Reactivar' : 'Desactivar') + '</button>' +
+        '</div>';
+      }).join('') + '</div>';
+
+      caja.querySelectorAll('[data-clave]').forEach(function (b) {
+        b.addEventListener('click', async function () {
+          if (!confirm('Se generará una clave nueva y se cerrarán sus sesiones abiertas.\n\n¿Continuar?')) return;
+          try {
+            const r2 = await API.staffReponerClave(this.dataset.clave);
+            mostrarCredencial(r2.usuario, r2.password_temporal, r2.dias_validez);
+            await pintarUsuarios();
+          } catch (e) { aviso('usuariosResult', 'bad', e.message); }
+        });
+      });
+
+      caja.querySelectorAll('[data-activo]').forEach(function (b) {
+        b.addEventListener('click', async function () {
+          const activar = this.dataset.valor === 'true';
+          if (!activar && !confirm('Se cerrarán sus sesiones y no podrá volver a entrar.\n\n¿Desactivar?')) return;
+          try {
+            await API.staffActivo(this.dataset.activo, activar);
+            limpiar('usuariosResult');
+            await pintarUsuarios();
+          } catch (e) { aviso('usuariosResult', 'bad', e.message); }
+        });
+      });
+    } catch (e) {
+      caja.innerHTML = '<div class="flash bad">' + esc(e.message) + '</div>';
+    }
+  }
+
+  document.addEventListener('cf:pantalla', function (ev) {
+    if (ev.detail.pantalla !== 'usuarios') return;
+    limpiar('usuariosResult');
+    el('formUsuario').hidden = true;
+    pintarUsuarios();
+  });
+
+  /* --------------------------------------------------------------------- */
   /* arranque                                                              */
   /* --------------------------------------------------------------------- */
   function arrancar() {
@@ -663,14 +889,38 @@
       .then(function (r) { if (r.event && r.event.nombre) el('evNombre').textContent = r.event.nombre; })
       .catch(function () {});
 
-    if (!API.tieneTokenStaff()) { go('sin-token'); return; }
-
-    staffNombre = leer(CLAVE_STAFF_NOMBRE);
     staffPuerta = leer(CLAVE_STAFF_PUERTA);
-    pintarBarra();
+    el('q-puerta').value = staffPuerta;
 
-    if (!staffNombre) { go('quien'); return; }
-    go('home');
+    // Sesión de usuario: el camino normal.
+    if (API.tieneSesionStaff()) {
+      API.staffYo()
+        .then(function (r) { establecerActor(r.actor); go('home'); })
+        .catch(function (e) {
+          if (e.status === 403 && e.datos && e.datos.must_change_password) {
+            go('staff-clave');
+            return;
+          }
+          if (e.sinRed) {
+            go('sin-token');
+            aviso('tokenResult', 'warn', 'No hay conexión. Inténtalo cuando tengas señal.');
+            return;
+          }
+          API.borrarSesionStaff();
+          go('sin-token');
+        });
+      return;
+    }
+
+    // Token de emergencia: entra como organizador, sin nombre propio.
+    if (API.tieneTokenStaff()) {
+      establecerActor({ nombre: 'Token de emergencia', rol: 'organizador' });
+      go('home');
+      return;
+    }
+
+    pintarBarra();
+    go('sin-token');
   }
 
   arrancar();

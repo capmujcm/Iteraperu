@@ -490,6 +490,9 @@ const API = (function () {
   // sesion de persona y una de puesto sin pisarse, y sobre todo el token de una
   // no debe poder usarse como el de la otra.
   const CLAVE_EMPRESA = 'cf_sesion_empresa';
+  // Sesion de un usuario de staff con nombre propio. Convive con CLAVE_STAFF,
+  // que guarda el token de emergencia.
+  const CLAVE_STAFF_SESION = 'cf_staff_sesion';
 
   // localStorage no siempre esta disponible: navegacion privada en algunos
   // Safari, politicas corporativas, o el usuario bloqueando el almacenamiento.
@@ -558,8 +561,17 @@ const API = (function () {
       const t = leer(CLAVE_EMPRESA);
       if (t) opciones.headers['Authorization'] = 'Bearer ' + t;
     } else if (auth === 'staff') {
-      const t = leer(CLAVE_STAFF);
-      if (t) opciones.headers['X-Admin-Token'] = t;
+      // Se prefiere SIEMPRE la sesión de usuario: así la acción queda atribuida
+      // a una persona concreta. El token de emergencia solo entra en juego si
+      // no hay sesión, que es el caso de crear el primer organizador o de
+      // recuperar el acceso cuando alguien se quedó fuera.
+      const s = leer(CLAVE_STAFF_SESION);
+      if (s) {
+        opciones.headers['Authorization'] = 'Bearer ' + s;
+      } else {
+        const t = leer(CLAVE_STAFF);
+        if (t) opciones.headers['X-Admin-Token'] = t;
+      }
     }
 
     let res;
@@ -592,6 +604,10 @@ const API = (function () {
     tieneSesion: () => !!leer(CLAVE_SESION),
     tieneTokenStaff: () => !!leer(CLAVE_STAFF),
     tokenStaff: () => leer(CLAVE_STAFF),
+    tieneSesionStaff: () => !!leer(CLAVE_STAFF_SESION),
+    guardarSesionStaff: t => guardar(CLAVE_STAFF_SESION, t),
+    borrarSesionStaff: () => guardar(CLAVE_STAFF_SESION, ''),
+    credencialStaff: () => leer(CLAVE_STAFF_SESION) || leer(CLAVE_STAFF),
     guardarSesion: t => guardar(CLAVE_SESION, t),
     borrarSesion: () => guardar(CLAVE_SESION, ''),
     tieneSesionEmpresa: () => !!leer(CLAVE_EMPRESA),
@@ -624,7 +640,17 @@ const API = (function () {
 
     // --- organizador: puestos y sus QR ---
     puestosConQr: () => pedir('/api/soporte/empresas', { auth: 'staff' }),
-    crearPuesto: datos => pedir('/api/soporte/empresas', { metodo: 'POST', cuerpo: datos, auth: 'staff' })
+    crearPuesto: datos => pedir('/api/soporte/empresas', { metodo: 'POST', cuerpo: datos, auth: 'staff' }),
+
+    // --- cuentas de staff ---
+    staffLogin: datos => pedir('/api/staff/login', { metodo: 'POST', cuerpo: datos }),
+    staffYo: () => pedir('/api/staff/me', { auth: 'staff' }),
+    staffSalir: () => pedir('/api/staff/logout', { metodo: 'POST', auth: 'staff' }),
+    staffCambiarClave: datos => pedir('/api/staff/change-password', { metodo: 'POST', cuerpo: datos, auth: 'staff' }),
+    staffUsuarios: () => pedir('/api/staff/usuarios', { auth: 'staff' }),
+    staffCrearUsuario: datos => pedir('/api/staff/usuarios', { metodo: 'POST', cuerpo: datos, auth: 'staff' }),
+    staffReponerClave: id => pedir('/api/staff/usuarios/' + encodeURIComponent(id) + '/clave', { metodo: 'POST', auth: 'staff' }),
+    staffActivo: (id, activo) => pedir('/api/staff/usuarios/' + encodeURIComponent(id) + '/activo', { metodo: 'POST', cuerpo: { activo }, auth: 'staff' })
   };
 })();
 

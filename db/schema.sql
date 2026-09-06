@@ -299,3 +299,73 @@ CREATE TABLE IF NOT EXISTS sesiones_empresa (
 );
 
 CREATE INDEX IF NOT EXISTS idx_sesiones_emp_token ON sesiones_empresa (token_hash);
+
+-- =============================================================================
+-- 17. Usuarios de staff con nombre propio
+-- =============================================================================
+-- Sustituye al ADMIN_TOKEN compartido. Con una sola llave repartida entre todo
+-- el equipo no se podia revocar a una persona, y el nombre que quedaba en cada
+-- accion era el que cada uno escribia: trazabilidad declarada, no verificada.
+--
+-- Roles:
+--   staff        -> puerta: validar ingreso, registro rapido, buscar por DNI y
+--                   restablecer contrasenas de asistentes.
+--   organizador  -> ademas: consola, alta de puestos, exportaciones y gestion
+--                   de usuarios.
+--
+-- Quien esta en la puerta no necesita poder descargar la base entera de DNI y
+-- correos, asi que no puede.
+CREATE TABLE IF NOT EXISTS usuarios_staff (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  evento_id UUID REFERENCES eventos(id) ON DELETE CASCADE,
+  usuario VARCHAR(40) NOT NULL,
+  nombre VARCHAR(120) NOT NULL,
+  rol VARCHAR(20) NOT NULL DEFAULT 'staff',   -- staff | organizador
+  password_hash TEXT,
+  password_salt TEXT,
+  password_algo VARCHAR(20) DEFAULT 'scrypt',
+  password_updated_at TIMESTAMP WITH TIME ZONE,
+  must_change_password BOOLEAN DEFAULT true,
+  temp_password_expires_at TIMESTAMP WITH TIME ZONE,
+  failed_login_count INT DEFAULT 0,
+  locked_until TIMESTAMP WITH TIME ZONE,
+  activo BOOLEAN DEFAULT true,
+  creado_por VARCHAR(120),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- El usuario es unico dentro de un evento y se compara en minusculas, para que
+-- "Carlos" y "carlos" no sean dos cuentas distintas.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_usuarios_staff_evento_usuario
+  ON usuarios_staff (evento_id, LOWER(usuario));
+
+-- 18. Sesiones de staff
+-- Tabla propia, como las de asistentes y puestos: un token de un rol no puede
+-- servir como token de otro.
+CREATE TABLE IF NOT EXISTS sesiones_staff (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  usuario_id UUID NOT NULL REFERENCES usuarios_staff(id) ON DELETE CASCADE,
+  token_hash CHAR(64) UNIQUE NOT NULL,
+  device_id VARCHAR(60),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  last_seen_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  revoked_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX IF NOT EXISTS idx_sesiones_staff_token ON sesiones_staff (token_hash);
+
+-- 19. Bitacora de acciones de staff
+-- Ahora que cada accion tiene un autor verificado, se registra. Sirve para
+-- reconstruir que paso en la puerta y quien lo hizo.
+CREATE TABLE IF NOT EXISTS acciones_staff (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  evento_id UUID REFERENCES eventos(id) ON DELETE CASCADE,
+  usuario_id UUID REFERENCES usuarios_staff(id) ON DELETE SET NULL,
+  usuario_nombre VARCHAR(120),
+  accion VARCHAR(60) NOT NULL,
+  detalle TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_acciones_staff_created ON acciones_staff (created_at DESC);
