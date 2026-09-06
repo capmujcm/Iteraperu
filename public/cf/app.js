@@ -597,12 +597,23 @@ const API = (function () {
     cambiarClave: datos => pedir('/api/auth/change-password', { metodo: 'POST', cuerpo: datos, auth: 'sesion' }),
     salir: () => pedir('/api/auth/logout', { metodo: 'POST', auth: 'sesion' }),
 
+    // --- insignias ---
+    puestos: () => pedir('/api/empresas'),
+    escanearPuesto: (qr, device) => pedir('/api/insignias/scan', {
+      metodo: 'POST', cuerpo: { qr: qr, device_id: device }, auth: 'sesion'
+    }),
+    misInsignias: () => pedir('/api/insignias/mias', { auth: 'sesion' }),
+
     // --- staff ---
     verificarTicket: datos => pedir('/api/tickets/verify', { metodo: 'POST', cuerpo: datos }),
     checkin: datos => pedir('/api/tickets/checkin', { metodo: 'POST', cuerpo: datos, auth: 'staff' }),
     buscarPorDni: dni => pedir('/api/soporte/buscar', { metodo: 'POST', cuerpo: { dni: dni }, auth: 'staff' }),
     resetClave: datos => pedir('/api/soporte/reset-password', { metodo: 'POST', cuerpo: datos, auth: 'staff' }),
-    ultimosCheckins: n => pedir('/api/checkins?limit=' + encodeURIComponent(n || 20), { auth: 'staff' })
+    ultimosCheckins: n => pedir('/api/checkins?limit=' + encodeURIComponent(n || 20), { auth: 'staff' }),
+
+    // --- organizador: puestos y sus QR ---
+    puestosConQr: () => pedir('/api/soporte/empresas', { auth: 'staff' }),
+    crearPuesto: datos => pedir('/api/soporte/empresas', { metodo: 'POST', cuerpo: datos, auth: 'staff' })
   };
 })();
 

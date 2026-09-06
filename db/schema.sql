@@ -183,3 +183,73 @@ ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS acepta_marketing BOOLEAN
 -- en puerta). Sirve para auditar y para saber que fichas estan incompletas.
 ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS origen VARCHAR(20) DEFAULT 'web';
 ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS creado_por VARCHAR(100);
+
+-- =============================================================================
+-- 12. Puestos participantes (la dinamica de insignias)
+-- =============================================================================
+-- Cada puesto muestra su QR. El asistente lo escanea y gana UNA insignia de ese
+-- puesto, que vale un ticket para el sorteo.
+CREATE TABLE IF NOT EXISTS empresas (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  evento_id UUID REFERENCES eventos(id) ON DELETE CASCADE,
+  nombre VARCHAR(150) NOT NULL,
+  rubro VARCHAR(60),
+  emoji VARCHAR(16),
+  color VARCHAR(9),
+  descripcion TEXT,
+  stand VARCHAR(30),
+  condicion TEXT,                            -- que hay que hacer para ganarla
+  -- Token del QR impreso en el puesto. Aleatorio, no adivinable.
+  qr_token VARCHAR(64) UNIQUE NOT NULL,
+  -- Codigo corto legible bajo el QR, como red de seguridad cuando la camara
+  -- no lee (sol directo, pantalla sucia, permiso denegado).
+  codigo_corto VARCHAR(20) UNIQUE NOT NULL,
+  activo BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_empresas_evento ON empresas (evento_id);
+CREATE INDEX IF NOT EXISTS idx_empresas_qr ON empresas (qr_token);
+
+-- =============================================================================
+-- 13. Insignias obtenidas
+-- =============================================================================
+-- La regla antifraude vive AQUI, en un indice unico, no en el navegador:
+-- una insignia por persona y puesto. Volver a escanear el mismo QR no suma.
+-- Antes esto se comprobaba en localStorage, asi que cualquiera con la consola
+-- del navegador podia darse tickets de sorteo.
+CREATE TABLE IF NOT EXISTS insignias (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  evento_id UUID REFERENCES eventos(id) ON DELETE CASCADE,
+  ticket_id UUID NOT NULL REFERENCES asistentes_tickets(id) ON DELETE CASCADE,
+  empresa_id UUID NOT NULL REFERENCES empresas(id) ON DELETE CASCADE,
+  -- Numero correlativo del ticket de sorteo. Lo asigna el servidor: si lo
+  -- calculara el cliente, se podria pedir el numero que uno quisiera.
+  ticket_sorteo INT,
+  device_id VARCHAR(60),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT insignia_unica_por_puesto UNIQUE (ticket_id, empresa_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_insignias_ticket ON insignias (ticket_id);
+CREATE INDEX IF NOT EXISTS idx_insignias_empresa ON insignias (empresa_id);
+
+-- =============================================================================
+-- 14. Bitacora de escaneos
+-- =============================================================================
+-- Se registra TODO intento, valido o no. Sirve para detectar el fraude que el
+-- indice unico no puede frenar: si el QR de un puesto se filtra por WhatsApp,
+-- aqui se ve como cientos de personas lo escanean en pocos minutos desde
+-- dispositivos distintos sin pasar por el stand.
+CREATE TABLE IF NOT EXISTS scans_log (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  evento_id UUID REFERENCES eventos(id) ON DELETE CASCADE,
+  ticket_id UUID REFERENCES asistentes_tickets(id) ON DELETE SET NULL,
+  empresa_id UUID REFERENCES empresas(id) ON DELETE SET NULL,
+  resultado VARCHAR(30) NOT NULL,   -- ok, duplicado, sin_ingreso, qr_invalido
+  device_id VARCHAR(60),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_scans_created ON scans_log (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_scans_empresa ON scans_log (empresa_id, created_at DESC);

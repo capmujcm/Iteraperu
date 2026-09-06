@@ -168,6 +168,40 @@
       </div>
     </section>
 
+    <!-- ================= escanear puesto ================= -->
+    <section class="screen" data-sc="escanear">
+      <div class="schead"><h2>Escanear puesto</h2></div>
+      <div id="escanearGate"></div>
+      <div class="cam" id="camEscanear" style="margin-top:.7rem;"></div>
+      <p class="tiny muted" style="margin:.6rem 0 .5rem;">Apunta al QR del puesto. Si no lee, escribe el código impreso debajo.</p>
+      <div class="row">
+        <input type="search" id="sc-manual" placeholder="Código del puesto (ej. P-4K7Q)" autocomplete="off" style="flex:1;">
+        <button class="btn btn-event" id="btnScManual">Canjear</button>
+      </div>
+      <div id="scResult" style="margin-top:.8rem;"></div>
+    </section>
+
+    <!-- ================= mis insignias ================= -->
+    <section class="screen" data-sc="insignias">
+      <div class="schead"><h2>Mis insignias</h2></div>
+      <div class="counter" id="contadorSorteo">
+        <div>
+          <div class="lab">Tickets para el sorteo</div>
+          <div class="big" id="ticketsSorteo">0</div>
+        </div>
+        <div style="font-size:2rem;">🎟️</div>
+      </div>
+      <p class="tiny muted" style="margin:.7rem 0 .6rem;">Cada puesto da una sola insignia. Recorre puestos distintos para sumar más tickets.</p>
+      <div id="insigniasBox"></div>
+      <button class="btn btn-event btn-block" data-go="escanear" style="margin-top:.9rem;">Escanear otro puesto</button>
+    </section>
+
+    <!-- ================= puestos del evento ================= -->
+    <section class="screen" data-sc="puestos">
+      <div class="schead"><button class="back" data-go="insignias" aria-label="Volver">‹</button><h2>Puestos del evento</h2></div>
+      <div id="puestosBox"><div class="loading">Cargando puestos…</div></div>
+    </section>
+
     <!-- ================= perfil ================= -->
     <section class="screen" data-sc="perfil">
       <div class="schead"><h2>Mi perfil</h2></div>
@@ -176,6 +210,11 @@
       <div class="card" style="margin-top:.7rem;">
         <h4 style="font-size:.92rem;margin-bottom:.5rem;">Seguridad</h4>
         <button class="btn btn-line btn-block btn-sm" data-go="cambiar-clave-voluntario">Cambiar mi contraseña</button>
+      </div>
+
+      <div class="card" style="margin-top:.7rem;">
+        <h4 style="font-size:.92rem;margin-bottom:.5rem;">¿Necesitas ayuda?</h4>
+        <button class="btn btn-line btn-block btn-sm" data-go="ayuda">Preguntas frecuentes</button>
       </div>
 
       <div class="card" style="margin-top:.7rem;">
@@ -203,8 +242,16 @@
 
     <!-- ================= ayuda ================= -->
     <section class="screen" data-sc="ayuda">
-      <div class="schead"><h2>Ayuda</h2></div>
+      <div class="schead"><button class="back" data-go="perfil" aria-label="Volver">‹</button><h2>Ayuda</h2></div>
       <div class="stack">
+        <div class="soft">
+          <b style="font-size:.87rem;">¿Cómo gano una insignia?</b>
+          <p class="tiny muted" style="margin-top:.2rem;">Visita el puesto y cumple su condición. Te muestran su QR, tú lo escaneas desde "Escanear". Cada insignia es un ticket para el sorteo.</p>
+        </div>
+        <div class="soft">
+          <b style="font-size:.87rem;">Solo una insignia por puesto</b>
+          <p class="tiny muted" style="margin-top:.2rem;">Volver a escanear el mismo QR no suma tickets. Para sumar hay que recorrer puestos distintos.</p>
+        </div>
         <div class="soft">
           <b style="font-size:.87rem;">No puedo mostrar mi QR</b>
           <p class="tiny muted" style="margin-top:.2rem;">Acércate a un Punto de Ayuda: te ubican con tu DNI y te dejan pasar.</p>
@@ -228,8 +275,9 @@
 
   <nav class="vnav" id="vnav" hidden>
     <button data-go="ticket"><span class="i">🎟️</span>Mi entrada</button>
+    <button data-go="escanear"><span class="i">📷</span>Escanear</button>
+    <button data-go="insignias"><span class="i">🏅</span>Insignias</button>
     <button data-go="perfil"><span class="i">👤</span>Perfil</button>
-    <button data-go="ayuda"><span class="i">💬</span>Ayuda</button>
   </nav>
 </div>
 
@@ -288,6 +336,7 @@
     mostrarNav(true);
     pintarTicket();
     pintarPerfil();
+    cargarInsignias();
   }
 
   function cerrarSesionLocal() {
@@ -470,6 +519,151 @@
     'clv2Result', function () { go('perfil'); });
 
   /* --------------------------------------------------------------------- */
+  /* insignias                                                             */
+  /* --------------------------------------------------------------------- */
+  let insignias = [];
+  let puestos = [];
+
+  async function cargarInsignias() {
+    if (!persona) return;
+    try {
+      const datos = await API.misInsignias();
+      insignias = datos.insignias || [];
+      pintarInsignias();
+    } catch (e) { /* se reintenta al volver a entrar a la pantalla */ }
+  }
+
+  function medalla(i, ganada) {
+    const fondo = ganada
+      ? 'background:linear-gradient(135deg,' + esc(i.color || '#FF5A1F') + ',#111);'
+      : '';
+    return '<div class="medal' + (ganada ? '' : ' locked') + '" style="' + fondo + '">' +
+             '<span class="em">' + esc(i.emoji || '🎪') + '</span>' +
+             '<span class="mn">' + esc(i.nombre || '') + '</span>' +
+           '</div>';
+  }
+
+  function pintarInsignias() {
+    el('ticketsSorteo').textContent = insignias.length;
+
+    if (!insignias.length) {
+      el('insigniasBox').innerHTML =
+        '<div class="soft center tiny muted" style="padding:1.4rem 1rem;">' +
+          'Todavía no tienes insignias.<br>Visita un puesto y escanea su QR.' +
+        '</div>' +
+        '<button class="btn btn-line btn-block btn-sm" data-go="puestos" style="margin-top:.7rem;">Ver los puestos del evento</button>';
+      return;
+    }
+
+    el('insigniasBox').innerHTML =
+      '<div class="bgrid">' + insignias.map(function (i) { return medalla(i, true); }).join('') + '</div>' +
+      '<button class="btn btn-line btn-block btn-sm" data-go="puestos" style="margin-top:.8rem;">Ver los puestos que faltan</button>';
+  }
+
+  async function pintarPuestos() {
+    const caja = el('puestosBox');
+    try {
+      if (!puestos.length) {
+        const datos = await API.puestos();
+        puestos = datos.empresas || [];
+      }
+      if (!puestos.length) {
+        caja.innerHTML = '<div class="soft center tiny muted" style="padding:1.4rem;">Todavía no hay puestos publicados.</div>';
+        return;
+      }
+      const mias = {};
+      insignias.forEach(function (i) { mias[i.empresa_id] = true; });
+
+      caja.innerHTML = '<div class="list">' + puestos.map(function (p) {
+        const tengo = !!mias[p.id];
+        return '<div class="item">' +
+          '<div class="logo" style="background:' + esc(p.color || '#EEE') + '22;">' + esc(p.emoji || '🎪') + '</div>' +
+          '<div class="gr"><b>' + esc(p.nombre) + '</b>' +
+            '<span>' + esc(p.stand || '') + (p.condicion ? ' · ' + esc(p.condicion) : '') + '</span></div>' +
+          (tengo ? '<span class="pill p-gold">✓</span>' : '<span class="pill p-neutral">—</span>') +
+        '</div>';
+      }).join('') + '</div>';
+    } catch (e) {
+      caja.innerHTML = '<div class="flash bad">' + esc(e.message) + '</div>';
+    }
+  }
+
+  // Mensaje de estado arriba de la cámara: sin ingreso validado no se puede
+  // coleccionar, y conviene decirlo antes de que la persona escanee en vano.
+  function pintarPuertaEscaneo() {
+    const gate = el('escanearGate');
+    if (!persona) { gate.innerHTML = ''; return; }
+    if (persona.estado !== 'checkin') {
+      gate.innerHTML = '<div class="note n-warn tiny">Tu ingreso aún no está validado. ' +
+        'Pasa por la puerta con tu QR y después podrás coleccionar insignias.</div>';
+    } else {
+      gate.innerHTML = '<div class="note n-good tiny">Ingreso validado ✓ · ' +
+        insignias.length + ' insignia(s) hasta ahora</div>';
+    }
+  }
+
+  let escaneando = false;
+
+  async function escanear(valor) {
+    const bruto = String(valor || '').trim();
+    if (!bruto || escaneando) return;
+    escaneando = true;
+    limpiar('scResult');
+
+    try {
+      const datos = await API.escanearPuesto(bruto, deviceId());
+      const e = datos.empresa;
+
+      if (datos.resultado === 'duplicado') {
+        el('scResult').innerHTML =
+          '<div class="flash warn">Ya tienes la insignia de ' + esc(e.nombre) + '</div>' +
+          '<div class="soft tiny muted" style="margin-top:.6rem;">' +
+            '<b>Una insignia por puesto.</b> Volver a escanear el mismo QR no suma tickets. ' +
+            'Conviene recorrer puestos distintos.</div>';
+        return;
+      }
+
+      // Insignia nueva: se recarga la colección desde el servidor en vez de
+      // sumar en el cliente, para que lo que se ve sea lo que hay en la base.
+      await cargarInsignias();
+      pintarPuertaEscaneo();
+
+      el('scResult').innerHTML =
+        '<div class="flash good">' + esc(datos.message) + '</div>' +
+        '<div class="card center" style="margin-top:.7rem;">' +
+          '<div class="medal" style="width:104px;height:104px;margin:0 auto .5rem;aspect-ratio:auto;' +
+            'background:linear-gradient(135deg,' + esc(e.color || '#FF5A1F') + ',#111);">' +
+            '<span class="em">' + esc(e.emoji || '🎪') + '</span></div>' +
+          '<b>' + esc(e.nombre) + '</b>' +
+          '<p class="tiny muted">' + esc(e.rubro || '') + (e.stand ? ' · ' + esc(e.stand) : '') + '</p>' +
+          '<div class="kv" style="margin-top:.5rem;"><span>Ticket de sorteo</span>' +
+            '<span class="mono">#' + esc(String(datos.insignia.ticket_sorteo)) + '</span></div>' +
+          '<div class="kv"><span>Total de tickets</span><span>' + insignias.length + '</span></div>' +
+        '</div>' +
+        '<div class="row wrap" style="margin-top:.7rem;">' +
+          '<button class="btn btn-event" data-go="insignias" style="flex:1;">Ver colección</button>' +
+        '</div>';
+
+      el('sc-manual').value = '';
+    } catch (e) {
+      if (e.datos && e.datos.resultado === 'sin_ingreso') {
+        el('scResult').innerHTML = '<div class="flash warn">' + esc(e.message) + '</div>';
+      } else {
+        aviso('scResult', 'bad', e.message);
+      }
+    } finally {
+      // Pausa antes de aceptar otra lectura: la cámara reenviaría el mismo QR
+      // diez veces por segundo mientras la persona baja el brazo.
+      setTimeout(function () { escaneando = false; }, 1800);
+    }
+  }
+
+  el('btnScManual').addEventListener('click', function () { escanear(el('sc-manual').value); });
+  el('sc-manual').addEventListener('keydown', function (ev) {
+    if (ev.key === 'Enter') { ev.preventDefault(); escanear(this.value); }
+  });
+
+  /* --------------------------------------------------------------------- */
   /* salir                                                                 */
   /* --------------------------------------------------------------------- */
   el('btnSalir').addEventListener('click', async function () {
@@ -487,6 +681,17 @@
     document.querySelectorAll('#vnav button').forEach(function (b) {
       b.classList.toggle('active', b.dataset.go === p);
     });
+
+    // La cámara se enciende solo en la pantalla de escanear; go() la apaga al
+    // salir. Dejarla corriendo de fondo gasta batería, que en un evento de dos
+    // días es un problema real.
+    if (p === 'escanear') {
+      pintarPuertaEscaneo();
+      limpiar('scResult');
+      startCam('camEscanear', escanear);
+    }
+    if (p === 'insignias') cargarInsignias();
+    if (p === 'puestos') pintarPuestos();
   });
 
   /* --------------------------------------------------------------------- */

@@ -78,6 +78,7 @@
         <button class="btn btn-line btn-block bigbtn" data-go="rapido">➕ Registro rápido</button>
         <button class="btn btn-line btn-block bigbtn" data-go="buscar">🔎 Buscar por DNI</button>
         <button class="btn btn-line btn-block bigbtn" data-go="reset">🔑 Olvidó su contraseña</button>
+        <button class="btn btn-line btn-block bigbtn" data-go="puestos">🎪 Puestos y sus QR</button>
       </div>
       <div class="soft tiny muted" style="margin-top:.9rem;">
         <b>Regla operativa:</b> nunca se bloquea el ingreso por un registro incompleto.
@@ -154,6 +155,35 @@
         <button class="btn btn-accent btn-block" type="submit" style="margin-top:.9rem;">Restablecer</button>
       </form>
       <div id="rsResult" style="margin-top:.8rem;"></div>
+    </section>
+
+    <!-- ================= puestos y sus QR ================= -->
+    <section class="screen" data-sc="puestos">
+      <div class="schead"><button class="back" data-go="home" aria-label="Volver">‹</button><h2>Puestos y sus QR</h2></div>
+      <p class="tiny muted" style="margin-bottom:.8rem;">
+        Cada puesto necesita su QR impreso y visible. La gente lo escanea para ganar la insignia.
+      </p>
+      <button class="btn btn-accent btn-block" id="btnNuevoPuesto" style="margin-bottom:.8rem;">➕ Añadir puesto</button>
+
+      <form class="card" id="formPuesto" hidden style="margin-bottom:.8rem;">
+        <div class="field"><label for="pu-nombre">Nombre del puesto</label><input type="text" id="pu-nombre" maxlength="150" required autocomplete="off"></div>
+        <div class="g2">
+          <div class="field"><label for="pu-rubro">Rubro</label><input type="text" id="pu-rubro" maxlength="60" placeholder="Comida, Bebidas…" autocomplete="off"></div>
+          <div class="field"><label for="pu-stand">Stand</label><input type="text" id="pu-stand" maxlength="30" placeholder="A-10" autocomplete="off"></div>
+        </div>
+        <div class="g2">
+          <div class="field"><label for="pu-emoji">Emoji</label><input type="text" id="pu-emoji" maxlength="4" placeholder="🍝" autocomplete="off"></div>
+          <div class="field"><label for="pu-color">Color</label><input type="color" id="pu-color" value="#FF5A1F" style="height:42px;padding:.2rem;"></div>
+        </div>
+        <div class="field"><label for="pu-condicion">Condición para la insignia</label><input type="text" id="pu-condicion" maxlength="500" placeholder="Compra mínima S/ 30" autocomplete="off"></div>
+        <div class="row">
+          <button class="btn btn-accent" type="submit" style="flex:1;">Crear</button>
+          <button class="btn btn-line" type="button" id="btnCancelarPuesto">Cancelar</button>
+        </div>
+      </form>
+
+      <div id="puestosResult" style="margin-bottom:.8rem;"></div>
+      <div id="puestosLista"><div class="loading">Cargando puestos…</div></div>
     </section>
 
   </div>
@@ -461,6 +491,87 @@
         aviso('rsResult', 'bad', e.message);
       }
     });
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* puestos y sus QR                                                      */
+  /* --------------------------------------------------------------------- */
+  el('btnNuevoPuesto').addEventListener('click', function () {
+    el('formPuesto').hidden = false;
+    el('pu-nombre').focus();
+  });
+  el('btnCancelarPuesto').addEventListener('click', function () {
+    el('formPuesto').hidden = true;
+    el('formPuesto').reset();
+  });
+
+  el('formPuesto').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    limpiar('puestosResult');
+    const nombre = el('pu-nombre').value.trim();
+    if (!nombre) return aviso('puestosResult', 'bad', 'Escribe el nombre del puesto.');
+
+    const boton = this.querySelector('button[type="submit"]');
+    await conBoton(boton, 'Creando…', async function () {
+      try {
+        await API.crearPuesto({
+          nombre: nombre,
+          rubro: el('pu-rubro').value.trim(),
+          stand: el('pu-stand').value.trim(),
+          emoji: el('pu-emoji').value.trim(),
+          color: el('pu-color').value,
+          condicion: el('pu-condicion').value.trim()
+        });
+        el('formPuesto').reset();
+        el('formPuesto').hidden = true;
+        aviso('puestosResult', 'good', '✓ Puesto creado. Imprime su QR y colócalo visible.');
+        await pintarPuestos();
+      } catch (e) {
+        aviso('puestosResult', 'bad', e.message);
+      }
+    });
+  });
+
+  async function pintarPuestos() {
+    const caja = el('puestosLista');
+    try {
+      const datos = await API.puestosConQr();
+      const lista = datos.empresas || [];
+
+      if (!lista.length) {
+        caja.innerHTML = '<div class="soft center tiny muted" style="padding:1.4rem;">' +
+          'Todavía no hay puestos. Añade el primero con el botón de arriba.</div>';
+        return;
+      }
+
+      // Se dibuja el QR de cada puesto para imprimirlo. El contenido es
+      // "CFP|<token>", que es exactamente lo que espera el escaneo.
+      caja.innerHTML = lista.map(function (p, i) {
+        return '<div class="card" style="margin-bottom:.7rem;">' +
+          '<div class="between" style="margin-bottom:.6rem;">' +
+            '<b>' + esc(p.emoji || '🎪') + ' ' + esc(p.nombre) + '</b>' +
+            (p.activo ? '<span class="pill p-good">Activo</span>' : '<span class="pill p-neutral">Inactivo</span>') +
+          '</div>' +
+          '<div class="center" style="background:#fff;padding:10px;border-radius:12px;">' +
+            '<canvas id="qrPuesto' + i + '" style="width:150px;height:150px;image-rendering:pixelated;"></canvas>' +
+          '</div>' +
+          '<div class="kv" style="margin-top:.5rem;"><span>Código impreso</span>' +
+            '<span class="mono" style="font-size:1.05rem;font-weight:700;">' + esc(p.codigo_corto) + '</span></div>' +
+          (p.stand ? '<div class="kv"><span>Stand</span><span>' + esc(p.stand) + '</span></div>' : '') +
+          (p.condicion ? '<div class="kv"><span>Condición</span><span>' + esc(p.condicion) + '</span></div>' : '') +
+        '</div>';
+      }).join('');
+
+      lista.forEach(function (p, i) {
+        drawQR(p.qr_contenido, el('qrPuesto' + i), 4);
+      });
+    } catch (e) {
+      caja.innerHTML = '<div class="flash bad">' + esc(e.message) + '</div>';
+    }
+  }
+
+  document.addEventListener('cf:pantalla', function (ev) {
+    if (ev.detail.pantalla === 'puestos') pintarPuestos();
   });
 
   /* --------------------------------------------------------------------- */

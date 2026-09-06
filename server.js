@@ -3,6 +3,7 @@ const { Pool } = require('pg');
 
 const { pgDriver, memoryDriver, safeAttendee, publicAttendee, auth } = require('./lib/store');
 const registrarAuth = require('./lib/routes-auth');
+const registrarInsignias = require('./lib/routes-insignias');
 
 // Logger activado: durante el evento hay que poder reconstruir que paso en la
 // puerta. `disableRequestLogging` evita una linea por peticion de asset, que
@@ -27,6 +28,13 @@ const EVENTO = {
 // Datos ficticios de demostracion. Apagados por defecto: en una prueba real
 // contaminan el aforo, la analitica y la lista de asistentes.
 const SEED_DEMO = process.env.SEED_DEMO === 'true';
+
+// Para coleccionar insignias hay que haber validado el ingreso en la puerta.
+// Es la defensa contra el QR de un puesto filtrado por WhatsApp: sin esto,
+// quien reciba la foto gana tickets de sorteo sin haber ido al evento.
+// Se puede desactivar con EXIGIR_INGRESO_PARA_ESCANEAR=false, pero entonces el
+// sorteo deja de estar protegido.
+const EXIGIR_INGRESO_PARA_ESCANEAR = process.env.EXIGIR_INGRESO_PARA_ESCANEAR !== 'false';
 
 // -----------------------------------------------------------------------------
 // Base de Datos PostgreSQL con Fallback Resiliente
@@ -321,6 +329,7 @@ fastify.get('/api/events/analytics', { preHandler: requireAdmin }, async () => {
   const conteo = await store.countAttendees(eventoId);
   const porTipoFilas = await store.countByTipo(eventoId);
   const timeline = await store.checkinTimeline(eventoId);
+  const insignias = await store.contarInsignias(eventoId);
 
   const aforoMax = evento.aforo_max || 500;
   const porTipo = porTipoFilas.reduce((acc, f) => {
@@ -347,6 +356,10 @@ fastify.get('/api/events/analytics', { preHandler: requireAdmin }, async () => {
       tasaIngreso: conteo.total ? Math.round((conteo.ingresados / conteo.total) * 100) : 0,
       standsLeadsCount: inMemoryStore.standsLeads.length,
       preguntasCount: inMemoryStore.preguntas.length,
+      // Insignias emitidas = tickets de sorteo repartidos. `personas` es cuánta
+      // gente distinta consiguió al menos una.
+      insigniasTotal: insignias.total,
+      insigniasPersonas: insignias.personas,
       porTipo,
       timelineHoras
     }
@@ -650,7 +663,11 @@ const start = async () => {
     // despues de iniciar el store. Si el arranque fallo no se registran: la
     // guardia ya devuelve 503 antes de llegar aqui.
     if (!errorDeArranque) {
-      registrarAuth(fastify, { store, eventoId, rateLimit, requireAdmin });
+      const { requireSession } = registrarAuth(fastify, { store, eventoId, rateLimit, requireAdmin });
+      registrarInsignias(fastify, {
+        store, eventoId, rateLimit, requireAdmin, requireSession,
+        exigirIngreso: EXIGIR_INGRESO_PARA_ESCANEAR
+      });
     }
 
     const port = Number(process.env.PORT) || 3000;
