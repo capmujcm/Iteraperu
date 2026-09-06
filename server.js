@@ -63,23 +63,11 @@ if (connectionString) {
   }
 }
 
-// Contenido de catalogo y modulos que todavia no se han migrado a PostgreSQL.
-// Los asistentes, las sesiones y los check-ins YA no viven aqui: los gestiona
-// `lib/store.js` para que no vuelva a haber dos bases de datos distintas.
-const inMemoryStore = {
-  stands: [
-    { id: 'stand-01', nombre: 'ITERA Automation & AI', categoria: 'Automatización & IA', ubicacion: 'Stand A-01', color: '#315CFF' },
-    { id: 'stand-02', nombre: 'Cloud Infrastructure Lab', categoria: 'Cloud & DevOps', ubicacion: 'Stand A-02', color: '#0055FF' },
-    { id: 'stand-03', nombre: 'Enterprise Data BI', categoria: 'Business Intelligence', ubicacion: 'Stand B-01', color: '#0F9B6C' },
-    { id: 'stand-04', nombre: 'Fintech Payments Flow', categoria: 'Fintech & Pagos', ubicacion: 'Stand B-02', color: '#B5179E' }
-  ],
-  standsLeads: [],
-  preguntas: [
-    { id: 'qa-1', autor: 'Fernando Ríos (Banco Líder)', pregunta: '¿Cómo cuantifican el ROI de rediseñar un proceso antes de automatizarlo con RPA?', votos: 14, respondida: false },
-    { id: 'qa-2', autor: 'Lucía Cárdenas (Logística Express)', pregunta: '¿Cuál es el error más común al integrar ERPs antiguos con APIs modernas de almacén?', votos: 9, respondida: false },
-    { id: 'qa-3', autor: 'Mariana Vega', pregunta: '¿Qué arquitectura recomiendan para gobernar datos en empresas medianas sin elevar costos en la nube?', votos: 7, respondida: true }
-  ]
-};
+// Nota: aquí vivía un `inMemoryStore` con stands y preguntas sembradas del
+// evento anterior (ITERA Summit), servidas por /api/stands y /api/qa. Ninguna
+// app de Country Fest los usaba y devolvían datos inventados a quien preguntara,
+// así que se retiraron junto con sus endpoints. Los puestos participantes viven
+// ahora en la tabla `empresas`.
 
 // -----------------------------------------------------------------------------
 // Capa de datos: PostgreSQL cuando hay DATABASE_URL, RAM en caso contrario
@@ -260,6 +248,56 @@ fastify.register(require('@fastify/static'), {
 });
 
 // -----------------------------------------------------------------------------
+// Cabeceras de seguridad
+// -----------------------------------------------------------------------------
+// Se ponen a mano en vez de añadir @fastify/helmet: son seis cabeceras y así se
+// ve exactamente qué se está enviando y por qué (checklist punto 7).
+//
+// Sobre la CSP: las apps llevan sus <script> y <style> en el propio HTML, así
+// que hace falta 'unsafe-inline'. Eso limita el valor de la CSP frente a un XSS,
+// pero sigue sirviendo para lo que más importa aquí: `default-src 'self'` impide
+// que un script inyectado envíe los datos a un servidor externo, y
+// `frame-ancestors 'none'` impide el clickjacking sobre el Punto de Ayuda.
+// Separar los scripts a archivos propios y quitar 'unsafe-inline' es la mejora
+// pendiente.
+const CSP = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  // Las tipografías del festival vienen de Fontshare y Google Fonts.
+  "style-src 'self' 'unsafe-inline' https://api.fontshare.com https://fonts.googleapis.com",
+  "font-src 'self' https://api.fontshare.com https://cdn.fontshare.com https://fonts.gstatic.com",
+  // data: y blob: porque el QR se dibuja en un <canvas> y los logos se
+  // previsualizan desde el archivo antes de subirlos.
+  "img-src 'self' data: blob:",
+  "connect-src 'self'",
+  // La cámara necesita media-src para el <video> del lector de QR.
+  "media-src 'self' blob:"
+].join('; ');
+
+fastify.addHook('onSend', async (req, reply, payload) => {
+  reply.header('Content-Security-Policy', CSP);
+  reply.header('X-Content-Type-Options', 'nosniff');
+  reply.header('X-Frame-Options', 'DENY');
+  // El QR de una entrada no debe viajar en el Referer hacia terceros.
+  reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+  // Se desactivan las APIs que la plataforma no usa. La cámara SÍ se necesita
+  // para leer los QR, así que se permite en el propio origen.
+  reply.header('Permissions-Policy', 'geolocation=(), microphone=(), payment=(), usb=(), camera=(self)');
+
+  // HSTS solo cuando la petición llegó por HTTPS: activarlo en HTTP local
+  // dejaría el navegador del desarrollador clavado en https://localhost.
+  const proto = req.headers['x-forwarded-proto'] || (req.raw.socket && req.raw.socket.encrypted ? 'https' : 'http');
+  if (proto === 'https') {
+    reply.header('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+  }
+  return payload;
+});
+
+// -----------------------------------------------------------------------------
 // Guardia de arranque
 // -----------------------------------------------------------------------------
 // Si la base no quedó lista, la plataforma de eventos responde 503 en vez de
@@ -270,7 +308,7 @@ fastify.addHook('onRequest', async (req, reply) => {
   const url = req.raw.url || '';
   const esApi = url.startsWith('/api/') && url !== '/api/health';
   const esAppEvento = url.startsWith('/e/') || url.startsWith('/staff/') ||
-                      url.startsWith('/negocios/') ||
+                      url.startsWith('/negocios/') || url.startsWith('/consola/') ||
                       url === '/e' || url === '/entrada';
   if (esApi || esAppEvento) {
     reply.code(503).send({
@@ -356,12 +394,11 @@ fastify.get('/api/events/analytics', { preHandler: requireAdmin }, async () => {
       aforoMax,
       aforoPct: aforoMax ? Math.round((conteo.ingresados / aforoMax) * 100) : 0,
       tasaIngreso: conteo.total ? Math.round((conteo.ingresados / conteo.total) * 100) : 0,
-      standsLeadsCount: inMemoryStore.standsLeads.length,
-      preguntasCount: inMemoryStore.preguntas.length,
       // Insignias emitidas = tickets de sorteo repartidos. `personas` es cuánta
       // gente distinta consiguió al menos una.
       insigniasTotal: insignias.total,
       insigniasPersonas: insignias.personas,
+      puestos: (await store.listEmpresas(eventoId)).length,
       porTipo,
       timelineHoras
     }
@@ -381,6 +418,61 @@ fastify.get('/api/attendees', { preHandler: requireAdmin }, async (req) => {
     offset,
     attendees: rows.map(safeAttendee)
   };
+});
+
+// -----------------------------------------------------------------------------
+// Exportación de datos
+// -----------------------------------------------------------------------------
+// Convierte filas a CSV. El escapado importa: un nombre con coma, comillas o un
+// salto de línea rompería el archivo si se concatenara a pelo.
+//
+// El prefijo con comilla simple ante = + - @ evita la inyección de fórmulas:
+// una celda que empiece por "=" la ejecuta Excel al abrir el archivo, y un
+// nombre malicioso podría convertirse en un comando.
+function aCSV(filas) {
+  if (!filas.length) return '';
+  const columnas = Object.keys(filas[0]);
+  const celda = (v) => {
+    if (v === null || v === undefined) return '';
+    let s = String(v);
+    if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+    return '"' + s.replace(/"/g, '""') + '"';
+  };
+  const lineas = [columnas.join(',')];
+  filas.forEach(f => lineas.push(columnas.map(c => celda(f[c])).join(',')));
+  // BOM para que Excel en Windows reconozca el UTF-8 y no destroce las tildes.
+  return '﻿' + lineas.join('\r\n');
+}
+
+// Descarga de asistentes, check-ins o insignias. Lleva DNI, correo y celular:
+// exige token de staff y se registra quién lo pidió.
+fastify.get('/api/export/:que', { preHandler: requireAdmin }, async (req, reply) => {
+  const que = String(req.params.que || '').toLowerCase();
+  const fuentes = {
+    asistentes: () => store.exportarAsistentes(eventoId),
+    checkins: () => store.exportarCheckins(eventoId),
+    insignias: () => store.exportarInsignias(eventoId)
+  };
+
+  if (!fuentes[que]) {
+    return reply.code(404).send({ error: 'Exportación no reconocida. Usa: asistentes, checkins o insignias.' });
+  }
+
+  const filas = await fuentes[que]();
+  // No se registra el contenido, solo el hecho y el volumen (checklist punto 2).
+  req.log.warn({ export: que, filas: filas.length }, 'exportacion de datos personales');
+
+  const fecha = new Date().toISOString().slice(0, 10);
+  const nombre = `country-fest-${que}-${fecha}.csv`;
+
+  if (req.query.formato === 'json') {
+    return reply.send({ success: true, total: filas.length, filas });
+  }
+
+  return reply
+    .header('Content-Type', 'text/csv; charset=utf-8')
+    .header('Content-Disposition', `attachment; filename="${nombre}"`)
+    .send(aCSV(filas));
 });
 
 // Ultimos check-ins registrados, para el panel de puerta.
@@ -471,58 +563,6 @@ fastify.post('/api/soporte/buscar', {
   return { success: true, attendee: safeAttendee(persona) };
 });
 
-fastify.get('/api/stands', async () => {
-  return { success: true, stands: inMemoryStore.stands };
-});
-
-fastify.post('/api/stands/scan-lead', { preHandler: requireAdmin }, async (req, reply) => {
-  const { stand_id, attendee_code, attendee_token, interes, notas } = req.body || {};
-  const persona = await buscarPorTicket({ token: attendee_token, code: attendee_code });
-
-  if (!persona) return reply.status(404).send({ error: 'Asistente no encontrado' });
-
-  // El expositor recibe el ticket y el nombre, no la ficha de datos personales.
-  // Compartir DNI, correo o celular con un tercero exige un consentimiento
-  // especifico que todavia no esta implementado (Ley 29733).
-  const newLead = {
-    id: `lead-${Date.now()}`,
-    stand_id: stand_id || 'stand-01',
-    attendee: publicAttendee(persona),
-    interes: String(interes || 'Alto').slice(0, 30),
-    notas: String(notas || 'Contacto en stand.').slice(0, 500),
-    captured_at: new Date().toISOString()
-  };
-  inMemoryStore.standsLeads.unshift(newLead);
-  return reply.status(201).send({ success: true, lead: newLead });
-});
-
-fastify.get('/api/qa', async () => {
-  const sorted = [...inMemoryStore.preguntas].sort((a, b) => b.votos - a.votos);
-  return { success: true, count: sorted.length, questions: sorted };
-});
-
-fastify.post('/api/qa/ask', { preHandler: rateLimit(15, 60000) }, async (req, reply) => {
-  const { autor, pregunta } = req.body || {};
-  if (!pregunta) return reply.status(400).send({ error: 'Pregunta requerida' });
-
-  const newQ = {
-    id: `qa-${Date.now()}`,
-    autor: autor || 'Asistente',
-    pregunta: pregunta.trim(),
-    votos: 1,
-    respondida: false,
-    created_at: new Date().toISOString()
-  };
-  inMemoryStore.preguntas.unshift(newQ);
-  return reply.status(201).send({ success: true, question: newQ });
-});
-
-fastify.post('/api/qa/:id/upvote', { preHandler: rateLimit(60, 60000) }, async (req, reply) => {
-  const q = inMemoryStore.preguntas.find(item => item.id === req.params.id);
-  if (!q) return reply.status(404).send({ error: 'Pregunta no encontrada' });
-  q.votos += 1;
-  return { success: true, votos: q.votos };
-});
 
 // Texto exacto de la casilla de consentimiento de la landing. Se guarda junto
 // al lead: si mañana cambia la redaccion, hay que poder demostrar cual acepto
@@ -627,6 +667,7 @@ function appDeEvento(archivo) {
 fastify.get('/e/:slug', appDeEvento('asistente.html'));       // asistente
 fastify.get('/staff/:slug', appDeEvento('staff.html'));       // Punto de Ayuda
 fastify.get('/negocios/:slug', appDeEvento('negocio.html'));  // puesto participante
+fastify.get('/consola/:slug', appDeEvento('consola.html'));   // organizador
 
 // Atajos sin slug, para carteles y enlaces cortos.
 fastify.get('/e', async (req, reply) => reply.redirect(302, '/e/' + evento.slug));

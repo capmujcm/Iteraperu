@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A1128">
+<meta name="robots" content="noindex">
+<title>Country Fest · Consola</title>
+<link rel="icon" href="/assets/itera-mark.svg">
+<link rel="preconnect" href="https://api.fontshare.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/cf/app.css">
+<style>
+  /* La consola es la única pantalla pensada para un portátil, no para el
+     celular: el organizador la mira desde la mesa de producción. */
+  .app{max-width:1100px;}
+  .apphead .dot{background:var(--event-navy);}
+
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.6rem;}
+  .kpi{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:.9rem;}
+  .kpi .n{font-family:'JetBrains Mono',monospace;font-size:1.9rem;font-weight:800;line-height:1;}
+  .kpi .l{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--ink-soft);margin-top:.3rem;}
+  .kpi .sub{font-size:.7rem;color:var(--ink-mut);margin-top:.2rem;}
+  .kpi.destacado{background:linear-gradient(135deg,var(--event),var(--event-deep));border-color:transparent;}
+  .kpi.destacado .n,.kpi.destacado .l,.kpi.destacado .sub{color:#fff;}
+  .kpi.destacado .l,.kpi.destacado .sub{opacity:.85;}
+
+  .aforo{height:12px;border-radius:999px;background:var(--surface-2);overflow:hidden;margin-top:.5rem;
+    border:1px solid var(--line);}
+  .aforo i{display:block;height:100%;background:linear-gradient(90deg,var(--event),var(--event-yellow));}
+
+  .curva{display:flex;align-items:flex-end;gap:4px;height:150px;margin-top:.7rem;}
+  .curva div{flex:1;background:var(--event);border-radius:4px 4px 0 0;min-height:2px;position:relative;}
+  .curva-x{display:flex;gap:4px;margin-top:.3rem;}
+  .curva-x span{flex:1;font-size:.58rem;color:var(--ink-mut);text-align:center;}
+
+  .auto{font-size:.7rem;color:var(--ink-mut);}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="apphead">
+    <div class="ev"><span class="dot"></span><b id="evNombre">Country Fest</b></div>
+    <span class="pill p-neutral" id="pillAuto">—</span>
+  </header>
+
+  <div class="offbar" id="offbar">Sin conexión con el servidor.</div>
+
+  <div class="vbody">
+
+    <section class="screen active" data-sc="cargando">
+      <div class="loading">Cargando…</div>
+    </section>
+
+    <!-- ================= sin token ================= -->
+    <section class="screen" data-sc="sin-token">
+      <div class="schead"><h2>Consola del organizador</h2></div>
+      <div class="note n-warn tiny" style="margin-bottom:.9rem;">
+        Este equipo no tiene el token de organización. Abre la consola con el enlace
+        que incluye el token, o pégalo aquí.
+      </div>
+      <div class="card">
+        <div class="field">
+          <label for="tk-manual">Token de organización</label>
+          <input type="password" id="tk-manual" autocomplete="off">
+        </div>
+        <button class="btn btn-dark btn-block" id="btnGuardarToken">Entrar</button>
+      </div>
+      <div id="tokenResult" style="margin-top:.8rem;"></div>
+    </section>
+
+    <!-- ================= panel ================= -->
+    <section class="screen" data-sc="panel">
+      <div class="schead"><h2>Pulso del evento</h2></div>
+
+      <div class="kpis">
+        <div class="kpi destacado">
+          <div class="n" id="kIngresados">0</div>
+          <div class="l">Dentro del evento</div>
+          <div class="sub" id="kAforoTexto">— del aforo</div>
+        </div>
+        <div class="kpi">
+          <div class="n" id="kRegistrados">0</div>
+          <div class="l">Registrados</div>
+          <div class="sub" id="kTasa">— han ingresado</div>
+        </div>
+        <div class="kpi">
+          <div class="n" id="kInsignias">0</div>
+          <div class="l">Tickets de sorteo</div>
+          <div class="sub" id="kInsPersonas">— personas</div>
+        </div>
+        <div class="kpi">
+          <div class="n" id="kPuestos">0</div>
+          <div class="l">Puestos activos</div>
+          <div class="sub">Con QR emitido</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:.7rem;">
+        <div class="between">
+          <h4 style="font-size:.95rem;">Aforo</h4>
+          <span class="mono" id="aforoCifra">0 / 0</span>
+        </div>
+        <div class="aforo"><i id="aforoBarra" style="width:0%"></i></div>
+      </div>
+
+      <div class="card" style="margin-top:.7rem;">
+        <h4 style="font-size:.95rem;">Ingresos acumulados por hora</h4>
+        <div id="curva"></div>
+      </div>
+
+      <div class="card" style="margin-top:.7rem;">
+        <div class="between" style="margin-bottom:.5rem;">
+          <h4 style="font-size:.95rem;">Últimos ingresos</h4>
+          <span class="auto" id="autoTexto">Se actualiza solo</span>
+        </div>
+        <div class="tw"><table id="tablaCheckins"><tbody></tbody></table></div>
+      </div>
+
+      <div class="card" style="margin-top:.7rem;">
+        <h4 style="font-size:.95rem;margin-bottom:.5rem;">Descargar datos</h4>
+        <p class="tiny muted" style="margin-bottom:.6rem;">
+          Los archivos llevan DNI, correo y celular. Trátalos como lo que son:
+          datos personales bajo la Ley 29733.
+        </p>
+        <div class="row wrap">
+          <button class="btn btn-line btn-sm" data-export="asistentes">Asistentes</button>
+          <button class="btn btn-line btn-sm" data-export="checkins">Check-ins</button>
+          <button class="btn btn-line btn-sm" data-export="insignias">Insignias</button>
+        </div>
+        <div id="exportResult" style="margin-top:.6rem;"></div>
+      </div>
+
+      <div class="soft tiny muted" style="margin-top:.7rem;">
+        Para dar de alta puestos, validar ingresos o restablecer contraseñas, usa el
+        <b>Punto de Ayuda</b>.
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="/cf/app.js"></script>
+<script>
+/* =============================================================================
+   Country Fest - consola del organizador
+   =============================================================================
+   Solo lectura y descargas. Las acciones que tocan personas (validar ingreso,
+   restablecer contrasenas, crear puestos) viven en el Punto de Ayuda, donde
+   queda registrado quien las hizo.
+   ============================================================================= */
+(function () {
+  'use strict';
+
+  const REFRESCO_MS = 20000;
+  let temporizador = null;
+
+  function aviso(caja, tipo, mensaje) {
+    const c = el(caja);
+    if (c) c.innerHTML = '<div class="flash ' + tipo + '">' + esc(mensaje) + '</div>';
+  }
+
+  /* --------------------------------------------------------------------- */
+  /* token                                                                 */
+  /* --------------------------------------------------------------------- */
+  el('btnGuardarToken').addEventListener('click', function () {
+    const t = el('tk-manual').value.trim();
+    if (!t) return aviso('tokenResult', 'bad', 'Pega el token para continuar.');
+    API.guardarTokenStaff(t);
+    el('tk-manual').value = '';
+    arrancar();
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* panel                                                                 */
+  /* --------------------------------------------------------------------- */
+  const n = x => Number(x || 0).toLocaleString('es-PE');
+
+  async function refrescar() {
+    try {
+      const r = await API.pedir('/api/events/analytics', { auth: 'staff' });
+      const m = r.metrics;
+
+      el('kIngresados').textContent = n(m.totalIngresados);
+      el('kRegistrados').textContent = n(m.totalRegistrados);
+      el('kInsignias').textContent = n(m.insigniasTotal);
+      el('kPuestos').textContent = n(m.puestos);
+
+      el('kAforoTexto').textContent = m.aforoPct + '% del aforo';
+      el('kTasa').textContent = m.tasaIngreso + '% han ingresado';
+      el('kInsPersonas').textContent = n(m.insigniasPersonas) + ' personas distintas';
+
+      el('aforoCifra').textContent = n(m.totalIngresados) + ' / ' + n(m.aforoMax);
+      el('aforoBarra').style.width = Math.min(100, m.aforoPct) + '%';
+
+      pintarCurva(m.timelineHoras || []);
+
+      el('pillAuto').className = 'pill p-good';
+      el('pillAuto').textContent = '● En vivo · ' + fT(Date.now());
+
+      await pintarCheckins();
+    } catch (e) {
+      if (e.status === 401 || e.status === 503) {
+        detener();
+        go('sin-token');
+        aviso('tokenResult', 'bad', 'El token no es válido para esta consola.');
+        return;
+      }
+      el('pillAuto').className = 'pill p-warn';
+      el('pillAuto').textContent = '● Sin actualizar';
+    }
+  }
+
+  function pintarCurva(horas) {
+    if (!horas.length) {
+      el('curva').innerHTML = '<p class="tiny muted" style="padding:.8rem 0;">Todavía no hay ingresos.</p>';
+      return;
+    }
+    const max = Math.max.apply(null, horas.map(function (h) { return h.ingresos; })) || 1;
+    el('curva').innerHTML =
+      '<div class="curva">' + horas.map(function (h) {
+        return '<div style="height:' + Math.round((h.ingresos / max) * 100) + '%" title="' +
+          esc(h.hora) + ': ' + h.ingresos + '"></div>';
+      }).join('') + '</div>' +
+      '<div class="curva-x">' + horas.map(function (h) {
+        return '<span>' + esc(h.hora.slice(0, 2)) + '</span>';
+      }).join('') + '</div>';
+  }
+
+  async function pintarCheckins() {
+    try {
+      const r = await API.ultimosCheckins(12);
+      const filas = r.checkins || [];
+      const cuerpo = el('tablaCheckins').querySelector('tbody');
+
+      if (!filas.length) {
+        cuerpo.innerHTML = '<tr><td class="tiny muted" style="padding:.8rem 0;">Todavía no hay ingresos registrados.</td></tr>';
+        return;
+      }
+      cuerpo.innerHTML = filas.map(function (c) {
+        return '<tr>' +
+          '<td class="mono" style="white-space:nowrap;">' + esc(fT(c.created_at)) + '</td>' +
+          '<td>' + NM(c) + '</td>' +
+          '<td class="mono">' + esc(c.codigo_ticket || '') + '</td>' +
+          '<td>' + esc(c.puerta || '') + '</td>' +
+          '<td>' + (c.resultado === 'duplicado'
+            ? '<span class="pill p-warn">repetido</span>'
+            : '<span class="pill p-good">ok</span>') + '</td>' +
+        '</tr>';
+      }).join('');
+    } catch (e) { /* el KPI ya avisa si no hay conexión */ }
+  }
+
+  /* --------------------------------------------------------------------- */
+  /* descargas                                                             */
+  /* --------------------------------------------------------------------- */
+  // La descarga va por fetch y no por un enlace directo porque el token de
+  // organización viaja en una cabecera, no en la URL: ponerlo en la dirección
+  // lo dejaría en el historial del navegador y en los logs del proxy.
+  document.querySelectorAll('[data-export]').forEach(function (b) {
+    b.addEventListener('click', async function () {
+      const que = this.dataset.export;
+      const original = this.textContent;
+      this.disabled = true;
+      this.textContent = 'Preparando…';
+      try {
+        const res = await fetch('/api/export/' + encodeURIComponent(que), {
+          headers: { 'X-Admin-Token': API.tokenStaff() }
+        });
+        if (!res.ok) throw new Error('No se pudo generar el archivo.');
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'country-fest-' + que + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        aviso('exportResult', 'good', '✓ Descargado. Guárdalo en un lugar seguro.');
+      } catch (e) {
+        aviso('exportResult', 'bad', e.message);
+      } finally {
+        this.disabled = false;
+        this.textContent = original;
+      }
+    });
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* ciclo de refresco                                                     */
+  /* --------------------------------------------------------------------- */
+  function arrancarRefresco() {
+    detener();
+    refrescar();
+    temporizador = setInterval(refrescar, REFRESCO_MS);
+  }
+  function detener() {
+    if (temporizador) { clearInterval(temporizador); temporizador = null; }
+  }
+  // Con la pestaña oculta no se consulta: durante el evento esta pantalla queda
+  // abierta horas y no tiene sentido machacar la base cada 20 segundos.
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) detener();
+    else if (!el('[data-sc="panel"]') || document.querySelector('.screen.active').dataset.sc === 'panel') {
+      arrancarRefresco();
+    }
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* arranque                                                              */
+  /* --------------------------------------------------------------------- */
+  function arrancar() {
+    API.evento()
+      .then(function (r) { if (r.event && r.event.nombre) el('evNombre').textContent = r.event.nombre; })
+      .catch(function () {});
+
+    if (!API.tieneTokenStaff()) { detener(); go('sin-token'); return; }
+    go('panel');
+    arrancarRefresco();
+  }
+
+  arrancar();
+})();
+</script>
+</body>
+</html>

@@ -591,6 +591,7 @@ const API = (function () {
     almacenamientoPersistente: () => hayAlmacenamiento,
     tieneSesion: () => !!leer(CLAVE_SESION),
     tieneTokenStaff: () => !!leer(CLAVE_STAFF),
+    tokenStaff: () => leer(CLAVE_STAFF),
     guardarSesion: t => guardar(CLAVE_SESION, t),
     borrarSesion: () => guardar(CLAVE_SESION, ''),
     tieneSesionEmpresa: () => !!leer(CLAVE_EMPRESA),

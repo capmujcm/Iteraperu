@@ -19,6 +19,7 @@ public/                   Todo lo que se sirve al navegador (static root)
     asistente.html        App del asistente         →  /e/country-fest
     staff.html            Punto de Ayuda            →  /staff/country-fest
     negocio.html          Panel del puesto          →  /negocios/country-fest
+    consola.html          Consola del organizador   →  /consola/country-fest
   evento/
     prototipo.html        Prototipo comercial       →  /evento  (autónomo, sin API)
     qr-test.html          Banco de pruebas del motor QR
@@ -47,6 +48,7 @@ Nada fuera de `public/` es accesible por HTTP.
 | `/e/country-fest` | **App real del asistente** (`/e`, `/entrada` redirigen aquí) |
 | `/staff/country-fest` | **App real del Punto de Ayuda** (requiere `?staff=TOKEN`) |
 | `/negocios/country-fest` | **Panel del puesto participante** |
+| `/consola/country-fest` | **Consola del organizador** (requiere `?staff=TOKEN`) |
 | `/evento` | Prototipo comercial, con datos ficticios |
 | `/api/*` | API del evento |
 
@@ -231,3 +233,41 @@ Ver [`.env.example`](.env.example). Las que importan para operar:
 ---
 
 © 2026 ITERA. Todos los derechos reservados.
+
+## Consola del organizador: `/consola/country-fest`
+
+Solo lectura y descargas, con el mismo `ADMIN_TOKEN` que el Punto de Ayuda.
+Muestra aforo en vivo, registrados, tickets de sorteo, puestos activos, la curva
+de ingresos por hora y los últimos check-ins. Se refresca sola cada 20 segundos
+y **deja de consultar cuando la pestaña está oculta**, para no machacar la base
+durante las horas que queda abierta.
+
+Las acciones que tocan a personas —validar ingreso, restablecer contraseñas,
+dar de alta puestos— viven en el Punto de Ayuda, donde queda registrado quién
+las hizo.
+
+### Exportar los datos
+
+`GET /api/export/asistentes`, `/checkins` o `/insignias` (token de staff).
+Devuelve CSV con BOM para que Excel en Windows respete las tildes; añade
+`?formato=json` si prefieres JSON.
+
+El CSV escapa comillas y saltos de línea, y **antepone una comilla simple a las
+celdas que empiezan por `=`, `+`, `-` o `@`**: sin eso, un nombre que empiece
+por `=` lo ejecutaría Excel como fórmula al abrir el archivo.
+
+Estos archivos llevan DNI, correo y celular. Cada descarga queda registrada en
+los logs del servidor (el hecho y el número de filas, nunca el contenido).
+
+## Cabeceras de seguridad
+
+Se envían a mano desde `server.js`, sin `@fastify/helmet`: `Content-Security-Policy`,
+`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`,
+`Permissions-Policy` y `Strict-Transport-Security` (esta última solo sobre HTTPS,
+para no dejar clavado el navegador en desarrollo local).
+
+La CSP permite `'unsafe-inline'` en scripts porque las apps llevan su JavaScript
+en el propio HTML. Eso limita su valor frente a un XSS, pero `default-src 'self'`
+sigue impidiendo que un script inyectado envíe los datos fuera, y
+`frame-ancestors 'none'` bloquea el clickjacking sobre el Punto de Ayuda.
+**Pendiente:** separar los scripts a archivos propios y quitar `'unsafe-inline'`.
