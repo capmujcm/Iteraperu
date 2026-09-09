@@ -363,13 +363,13 @@ const CSP = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net",
   // Las tipografías del festival vienen de Fontshare y Google Fonts.
   "style-src 'self' 'unsafe-inline' https://api.fontshare.com https://fonts.googleapis.com",
   "font-src 'self' https://api.fontshare.com https://cdn.fontshare.com https://fonts.gstatic.com",
   // data: y blob: porque el QR se dibuja en un <canvas> y los logos se
-  // previsualizan desde el archivo antes de subirlos.
-  "img-src 'self' data: blob:",
+  // previsualizan desde el archivo antes de subirlos. Unsplash para imágenes demo.
+  "img-src 'self' data: blob: https://images.unsplash.com",
   "connect-src 'self'",
   // La cámara necesita media-src para el <video> del lector de QR.
   "media-src 'self' blob:"
@@ -786,6 +786,14 @@ fastify.get('/organizador', async (req, reply) => reply.sendFile('evento/prototi
 fastify.get('/proveedor', async (req, reply) => reply.sendFile('evento/prototipo.html'));
 fastify.get('/staff', async (req, reply) => reply.sendFile('evento/prototipo.html'));
 fastify.get('/ayuda', async (req, reply) => reply.sendFile('evento/prototipo.html'));
+
+// Sunrise Hotel Ilo — Plataforma Web, Presentación y Centro de Mando
+fastify.get('/sunrise', async (req, reply) => reply.redirect(302, '/sunrise/'));
+fastify.get('/hotel', async (req, reply) => reply.redirect(302, '/sunrise/'));
+fastify.get('/sunrise-hotel', async (req, reply) => reply.redirect(302, '/sunrise/'));
+fastify.get('/sunrise/', async (req, reply) => reply.sendFile('sunrise/index.html'));
+fastify.get('/sunrise/presentacion', async (req, reply) => reply.sendFile('sunrise/presentacion.html'));
+fastify.get('/sunrise/portal', async (req, reply) => reply.sendFile('sunrise/portal.html'));
 
 // -----------------------------------------------------------------------------
 // Arranque

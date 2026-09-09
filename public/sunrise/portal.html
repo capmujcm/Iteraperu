@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sunrise Hotel Ilo ★★★★ | Centro de Mando & Suite Digital</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Outfit + Plus Jakarta Sans + Playfair Display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  
+  <style>
+    h1, h2, h3, .font-serif {
+      font-family: 'Outfit', sans-serif !important;
+      letter-spacing: -0.02em;
+    }
+    .suite-card {
+      background: rgba(6, 35, 40, 0.7);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(246, 207, 146, 0.15);
+      transition: all 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .suite-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(246, 207, 146, 0.5);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+    .featured-card {
+      background: linear-gradient(135deg, rgba(8, 47, 54, 0.9) 0%, rgba(3, 23, 26, 0.95) 100%);
+      border: 1px solid rgba(246, 207, 146, 0.35);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    }
+    .btn-gold {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background: linear-gradient(135deg, #eed8b0 0%, #d8b877 50%, #bf9a53 100%) !important;
+      color: #05080e !important;
+      font-family: 'Outfit', sans-serif !important;
+      font-size: 0.72rem !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.14em !important;
+      text-transform: uppercase !important;
+      border-radius: 9999px !important;
+      padding: 0.68rem 1.45rem !important;
+      border: 1px solid rgba(255, 255, 255, 0.5) !important;
+      box-shadow: 0 4px 18px -2px rgba(191, 154, 83, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.75) !important;
+      transition: all 0.35s cubic-bezier(0.32, 0.72, 0, 1) !important;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-gold:hover {
+      background: linear-gradient(135deg, #faebd0 0%, #e2c589 50%, #cfaa5d 100%) !important;
+      box-shadow: 0 6px 24px -1px rgba(216, 184, 119, 0.5), inset 0 1px 0 #ffffff !important;
+      transform: translateY(-2px);
+      color: #000000 !important;
+    }
+    .btn-gold .btn-arrow {
+      display: inline-block;
+      font-size: 0.95rem;
+      line-height: 1;
+      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .btn-gold:hover .btn-arrow {
+      transform: translateX(4px);
+    }
+  </style>
+</head>
+<body class="bg-[#03171a] text-slate-100 font-sans antialiased min-h-screen flex flex-col p-4 sm:p-8 justify-center selection:bg-amber-500 selection:text-slate-950">
+
+  <div class="max-w-6xl mx-auto w-full space-y-8 my-auto py-6">
+    
+    <!-- Hero Brand with Official Logo -->
+    <div class="text-center space-y-4 max-w-3xl mx-auto">
+      <div class="relative inline-block mx-auto">
+        <div class="absolute inset-0 rounded-full bg-amber-400/20 blur-3xl transform scale-150"></div>
+        <img src="assets/logo_transparent.png" alt="Sunrise Hotel Ilo Logo Oficial" class="relative z-10 h-28 sm:h-36 w-auto object-contain mx-auto filter drop-shadow-2xl">
+      </div>
+      <div>
+        <div class="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-slate-900/80 border border-amber-400/30 text-amber-300 text-xs font-semibold mb-2">
+          <span>★★★★ ILO, MOQUEGUA • SUITE DIGITAL & COMERCIAL 2026</span>
+        </div>
+        <h1 class="text-3xl sm:text-5xl font-serif font-bold text-white tracking-tight">
+          Centro de Mando & Suite Digital
+        </h1>
+        <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-xl mx-auto">
+          Todo el ecosistema comercial, tecnológico y de datos creado a la medida para Sunrise Hotel Ilo.
+        </p>
+      </div>
+    </div>
+
+    <!-- FEATURED CARD: PRESENTACIÓN ESTRATÉGICA (PITCH DECK) -->
+    <a href="presentacion.html" class="featured-card rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 group hover:border-amber-400 transition-all block">
+      <div class="space-y-3 flex-1 text-center md:text-left">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-[11px] font-bold tracking-wider uppercase">
+          <span>🎬 Recomendado para Dueños & Gerencia</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-white group-hover:text-amber-300 transition-colors">
+          Presentación Estratégica Interactiva (Keynote Pitch Deck)
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
+          8 diapositivas dinámicas de alto impacto: diagnóstico de la paradoja de los 4 días, el corredor turístico Moquegua-Tacna, la tríada de productos, gráficos de Chart.js y el salto a <strong>+S/ 583,200 de EBITDA anual</strong>.
+        </p>
+        <div class="flex flex-wrap gap-2 text-[10px] text-amber-200/90 pt-1 justify-center md:justify-start">
+          <span class="bg-black/40 px-2.5 py-1 rounded-md border border-white/10">Navegación con Teclas ← →</span>
+          <span class="bg-black/40 px-2.5 py-1 rounded-md border border-white/10">Gráficos Chart.js en Vivo</span>
+          <span class="bg-black/40 px-2.5 py-1 rounded-md border border-white/10">Logo Oficial Integrado</span>
+        </div>
+      </div>
+      <div class="flex-shrink-0">
+        <div class="btn-gold group-hover:scale-105 transition-all">
+          <span>Ver Diapositivas</span>
+          <span class="btn-arrow">↗</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 4 OPERATIONAL APPS GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- PORTAL 1: Public Web & Booking Engine -->
+      <a href="index.html" class="suite-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between group block">
+        <div class="space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-sky-500/10 text-sky-400 flex items-center justify-center text-2xl border border-sky-500/20 group-hover:scale-110 transition-transform">
+            🏨
+          </div>
+          <div>
+            <span class="text-[10px] font-bold text-sky-400 uppercase tracking-widest block">Para el Huésped & Turista</span>
+            <h3 class="text-xl font-bold text-white mt-1 group-hover:text-amber-300 transition-colors">
+              1. Web Oficial & Motor de Reservas
+            </h3>
+            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+              La plataforma pública de alta conversión: catálogo con fotos HD, selector Soles/Dólares, fechas dinámicas, guía de playas de Ilo, FAQ y checkout con <strong>Yape/Plin (QR oficial)</strong>.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2 text-[10px] text-slate-400 pt-1">
+            <span class="bg-black/30 px-2.5 py-1 rounded-md border border-slate-800">Motor Directo</span>
+            <span class="bg-black/30 px-2.5 py-1 rounded-md border border-slate-800">Yape / Plin</span>
+            <span class="bg-black/30 px-2.5 py-1 rounded-md border border-slate-800">Guía de Playas</span>
+          </div>
+        </div>
+        <div class="mt-6 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-bold text-sky-400">
+          <span>Abrir index.html</span>
+          <span class="group-hover:translate-x-1 transition-transform">Entrar →</span>
+        </div>
+      </a>
+
+      <!-- PORTAL 2: Reception & Manager PMS -->
+      <a href="admin.html" class="suite-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between group block">
+        <div class="space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-2xl border border-emerald-500/20 group-hover:scale-110 transition-transform">
+            🖥️
+          </div>
+          <div>
+            <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block">Para Recepción & Gerencia</span>
+            <h3 class="text-xl font-bold text-white mt-1 group-hover:text-amber-300 transition-colors">
+              2. Panel de Recepción (PMS Operativo)
+            </h3>
+            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+              El panel de control diario: validación de pagos Yape en vivo, rack visual de habitaciones (pisos 1 al 4) y control de aforo para pasadías de piscina con tickets de consumo.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2 text-[10px] text-slate-400 pt-1">
+            <span class="bg-black/30 px-2.5 py-1 rounded-md border border-slate-800">Check-in / Out</span>
+            <span class="bg-black/30 px-2.5 py-1 rounded-md border border-slate-800">Rack Pisos 1-4</span>
+            <span class="bg-black/30 px-2.5 py-1 rounded-md border border-slate-800">Aforo Piscina</span>
+          </div>
+        </div>
+        <div class="mt-6 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-bold text-emerald-400">
+          <span>Abrir admin.html</span>
+          <span class="group-hover:translate-x-1 transition-transform">Entrar →</span>
+        </div>
+      </a>
+
+      <!-- PORTAL 3: Financial Analytics & RevPAR Dashboard -->
+      <a href="dashboard.html" class="suite-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between group block">
+        <div class="space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-2xl border border-amber-500/20 group-hover:scale-110 transition-transform">
+            📊
+          </div>
+          <div>
+            <span class="text-[10px] font-bold text-amber-400 uppercase tracking-widest block">Para Inversionistas & CCO</span>
+            <h3 class="text-xl font-bold text-white mt-1 group-hover:text-amber-300 transition-colors">
+              3. Dashboard de Analítica & RevPAR
+            </h3>
+            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+              Inteligencia de negocio con Chart.js: curvas de ocupación semanal lunes a domingo, métricas RevPAR/ADR, matriz de sensibilidad y análisis de costes marginales (Unit Economics).
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2 text-[10px] text-slate-400 pt-1">
+            <span class="bg-black/30 px-2.5 py-1 rounded-md border border-slate-800">Métricas RevPAR</span>
+            <span class="bg-black/30 px-2.5 py-1 rounded-md border border-slate-800">Gráficos Chart.js</span>
+            <span class="bg-black/30 px-2.5 py-1 rounded-md border border-slate-800">Unit Economics</span>
+          </div>
+        </div>
+        <div class="mt-6 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-bold text-amber-400">
+          <span>Abrir dashboard.html</span>
+          <span class="group-hover:translate-x-1 transition-transform">Entrar →</span>
+        </div>
+      </a>
+
+      <!-- PORTAL 4: Strategic Plan & WhatsApp Bot Simulator -->
+      <a href="estrategia.html" class="suite-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between group block">
+        <div class="space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-2xl border border-purple-500/20 group-hover:scale-110 transition-transform">
+            🎯
+          </div>
+          <div>
+            <span class="text-[10px] font-bold text-purple-400 uppercase tracking-widest block">Para Marketing & Ventas</span>
+            <h3 class="text-xl font-bold text-white mt-1 group-hover:text-amber-300 transition-colors">
+              4. Plan Estratégico & WhatsApp Bot
+            </h3>
+            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+              El plan de marketing: simulador funcional de WhatsApp Bot en celular (cierre en 90s), calculadora financiera con barras deslizantes y bocetos de pauta para Meta Ads en Tacna y Moquegua.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2 text-[10px] text-slate-400 pt-1">
+            <span class="bg-black/30 px-2.5 py-1 rounded-md border border-slate-800">Simulador Celular</span>
+            <span class="bg-black/30 px-2.5 py-1 rounded-md border border-slate-800">Calculadora ROI</span>
+            <span class="bg-black/30 px-2.5 py-1 rounded-md border border-slate-800">Anuncios Meta Ads</span>
+          </div>
+        </div>
+        <div class="mt-6 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-bold text-purple-400">
+          <span>Abrir estrategia.html</span>
+          <span class="group-hover:translate-x-1 transition-transform">Entrar →</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- Quick Footer -->
+    <div class="text-center text-xs text-slate-400 border-t border-slate-800 pt-6">
+      Sunrise Hotel Ilo ★★★★ • Jirón Moquegua 657, Ilo, Moquegua - Perú • Tel: +51 994 342 040
+    </div>
+
+  </div>
+
+</body>
+</html>

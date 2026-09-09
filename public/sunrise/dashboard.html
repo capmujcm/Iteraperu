@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sunrise Hotel Ilo - Dashboard de Inteligencia de Ingresos & Analítica de Datos</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              950: '#060d17',
+              900: '#0b1728',
+              800: '#13243d',
+              700: '#1d3557',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #060d17; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    .kpi-card {
+      background: rgba(11, 23, 40, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+  </style>
+</head>
+<body class="bg-brand-950 text-slate-100 font-sans antialiased min-h-screen p-4 sm:p-6 lg:p-8">
+
+  <!-- ============================================================== -->
+  <!-- TOP HEADER & CONTROLS                                          -->
+  <!-- ============================================================== -->
+  <div class="max-w-7xl mx-auto space-y-8">
+    
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+      <div class="flex items-center space-x-4">
+        <img src="assets/logo_transparent.png" alt="Sunrise Hotel" class="h-14 w-auto object-contain">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold border border-amber-500/30 uppercase tracking-wider">
+              Revenue Management & Data Analytics
+            </span>
+            <span class="text-xs text-slate-500">|</span>
+            <span class="text-xs text-slate-400">Modelo Financiero Sunrise Hotel Ilo (35 Habs)</span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
+            Análisis de Impacto Financiero & Métricas de Rendimiento (RevPAR)
+          </h1>
+        </div>
+      </div>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">
+          Evaluación econométrica del paso de mono-cliente corporativo a modelo híbrido B2B + B2C.
+        </p>
+      </div>
+
+      <!-- Quick Navigation -->
+      <div class="flex items-center space-x-2">
+        <a href="presentacion.html" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-bold text-xs shadow transition-all">
+          🎬 Presentación
+        </a>
+        <a href="index.html" class="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow transition-all">
+          🏨 Web Pública
+        </a>
+        <a href="admin.html" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition-all">
+          PMS Recepción
+        </a>
+        <a href="portal.html" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white font-semibold text-xs border border-slate-700 transition-all">
+          Portal
+        </a>
+      </div>
+    </header>
+
+    <!-- ============================================================== -->
+    <!-- 4 EXECUTIVE KPI CARDS (THE HEADLINE METRICS)                   -->
+    <!-- ============================================================== -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      
+      <!-- KPI 1: RevPAR Fin de Semana -->
+      <div class="kpi-card rounded-2xl p-5 border-l-4 border-l-amber-500 shadow-xl">
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">RevPAR Fin de Semana</span>
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold">+184%</span>
+        </div>
+        <div class="mt-3 flex items-baseline space-x-2">
+          <span class="text-3xl font-black text-white font-mono">S/ 157.50</span>
+          <span class="text-xs text-slate-500 line-through font-mono">S/ 55.40</span>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-1">Ingreso por habitación disponible (Vie-Dom)</p>
+      </div>
+
+      <!-- KPI 2: EBITDA Mensual Extra -->
+      <div class="kpi-card rounded-2xl p-5 border-l-4 border-l-emerald-500 shadow-xl">
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">EBITDA Mensual Incremental</span>
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold">Margen 72%</span>
+        </div>
+        <div class="mt-3 flex items-baseline space-x-2">
+          <span class="text-3xl font-black text-emerald-400 font-mono">+S/ 48,200</span>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-1">Aprox. <strong>+$12,680 USD/mes</strong> netos tras costes marginales</p>
+      </div>
+
+      <!-- KPI 3: Ahorro Comisiones OTAs -->
+      <div class="kpi-card rounded-2xl p-5 border-l-4 border-l-sky-500 shadow-xl">
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ahorro Anual Comisiones</span>
+          <span class="text-[10px] bg-sky-500/20 text-sky-300 px-2 py-0.5 rounded-full font-bold">vs Booking 18%</span>
+        </div>
+        <div class="mt-3 flex items-baseline space-x-2">
+          <span class="text-3xl font-black text-sky-400 font-mono">S/ 64,800</span>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-1">Retenido en el hotel por venta directa web + WhatsApp</p>
+      </div>
+
+      <!-- KPI 4: CAC (Costo Adquisición) -->
+      <div class="kpi-card rounded-2xl p-5 border-l-4 border-l-purple-500 shadow-xl">
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">CAC Canal Propio</span>
+          <span class="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full font-bold">5.1% del Ticket</span>
+        </div>
+        <div class="mt-3 flex items-baseline space-x-2">
+          <span class="text-3xl font-black text-purple-300 font-mono">S/ 12.80</span>
+          <span class="text-xs text-slate-500 font-mono">/ reserva</span>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-1">Costo publicitario en Meta Ads por cliente confirmado</p>
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- CHARTS SECTION: COMPARATIVAS EN TIEMPO REAL                    -->
+    <!-- ============================================================== -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Chart 1: Curva de Ocupación Semanal (Lunes a Domingo) -->
+      <div class="lg:col-span-7 kpi-card rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="font-bold text-base text-white">Curva de Ocupación Semanal (% Inventario de 35 Habs)</h3>
+            <p class="text-xs text-slate-400">El "Valle de Fin de Semana" y cómo la estrategia B2C cierra la brecha</p>
+          </div>
+          <span class="text-[11px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700">
+            Capacidad: 35 Habitaciones
+          </span>
+        </div>
+        <div class="h-64 sm:h-72">
+          <canvas id="occupancyChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 2: Estructura de Ingresos y Margen EBITDA (Waterfall) -->
+      <div class="lg:col-span-5 kpi-card rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="border-b border-slate-800 pb-3">
+          <h3 class="font-bold text-base text-white">Composición de Ingresos Nuevos Mensuales</h3>
+          <p class="text-xs text-slate-400">Total Proyectado: <strong>S/ 67,200 / mes</strong></p>
+        </div>
+        <div class="h-64 sm:h-72 flex items-center justify-center">
+          <canvas id="revenueMixChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- TABLA DE SENSIBILIDAD FINANCIERA (ESCENARIOS)                  -->
+    <!-- ============================================================== -->
+    <div class="kpi-card rounded-2xl p-6 sm:p-8 shadow-xl space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
+        <div>
+          <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Matriz de Sensibilidad</span>
+          <h3 class="text-xl font-bold text-white mt-0.5">Escenarios de Rendimiento Financiero (30 Días)</h3>
+        </div>
+        <div class="text-xs text-slate-400">
+          Tipo de cambio referencial: <strong>1 USD = 3.80 PEN</strong>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs sm:text-sm">
+          <thead class="bg-slate-900/90 text-slate-400 uppercase tracking-wider text-[11px]">
+            <tr>
+              <th class="p-3.5 rounded-l-lg">Variable / Métrica</th>
+              <th class="p-3.5 text-slate-400">Situación Actual</th>
+              <th class="p-3.5 text-amber-300">Escenario Conservador</th>
+              <th class="p-3.5 text-sky-300 bg-sky-950/20 border-x border-sky-500/20">Escenario Base (Esperado)</th>
+              <th class="p-3.5 rounded-r-lg text-emerald-300">Escenario Óptimo (Temporada)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/60 font-mono text-slate-300">
+            <tr>
+              <td class="p-3.5 font-sans font-semibold text-white">Ocupación Fin de Semana (Vie-Dom)</td>
+              <td class="p-3.5 text-rose-400">26% (9 habs)</td>
+              <td class="p-3.5 text-amber-400">50% (17 habs)</td>
+              <td class="p-3.5 text-sky-400 bg-sky-950/10 font-bold">70% (24 habs)</td>
+              <td class="p-3.5 text-emerald-400 font-bold">88% (31 habs)</td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-sans font-semibold text-white">ADR Fin de Semana (Tarifa Promedio)</td>
+              <td class="p-3.5">S/ 175</td>
+              <td class="p-3.5">S/ 205</td>
+              <td class="p-3.5 bg-sky-950/10 text-white font-bold">S/ 225</td>
+              <td class="p-3.5 text-white font-bold">S/ 245</td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-sans font-semibold text-white">RevPAR Fin de Semana</td>
+              <td class="p-3.5 text-rose-400">S/ 45.50</td>
+              <td class="p-3.5 text-amber-400">S/ 102.50</td>
+              <td class="p-3.5 bg-sky-950/10 text-sky-300 font-bold">S/ 157.50 (+246%)</td>
+              <td class="p-3.5 text-emerald-300 font-bold">S/ 215.60 (+373%)</td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-sans font-semibold text-white">Pasadías de Piscina / Mes</td>
+              <td class="p-3.5 text-slate-500">0</td>
+              <td class="p-3.5">160 personas</td>
+              <td class="p-3.5 bg-sky-950/10 text-white font-bold">280 personas</td>
+              <td class="p-3.5 text-white font-bold">450 personas</td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-sans font-semibold text-white">Consumo Bar & Billar / Mes</td>
+              <td class="p-3.5 text-slate-500">S/ 800</td>
+              <td class="p-3.5">S/ 3,500</td>
+              <td class="p-3.5 bg-sky-950/10 text-white font-bold">S/ 6,800</td>
+              <td class="p-3.5 text-white font-bold">S/ 11,500</td>
+            </tr>
+            <tr class="bg-slate-900/60 font-bold text-base">
+              <td class="p-4 font-sans text-white">Facturación Extra Mensual</td>
+              <td class="p-4 text-slate-500">S/ 0</td>
+              <td class="p-4 text-amber-400">S/ 36,900</td>
+              <td class="p-4 bg-sky-950/40 text-sky-400 border-x border-sky-500/30">S/ 67,200 ($17,680)</td>
+              <td class="p-4 text-emerald-400">S/ 101,200 ($26,630)</td>
+            </tr>
+            <tr class="bg-emerald-950/30 font-bold text-base border-t-2 border-emerald-500/40">
+              <td class="p-4 font-sans text-emerald-300">EBITDA Neto Mensual (Utilidad)</td>
+              <td class="p-4 text-slate-500">S/ 0</td>
+              <td class="p-4 text-emerald-400">S/ 26,500</td>
+              <td class="p-4 bg-emerald-950/40 text-emerald-300 border-x border-emerald-500/30">S/ 48,200 ($12,680)</td>
+              <td class="p-4 text-emerald-200">S/ 73,800 ($19,420)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- UNIT ECONOMICS & COSTOS MARGINALES                             -->
+    <!-- ============================================================== -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Unit Economics: Habitación Extra -->
+      <div class="kpi-card rounded-2xl p-6 shadow-xl space-y-4">
+        <h4 class="font-bold text-white text-base flex items-center space-x-2">
+          <span>🛏️ Unit Economics: Habitación Noche Extra</span>
+        </h4>
+        <div class="space-y-2 text-xs font-mono">
+          <div class="flex justify-between text-slate-300 py-1.5 border-b border-slate-800">
+            <span class="font-sans">Tarifa Venta B2C Promedio:</span>
+            <strong class="text-amber-400">+S/ 225.00</strong>
+          </div>
+          <div class="flex justify-between text-slate-400 py-1">
+            <span class="font-sans">(-) Costo Lavandería sábanas/toallas:</span>
+            <span class="text-rose-400">-S/ 12.00</span>
+          </div>
+          <div class="flex justify-between text-slate-400 py-1">
+            <span class="font-sans">(-) Costo Insumos Desayuno Buffet:</span>
+            <span class="text-rose-400">-S/ 18.00</span>
+          </div>
+          <div class="flex justify-between text-slate-400 py-1">
+            <span class="font-sans">(-) Energía (A/C, agua caliente, luz):</span>
+            <span class="text-rose-400">-S/ 11.00</span>
+          </div>
+          <div class="flex justify-between text-slate-400 py-1 border-b border-slate-800">
+            <span class="font-sans">(-) Amenities (shampoo, jabón, reposición):</span>
+            <span class="text-rose-400">-S/ 5.00</span>
+          </div>
+          <div class="flex justify-between text-emerald-400 py-2 font-bold text-sm bg-emerald-950/20 px-2 rounded-lg">
+            <span class="font-sans">Margen de Contribución por Noche:</span>
+            <span>+S/ 179.00 (79.5% Margen)</span>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400 leading-relaxed font-sans">
+          <strong>Conclusión:</strong> El 80% de cada sol facturado en hospedaje el fin de semana queda libre, porque el personal de recepción, vigilancia e infraestructura ya está pagado por el cliente corporativo.
+        </p>
+      </div>
+
+      <!-- Unit Economics: Pasadía Piscina (Day Pass) -->
+      <div class="kpi-card rounded-2xl p-6 shadow-xl space-y-4">
+        <h4 class="font-bold text-white text-base flex items-center space-x-2">
+          <span>🏊 Unit Economics: Pasadía Piscina (Day Pass)</span>
+        </h4>
+        <div class="space-y-2 text-xs font-mono">
+          <div class="flex justify-between text-slate-300 py-1.5 border-b border-slate-800">
+            <span class="font-sans">Precio Pasadía por Adulto:</span>
+            <strong class="text-sky-400">+S/ 65.00</strong>
+          </div>
+          <div class="flex justify-between text-slate-400 py-1">
+            <span class="font-sans">(-) Costo de Alimentos (S/ 40 consumibles al 35% COGS):</span>
+            <span class="text-rose-400">-S/ 14.00</span>
+          </div>
+          <div class="flex justify-between text-slate-400 py-1">
+            <span class="font-sans">(-) Lavado de toalla de piscina:</span>
+            <span class="text-rose-400">-S/ 3.50</span>
+          </div>
+          <div class="flex justify-between text-slate-400 py-1 border-b border-slate-800">
+            <span class="font-sans">(-) Insumos químicos piscina (proporcional):</span>
+            <span class="text-rose-400">-S/ 1.50</span>
+          </div>
+          <div class="flex justify-between text-sky-400 py-2 font-bold text-sm bg-sky-950/20 px-2 rounded-lg">
+            <span class="font-sans">Margen Líquido por Pasadía:</span>
+            <span>+S/ 46.00 (70.7% Margen)</span>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400 leading-relaxed font-sans">
+          <strong>Efecto Cruzado:</strong> El 60% de las personas que compran un Pasadía gastan entre S/ 20 y S/ 45 adicionales en cervezas, cócteles o postres por encima del crédito incluido.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- CHARTS INITIALIZATION SCRIPT                                   -->
+  <!-- ============================================================== -->
+  <script>
+    // Chart 1: Ocupación Semanal (Lunes a Domingo)
+    const ctxOcc = document.getElementById('occupancyChart').getContext('2d');
+    new Chart(ctxOcc, {
+      type: 'line',
+      data: {
+        labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+        datasets: [
+          {
+            label: 'Situación Actual (Solo Corporativo)',
+            data: [78, 85, 88, 75, 40, 24, 20],
+            borderColor: '#ef4444',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            tension: 0.3,
+            fill: true
+          },
+          {
+            label: 'Proyección Híbrida (Corporativo + B2C)',
+            data: [78, 85, 88, 77, 72, 82, 68],
+            borderColor: '#0284c7',
+            backgroundColor: 'rgba(2, 132, 199, 0.2)',
+            borderWidth: 3,
+            tension: 0.3,
+            fill: true
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: { color: '#cbd5e1', font: { family: 'Plus Jakarta Sans', size: 11 } }
+          }
+        },
+        scales: {
+          y: {
+            min: 0,
+            max: 100,
+            ticks: { color: '#94a3b8', callback: v => v + '%' },
+            grid: { color: 'rgba(255, 255, 255, 0.06)' }
+          },
+          x: {
+            ticks: { color: '#94a3b8' },
+            grid: { color: 'rgba(255, 255, 255, 0.06)' }
+          }
+        }
+      }
+    });
+
+    // Chart 2: Revenue Mix (Doughnut)
+    const ctxMix = document.getElementById('revenueMixChart').getContext('2d');
+    new Chart(ctxMix, {
+      type: 'doughnut',
+      data: {
+        labels: ['Habitaciones Fines de Semana', 'Pasadías Piscina (Day Pass)', 'Bar, Salón & Billar'],
+        datasets: [{
+          data: [42200, 18200, 6800],
+          backgroundColor: ['#0284c7', '#f59e0b', '#10b981'],
+          borderWidth: 0,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#cbd5e1', font: { family: 'Plus Jakarta Sans', size: 11 }, padding: 16 }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                return ' ' + ctx.label + ': S/ ' + ctx.raw.toLocaleString();
+              }
+            }
+          }
+        },
+        cutout: '70%'
+      }
+    });
+  </script>
+</body>
+</html>

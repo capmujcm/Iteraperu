@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sunrise Hotel Ilo ★★★★ | Master Keynote Presentation 2026</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Fonts: Outfit (Geometric Luxury) + Playfair Display (Italian Editorial) + Cinzel (Imperial) + Syne (Avant-Garde) + Plus Jakarta Sans + Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            heading: ['"Outfit"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif'],
+            display: ['"Cinzel"', 'serif'],
+            avant: ['"Syne"', 'sans-serif'],
+            mono: ['"Space Grotesk"', 'monospace'],
+          },
+          colors: {
+            noir: {
+              950: '#04060a',
+              900: '#070b12',
+              850: '#0b111c',
+              800: '#101826',
+              700: '#1a2638',
+            },
+            champagne: {
+              200: '#fef3e2',
+              300: '#fbe4be',
+              400: '#f6cf92',
+              500: '#e5b869',
+              600: '#c8953c',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-serif: 'Playfair Display', Georgia, serif;
+      --font-brand: 'Cinzel', serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #04060a;
+      color: #f8fafc;
+      overflow: hidden;
+      user-select: none;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    h1, h2, h3, .font-serif, .font-heading {
+      font-family: var(--font-heading) !important;
+      letter-spacing: -0.022em;
+    }
+
+    .gold-gradient-text.italic, em, i {
+      font-family: var(--font-serif) !important;
+      font-style: italic;
+    }
+    
+    /* Noise texture overlay for high-end editorial feel */
+    .bg-noise {
+      background-image: radial-gradient(rgba(246, 207, 146, 0.08) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+
+    .slide-viewport {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      padding: clamp(24px, 4.5vw, 64px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.55s cubic-bezier(0.32, 0.72, 0, 1), transform 0.55s cubic-bezier(0.32, 0.72, 0, 1);
+      transform: scale(0.96) translateY(14px);
+      pointer-events: none;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+    }
+
+    /* Double Bezel Hardware Architecture */
+    .bezel-shell {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(246, 207, 146, 0.08) 100%);
+      border: 1px solid rgba(246, 207, 146, 0.22);
+      border-radius: 2rem;
+      padding: 0.375rem;
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.85), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    }
+    .bezel-core {
+      background: rgba(7, 11, 18, 0.88);
+      border-radius: calc(2rem - 0.375rem);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(24px);
+    }
+
+    /* Ambient glow under logo and key elements */
+    .gold-halo {
+      filter: drop-shadow(0 0 35px rgba(246, 207, 146, 0.35));
+    }
+    
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #ffffff 0%, #f6cf92 50%, #e5b869 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Luxury Boutique Button */
+    .btn-gold {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background: linear-gradient(135deg, #eed8b0 0%, #d8b877 50%, #bf9a53 100%) !important;
+      color: #05080e !important;
+      font-family: 'Outfit', sans-serif !important;
+      font-size: 0.72rem !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.14em !important;
+      text-transform: uppercase !important;
+      border-radius: 9999px !important;
+      padding: 0.68rem 1.45rem !important;
+      border: 1px solid rgba(255, 255, 255, 0.5) !important;
+      box-shadow: 0 4px 18px -2px rgba(191, 154, 83, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.75) !important;
+      transition: all 0.35s cubic-bezier(0.32, 0.72, 0, 1) !important;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-gold:hover {
+      background: linear-gradient(135deg, #faebd0 0%, #e2c589 50%, #cfaa5d 100%) !important;
+      box-shadow: 0 6px 24px -1px rgba(216, 184, 119, 0.5), inset 0 1px 0 #ffffff !important;
+      transform: translateY(-2px);
+      color: #000000 !important;
+    }
+    .btn-gold:active {
+      transform: translateY(0) scale(0.98);
+    }
+    .btn-gold .btn-arrow {
+      display: inline-block;
+      font-size: 0.95rem;
+      line-height: 1;
+      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .btn-gold:hover .btn-arrow {
+      transform: translateX(4px);
+    }
+  </style>
+</head>
+<body class="font-sans antialiased bg-noise">
+
+  <!-- ============================================================== -->
+  <!-- MASTER SLIDE DECK CONTAINER                                    -->
+  <!-- ============================================================== -->
+  <div class="slide-viewport">
+
+    <!-- TOP FLOATING ISLAND BAR -->
+    <header class="absolute top-5 inset-x-0 z-50 px-6 sm:px-12 flex justify-between items-center pointer-events-auto">
+      
+      <!-- Brand with Clean Transparent Logo -->
+      <div class="flex items-center space-x-3 bg-noir-900/80 border border-white/10 rounded-full px-4 py-2 backdrop-blur-xl shadow-2xl">
+        <img src="assets/logo_transparent.png" alt="Sunrise Hotel Ilo" class="h-8 w-auto object-contain gold-halo">
+        <div class="border-l border-white/10 pl-3">
+          <span class="text-xs font-serif tracking-widest text-white block uppercase leading-none font-bold">SUNRISE HOTEL</span>
+          <span class="text-[9px] text-champagne-400 font-sans tracking-[0.2em] uppercase block mt-0.5">★★★★ Ilo • Dossier 2026</span>
+        </div>
+      </div>
+
+      <!-- Navigation Dock -->
+      <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-2 bg-noir-900/80 border border-white/10 rounded-full px-3 py-1.5 backdrop-blur-xl text-xs">
+          <span class="text-slate-400 font-mono text-[11px]" id="slideCounter">1 / 8</span>
+          <div class="w-20 h-1.5 bg-noir-800 rounded-full overflow-hidden">
+            <div id="deckProgressBar" class="h-full bg-gradient-to-r from-[#eed8b0] to-[#bf9a53] w-[12.5%] transition-all duration-300"></div>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-1">
+          <button onclick="prevSlide()" title="Anterior (Flecha Izq)" class="w-9 h-9 rounded-full bg-noir-900/80 border border-white/10 hover:border-champagne-400 text-white flex items-center justify-center text-sm transition-all hover:scale-105 active:scale-95">
+            ←
+          </button>
+          <button onclick="nextSlide()" title="Siguiente (Flecha Der / Espacio)" class="w-9 h-9 rounded-full bg-gradient-to-br from-[#eed8b0] to-[#bf9a53] hover:from-[#faebd0] hover:to-[#cfaa5d] text-slate-950 font-bold flex items-center justify-center text-sm transition-all hover:scale-105 active:scale-95 shadow-md border border-white/40">
+            →
+          </button>
+        </div>
+
+        <button onclick="toggleFullScreen()" title="Pantalla Completa" class="hidden sm:flex w-9 h-9 rounded-full bg-noir-900/80 border border-white/10 text-slate-400 hover:text-white items-center justify-center text-xs transition-colors">
+          ⛶
+        </button>
+      </div>
+    </header>
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 1: PORTADA CINEMATOGRÁFICA                               -->
+    <!-- ============================================================== -->
+    <section class="slide active" id="slide-1">
+      <div class="max-w-4xl mx-auto text-center space-y-7">
+        
+        <!-- Clean Transparent Logo as Core Hero Asset -->
+        <div class="relative inline-block mx-auto">
+          <div class="absolute -inset-8 rounded-full bg-champagne-400/15 blur-3xl transform scale-150 animate-pulse"></div>
+          <img src="assets/logo_transparent.png" alt="Sunrise Hotel Logo" class="relative z-10 h-36 sm:h-48 w-auto object-contain mx-auto gold-halo">
+        </div>
+
+        <div class="space-y-3">
+          <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-noir-850/90 border border-champagne-400/30 text-champagne-400 text-xs font-mono uppercase tracking-[0.25em]">
+            <span>Estrategia de Transformación Comercial B2C</span>
+          </div>
+
+          <h1 class="text-4xl sm:text-6xl md:text-7xl font-serif font-bold text-white tracking-tight leading-[1.08]">
+            El Renacimiento del <br>
+            <span class="gold-gradient-text italic">
+              Ícono Hotelero de Ilo
+            </span>
+          </h1>
+
+          <p class="max-w-2xl mx-auto text-sm sm:text-base text-slate-300 font-light leading-relaxed">
+            Cómo monetizar los fines de semana, activar la piscina y salones de billar, y generar <strong>+S/ 67,500 mensuales</strong> de facturación directa con <strong>80% de margen líquido neto</strong>.
+          </p>
+        </div>
+
+        <!-- Speaker & Meta Badges -->
+        <div class="pt-4 flex flex-wrap justify-center items-center gap-4 sm:gap-8 text-xs text-slate-400 border-t border-white/10 max-w-xl mx-auto">
+          <div class="flex items-center space-x-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>Jirón Moquegua 657, Ilo</span>
+          </div>
+          <div>★ 4.4 Google (+440 reseñas)</div>
+          <div class="text-champagne-400 font-mono font-bold">+S/ 583,200 EBITDA / año</div>
+        </div>
+
+        <div class="pt-2">
+          <button onclick="nextSlide()" class="btn-gold">
+            <span>Explorar Estrategia</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 2: LA PARADOJA DE LOS 4 DÍAS (DIAGNÓSTICO)               -->
+    <!-- ============================================================== -->
+    <section class="slide" id="slide-2">
+      <div class="max-w-5xl mx-auto w-full space-y-6">
+        
+        <div class="text-center space-y-1">
+          <span class="text-xs font-mono uppercase tracking-[0.25em] text-champagne-400">01 / Diagnóstico Operativo</span>
+          <h2 class="text-3xl sm:text-5xl font-serif font-bold text-white">La Paradoja de los 4 Días</h2>
+          <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
+            Sunrise Hotel tiene una fortaleza envidiable: sus costes fijos ya están 100% cubiertos cada jueves.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+          
+          <!-- Lunes a Jueves (Fortaleza) -->
+          <div class="bezel-shell">
+            <div class="bezel-core p-6 sm:p-7 space-y-4 h-full flex flex-col justify-between">
+              <div>
+                <div class="flex justify-between items-center">
+                  <span class="px-3 py-1 rounded-full bg-sky-500/20 text-sky-400 text-xs font-bold font-mono">LUNES A JUEVES</span>
+                  <span class="text-emerald-400 font-mono font-bold text-sm">Ocupación: 80%</span>
+                </div>
+                <h3 class="text-xl font-bold text-white mt-3 font-serif">Motor Corporativo Activo</h3>
+                <ul class="text-xs text-slate-300 space-y-2.5 mt-3 leading-relaxed">
+                  <li class="flex items-start space-x-2">
+                    <span class="text-sky-400 font-bold">✓</span>
+                    <span>Ingenieros y contratistas mineros (Southern Perú, Quellaveco, ENAPU, pesqueras).</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-sky-400 font-bold">✓</span>
+                    <span>Facturación corporativa formal a tarifa estándar de lunes a jueves.</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-sky-400 font-bold">✓</span>
+                    <span><strong>Paga la totalidad de la planilla, luz, agua y mantenimiento</strong>.</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="p-3.5 bg-sky-950/40 rounded-xl border border-sky-500/20 text-xs text-sky-300 font-medium">
+                Punto de equilibrio superado cada semana con empresas.
+              </div>
+            </div>
+          </div>
+
+          <!-- Viernes a Domingo (Fuga) -->
+          <div class="bezel-shell">
+            <div class="bezel-core p-6 sm:p-7 space-y-4 h-full flex flex-col justify-between">
+              <div>
+                <div class="flex justify-between items-center">
+                  <span class="px-3 py-1 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold font-mono">VIERNES A DOMINGO</span>
+                  <span class="text-rose-400 font-mono font-bold text-sm">Ocupación: 25% (Valle)</span>
+                </div>
+                <h3 class="text-xl font-bold text-white mt-3 font-serif">La Fuga Invisible</h3>
+                <ul class="text-xs text-slate-300 space-y-2.5 mt-3 leading-relaxed">
+                  <li class="flex items-start space-x-2">
+                    <span class="text-rose-400 font-bold">✕</span>
+                    <span>Los ejecutivos viajan de regreso; 26 habitaciones quedan vacías viernes, sábado y domingo.</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-rose-400 font-bold">✕</span>
+                    <span>Piscina, solárium y salones de billar sin generar facturación diurna ni nocturna.</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-rose-400 font-bold">✕</span>
+                    <span>Solo tienen Facebook; no hay motor de reservas online ni catálogo de WhatsApp.</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="p-3.5 bg-champagne-400/10 rounded-xl border border-champagne-400/30 text-xs text-champagne-300 font-bold">
+                💡 El Secreto: Cada sol nuevo en fin de semana es casi 80% utilidad líquida directa.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 3: EL CORREDOR A 90 MINUTOS                              -->
+    <!-- ============================================================== -->
+    <section class="slide" id="slide-3">
+      <div class="max-w-5xl mx-auto w-full space-y-6">
+        
+        <div class="text-center space-y-1">
+          <span class="text-xs font-mono uppercase tracking-[0.25em] text-champagne-400">02 / Mercado Objetivo</span>
+          <h2 class="text-3xl sm:text-5xl font-serif font-bold text-white">El Corredor Turístico Regional</h2>
+          <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
+            Ilo tiene sol garantizado y playas limpias. Su clientela natural está a 60 y 90 minutos de auto.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
+          
+          <div class="bezel-shell">
+            <div class="bezel-core p-6 space-y-3 h-full">
+              <span class="text-3xl">🚗</span>
+              <span class="text-[10px] text-champagne-400 font-mono block uppercase">A 60 min de Ilo</span>
+              <h3 class="text-lg font-bold text-white font-serif">Moquegua Capital</h3>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Valle cálido pero <strong>sin mar</strong>. Familias y parejas bajan a Ilo todos los fines de semana a comer pescado fresco y buscar piscina.
+              </p>
+              <div class="pt-2 text-[11px] text-sky-400 font-semibold">
+                Target: Pasadía Piscina + Almuerzo Marino
+              </div>
+            </div>
+          </div>
+
+          <div class="bezel-shell">
+            <div class="bezel-core p-6 space-y-3 h-full">
+              <span class="text-3xl">🌊</span>
+              <span class="text-[10px] text-champagne-400 font-mono block uppercase">A 90 min por Costanera</span>
+              <h3 class="text-lg font-bold text-white font-serif">Tacna & Frontera</h3>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Mercado con alto poder adquisitivo, auto propio y saturación urbana. Buscan escapadas tranquilas en hoteles de 4 estrellas con balcón y vista al mar.
+              </p>
+              <div class="pt-2 text-[11px] text-champagne-400 font-semibold">
+                Target: Pack Escapada 2 Días / 1 Noche
+              </div>
+            </div>
+          </div>
+
+          <div class="bezel-shell">
+            <div class="bezel-core p-6 space-y-3 h-full">
+              <span class="text-3xl">💼</span>
+              <span class="text-[10px] text-champagne-400 font-mono block uppercase">Huéspedes in-situ</span>
+              <h3 class="text-lg font-bold text-white font-serif">Bleisure Minero</h3>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Ingenieros cuyo pasaje aéreo ya fue cubierto por la empresa. Con un 35% de descuento, invitan a su pareja a volar a Ilo para pasar el fin de semana.
+              </p>
+              <div class="pt-2 text-[11px] text-emerald-400 font-semibold">
+                Target: Extensión de estancia a tarifa B2C
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 4: LA TRÍADA DE PRODUCTOS DE ALTO TICKET                 -->
+    <!-- ============================================================== -->
+    <section class="slide" id="slide-4">
+      <div class="max-w-5xl mx-auto w-full space-y-6">
+        
+        <div class="text-center space-y-1">
+          <span class="text-xs font-mono uppercase tracking-[0.25em] text-champagne-400">03 / Portafolio de Alto Margen</span>
+          <h2 class="text-3xl sm:text-5xl font-serif font-bold text-white">Los 3 Productos de Alto Margen</h2>
+          <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
+            No vendemos habitaciones frías. Vendemos planes y experiencias cerradas.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+          
+          <!-- Product 1 -->
+          <div class="bezel-shell">
+            <div class="bezel-core p-6 space-y-3 h-full flex flex-col justify-between">
+              <div>
+                <span class="text-[10px] font-mono bg-champagne-400/20 text-champagne-300 px-2.5 py-1 rounded-full font-bold">PAREJAS • ESCAPADA</span>
+                <h3 class="text-xl font-serif font-bold text-white mt-2">Pack Escapada Marina</h3>
+                <div class="text-3xl font-black text-champagne-400 font-mono my-2">S/ 250 <span class="text-xs font-normal text-slate-400">/ noche</span></div>
+                <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+                  <li>• Habitación con balcón privado frente al mar</li>
+                  <li>• Desayuno Buffet completo incluido</li>
+                  <li>• 2 Chilcanos de Pisco moqueguano en bar</li>
+                  <li>• <strong>Late check-out domingo 4:00 PM</strong></li>
+                </ul>
+              </div>
+              <div class="pt-3 border-t border-white/10 text-xs text-slate-400 flex justify-between">
+                <span>Margen Contribución:</span>
+                <strong class="text-emerald-400">81% Neto</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product 2 -->
+          <div class="bezel-shell">
+            <div class="bezel-core p-6 space-y-3 h-full flex flex-col justify-between">
+              <div>
+                <span class="text-[10px] font-mono bg-sky-500/20 text-sky-300 px-2.5 py-1 rounded-full font-bold">LOCAL & MOQUEGUA</span>
+                <h3 class="text-xl font-serif font-bold text-white mt-2">Pasadía Sunrise (Day Pass)</h3>
+                <div class="text-3xl font-black text-sky-400 font-mono my-2">S/ 65 <span class="text-xs font-normal text-slate-400">/ persona</span></div>
+                <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+                  <li>• Uso de piscina de 10:00 AM a 6:00 PM</li>
+                  <li>• Reposera, toallas y solárium</li>
+                  <li>• <strong>S/ 40 consumibles</strong> en comida/bebidas</li>
+                  <li>• Niños menores de 5 años no pagan</li>
+                </ul>
+              </div>
+              <div class="pt-3 border-t border-white/10 text-xs text-slate-400 flex justify-between">
+                <span>Margen Contribución:</span>
+                <strong class="text-sky-400">71% Líquido</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product 3 -->
+          <div class="bezel-shell">
+            <div class="bezel-core p-6 space-y-3 h-full flex flex-col justify-between">
+              <div>
+                <span class="text-[10px] font-mono bg-purple-500/20 text-purple-300 px-2.5 py-1 rounded-full font-bold">NOCHES VIERNES & SÁBADOS</span>
+                <h3 class="text-xl font-serif font-bold text-white mt-2">Lounge Bar & Billar</h3>
+                <div class="text-3xl font-black text-purple-300 font-mono my-2">Entrada Libre</div>
+                <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+                  <li>• Mesa de billar y juegos de salón climatizados</li>
+                  <li>• Coctelería de autor y pisco macerado</li>
+                  <li>• Piqueos marinos: tequeños, calamares</li>
+                  <li>• Abierto al público local y huéspedes</li>
+                </ul>
+              </div>
+              <div class="pt-3 border-t border-white/10 text-xs text-slate-400 flex justify-between">
+                <span>Ticket Promedio:</span>
+                <strong class="text-purple-300">S/ 45 / persona</strong>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 5: EL CANAL PROPIO VS LA TRAMPA DEL 18%                  -->
+    <!-- ============================================================== -->
+    <section class="slide" id="slide-5">
+      <div class="max-w-5xl mx-auto w-full space-y-6">
+        
+        <div class="text-center space-y-1">
+          <span class="text-xs font-mono uppercase tracking-[0.25em] text-champagne-400">04 / Tecnología de Conversión</span>
+          <h2 class="text-3xl sm:text-5xl font-serif font-bold text-white">Canal Directo vs Fuga en Booking.com</h2>
+          <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
+            Por qué nuestra plataforma web propia retiene más de S/ 64,000 al año en el bolsillo del hotel.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-2">
+          
+          <div class="space-y-4 text-xs text-slate-300">
+            <div class="bezel-shell">
+              <div class="bezel-core p-5 space-y-2">
+                <span class="text-rose-400 font-bold uppercase font-mono text-[10px]">El Costo Oculto de las OTAs</span>
+                <h4 class="text-white font-serif font-bold text-lg">Booking.com se lleva el 18%</h4>
+                <p class="text-slate-400 leading-relaxed">
+                  En una facturación de fin de semana de S/ 40,000/mes, Booking cobraría <strong>S/ 7,200 mensuales</strong> (más de S/ 86,000 al año) solo por procesar la reserva.
+                </p>
+              </div>
+            </div>
+
+            <div class="bezel-shell">
+              <div class="bezel-core p-5 space-y-2 border-emerald-500/40">
+                <span class="text-emerald-400 font-bold uppercase font-mono text-[10px]">Nuestro Motor Directo (Web + Yape + WhatsApp)</span>
+                <h4 class="text-white font-serif font-bold text-lg">Costo de Adquisición: ~5% (S/ 12 por reserva)</h4>
+                <p class="text-slate-400 leading-relaxed">
+                  El cliente reserva desde el celular en nuestra web, paga con <strong>código QR de Yape/Plin (0% comisión)</strong> o tarjeta, y recibe su comprobante en WhatsApp en 90 segundos.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Web Showcase Card -->
+          <div class="bezel-shell">
+            <div class="bezel-core p-7 space-y-4 text-center">
+              <img src="assets/logo_transparent.png" alt="Logo" class="h-16 mx-auto object-contain gold-halo">
+              <h3 class="text-2xl font-serif font-bold text-white">Plataforma Web Oficial Lista</h3>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Ya está construida, conectada con el logo transparente, cálculo dinámico de noches, selector Soles/Dólares y checkout en tiempo real.
+              </p>
+              <div class="pt-3">
+                <a href="index.html" target="_blank" class="btn-gold">
+                  <span>Probar Web de Reservas en Vivo</span>
+                  <span class="btn-arrow">→</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 6: LOS NÚMEROS (CHART.JS & PROYECCIÓN)                   -->
+    <!-- ============================================================== -->
+    <section class="slide" id="slide-6">
+      <div class="max-w-5xl mx-auto w-full space-y-6">
+        
+        <div class="text-center space-y-1">
+          <span class="text-xs font-mono uppercase tracking-[0.25em] text-champagne-400">05 / Proyección Financiera</span>
+          <h2 class="text-3xl sm:text-5xl font-serif font-bold text-white">Ingresos & EBITDA Incremental</h2>
+          <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
+            Modelado sobre la capacidad real de 35 habitaciones de Sunrise Hotel Ilo.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center pt-2">
+          
+          <!-- Chart (7 Cols) -->
+          <div class="lg:col-span-7 bezel-shell">
+            <div class="bezel-core p-5 space-y-2">
+              <span class="text-xs font-mono text-slate-300 block font-bold">Curva de Ocupación Semanal (% Inventario)</span>
+              <div class="h-60">
+                <canvas id="deckChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scorecard (5 Cols) -->
+          <div class="lg:col-span-5 space-y-3 text-xs">
+            
+            <div class="bezel-shell">
+              <div class="bezel-core p-4 space-y-1">
+                <span class="text-[10px] text-slate-400 uppercase font-mono">Facturación Mensual Nueva</span>
+                <div class="text-3xl font-black text-white font-mono">+S/ 67,500 <span class="text-xs text-champagne-400 font-sans">(~$17,700 USD)</span></div>
+                <p class="text-[10px] text-slate-400">24 habs fin de semana + 280 pasadías + bar</p>
+              </div>
+            </div>
+
+            <div class="bezel-shell">
+              <div class="bezel-core p-4 space-y-1 bg-emerald-950/20 border-emerald-500/30">
+                <span class="text-[10px] text-emerald-400 uppercase font-mono font-bold">EBITDA Neto Mensual (Utilidad)</span>
+                <div class="text-3xl font-black text-emerald-400 font-mono">+S/ 48,600 <span class="text-xs text-emerald-300 font-sans">(~$12,800 USD)</span></div>
+                <p class="text-[10px] text-slate-300">Margen neto operativo del 72% tras costes marginales</p>
+              </div>
+            </div>
+
+            <div class="bezel-shell">
+              <div class="bezel-core p-4 space-y-1 bg-champagne-400/10 border-champagne-400/30">
+                <span class="text-[10px] text-champagne-400 uppercase font-mono font-bold">Impacto Anual en Ganancias</span>
+                <div class="text-3xl font-black text-champagne-300 font-mono">+S/ 583,200 <span class="text-xs text-white font-sans">/ año</span></div>
+                <p class="text-[10px] text-slate-300">Más de $153,000 USD netos adicionales al año</p>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 7: CRONOGRAMA DE EJECUCIÓN (30 DÍAS)                     -->
+    <!-- ============================================================== -->
+    <section class="slide" id="slide-7">
+      <div class="max-w-5xl mx-auto w-full space-y-6">
+        
+        <div class="text-center space-y-1">
+          <span class="text-xs font-mono uppercase tracking-[0.25em] text-champagne-400">06 / Hoja de Ruta</span>
+          <h2 class="text-3xl sm:text-5xl font-serif font-bold text-white">Implementación en 30 Días</h2>
+          <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
+            Cuatro etapas quirúrgicas para operar sin fricción con los clientes de minería.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+          
+          <div class="bezel-shell">
+            <div class="bezel-core p-5 space-y-2 h-full text-xs">
+              <span class="px-2.5 py-0.5 rounded-full bg-champagne-400/20 text-champagne-300 text-[10px] font-mono font-bold">Semana 1</span>
+              <h4 class="font-bold text-white font-serif text-base">WhatsApp & Canales</h4>
+              <p class="text-slate-400 leading-relaxed text-[11px]">
+                Configurar WhatsApp Business con catálogo oficial de 3 planes y sustituir el botón en la página de Facebook.
+              </p>
+            </div>
+          </div>
+
+          <div class="bezel-shell">
+            <div class="bezel-core p-5 space-y-2 h-full text-xs">
+              <span class="px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 text-[10px] font-mono font-bold">Semana 2</span>
+              <h4 class="font-bold text-white font-serif text-base">Pasadía & Bleisure</h4>
+              <p class="text-slate-400 leading-relaxed text-[11px]">
+                Lanzar el Pasadía de piscina para Ilo y entregar tarjeta de fin de semana con 35% de descuento a mineros en recepción.
+              </p>
+            </div>
+          </div>
+
+          <div class="bezel-shell">
+            <div class="bezel-core p-5 space-y-2 h-full text-xs">
+              <span class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-mono font-bold">Semana 3</span>
+              <h4 class="font-bold text-white font-serif text-base">Pauta Regional</h4>
+              <p class="text-slate-400 leading-relaxed text-[11px]">
+                Activar pauta en Meta Ads ($5/día) en Tacna y Moquegua con anuncio de "Escapada Marina con piscina y desayuno buffet".
+              </p>
+            </div>
+          </div>
+
+          <div class="bezel-shell">
+            <div class="bezel-core p-5 space-y-2 h-full text-xs">
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold">Semana 4</span>
+              <h4 class="font-bold text-white font-serif text-base">Web & Automatización</h4>
+              <p class="text-slate-400 leading-relaxed text-[11px]">
+                Publicar la web oficial en dominio `.pe` y recibir reservas directas automatizadas con pasarela Yape/tarjeta.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 8: CONCLUSIÓN Y ACCIÓN INMEDIATA                         -->
+    <!-- ============================================================== -->
+    <section class="slide" id="slide-8">
+      <div class="max-w-4xl mx-auto text-center space-y-7">
+        
+        <img src="assets/logo_transparent.png" alt="Sunrise Hotel Logo" class="h-28 mx-auto object-contain gold-halo">
+
+        <div class="space-y-3">
+          <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-noir-850/90 border border-champagne-400/30 text-champagne-400 text-xs font-mono uppercase tracking-[0.25em]">
+            <span>Decisión Estratégica</span>
+          </div>
+          <h2 class="text-4xl sm:text-6xl font-serif font-bold text-white">
+            El sistema está construido. <br>
+            <span class="italic gold-gradient-text">El mercado de fin de semana espera.</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 max-w-lg mx-auto leading-relaxed">
+            Tenemos la infraestructura, la piscina, la reputación de 4.4 estrellas y la suite tecnológica completa lista para operar.
+          </p>
+        </div>
+
+        <div class="pt-4 flex flex-wrap justify-center gap-4">
+          <a href="index.html" target="_blank" class="btn-gold">
+            <span>Abrir Plataforma Web de Reservas</span>
+            <span class="btn-arrow">→</span>
+          </a>
+          <a href="admin.html" target="_blank" class="px-7 py-3.5 rounded-full bg-noir-900 hover:bg-noir-850 text-white font-bold text-xs uppercase tracking-wider border border-white/10 transition-colors">
+            Panel de Recepción (PMS) ↗
+          </a>
+          <a href="portal.html" class="px-7 py-3.5 rounded-full bg-noir-900 hover:bg-noir-850 text-champagne-400 font-bold text-xs uppercase tracking-wider border border-champagne-400/30 transition-colors">
+            Centro de Mando Suite ↗
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE DECK ENGINE JAVASCRIPT                                   -->
+  <!-- ============================================================== -->
+  <script>
+    // Live Typography Switcher
+    function setFontStyle(style) {
+      const root = document.documentElement;
+      const styles = ['outfit', 'playfair', 'cinzel', 'syne'];
+      
+      styles.forEach(s => {
+        const btn = document.getElementById('fontBtn_' + s);
+        if (btn) {
+          btn.className = 'px-2.5 py-0.5 rounded-full font-medium text-slate-400 hover:text-white transition-all';
+        }
+      });
+
+      const active = document.getElementById('fontBtn_' + style);
+      if (active) {
+        active.className = 'px-2.5 py-0.5 rounded-full font-bold bg-champagne-400 text-slate-950 transition-all';
+      }
+
+      if (style === 'outfit') {
+        root.style.setProperty('--font-heading', "'Outfit', -apple-system, BlinkMacSystemFont, sans-serif");
+        root.style.setProperty('--font-serif', "'Playfair Display', Georgia, serif");
+        root.style.setProperty('--font-brand', "'Outfit', sans-serif");
+      } else if (style === 'playfair') {
+        root.style.setProperty('--font-heading', "'Playfair Display', Georgia, serif");
+        root.style.setProperty('--font-serif', "'Playfair Display', Georgia, serif");
+        root.style.setProperty('--font-brand', "'Cinzel', serif");
+      } else if (style === 'cinzel') {
+        root.style.setProperty('--font-heading', "'Cinzel', serif");
+        root.style.setProperty('--font-serif', "'Cinzel', serif");
+        root.style.setProperty('--font-brand', "'Cinzel', serif");
+      } else if (style === 'syne') {
+        root.style.setProperty('--font-heading', "'Syne', sans-serif");
+        root.style.setProperty('--font-serif', "'Playfair Display', Georgia, serif");
+        root.style.setProperty('--font-brand', "'Syne', sans-serif");
+      }
+
+      try { localStorage.setItem('sunrise_font_theme', style); } catch (e) {}
+    }
+
+    // Initialize saved font
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('sunrise_font_theme') || 'outfit';
+      setFontStyle(saved);
+    });
+
+    let currentSlide = 1;
+    const totalSlides = 8;
+    let chartReady = false;
+
+    function updateSlide() {
+      document.querySelectorAll('.slide').forEach((s, idx) => {
+        if (idx + 1 === currentSlide) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+
+      document.getElementById('slideCounter').innerText = currentSlide + ' / ' + totalSlides;
+      const pct = (currentSlide / totalSlides) * 100;
+      document.getElementById('deckProgressBar').style.width = pct + '%';
+
+      if (currentSlide === 6 && !chartReady) {
+        initDeckChart();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    // Keyboard support
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      } else if (e.key.toLowerCase() === 'f') {
+        toggleFullScreen();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    window.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    window.addEventListener('touchend', (e) => {
+      const diff = e.changedTouches[0].screenX - touchStartX;
+      if (diff < -50) nextSlide();
+      if (diff > 50) prevSlide();
+    });
+
+    // Chart.js initialization on Slide 6
+    function initDeckChart() {
+      chartReady = true;
+      const ctx = document.getElementById('deckChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+          datasets: [
+            {
+              label: 'Situación Actual (Solo Corporativo)',
+              data: [78, 85, 88, 75, 40, 24, 20],
+              borderColor: '#f43f5e',
+              borderDash: [5, 5],
+              borderWidth: 2,
+              tension: 0.35,
+              pointRadius: 4,
+              pointBackgroundColor: '#f43f5e'
+            },
+            {
+              label: 'Modelo B2C Híbrido Propuesto',
+              data: [78, 85, 88, 78, 74, 84, 68],
+              borderColor: '#f6cf92',
+              backgroundColor: 'rgba(246, 207, 146, 0.18)',
+              fill: true,
+              borderWidth: 3.5,
+              tension: 0.35,
+              pointRadius: 5,
+              pointBackgroundColor: '#f6cf92'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#cbd5e1', font: { family: 'Plus Jakarta Sans', size: 10 } }
+            }
+          },
+          scales: {
+            y: {
+              min: 0,
+              max: 100,
+              ticks: { color: '#94a3b8', callback: v => v + '%' },
+              grid: { color: 'rgba(255, 255, 255, 0.06)' }
+            },
+            x: {
+              ticks: { color: '#94a3b8' },
+              grid: { color: 'rgba(255, 255, 255, 0.06)' }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

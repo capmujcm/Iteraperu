@@ -1,0 +1,1756 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sunrise Hotel Ilo ★★★★ | Plataforma Oficial de Reservas & Experiencias</title>
+  <meta name="description" content="Bienvenido a Sunrise Hotel Ilo (Jirón Moquegua 657). Disfrute de piscina al aire libre, suites de lujo, bar lounge, salón de billar y desayuno buffet frente a la costa del Pacífico.">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Outfit (Geometric Luxury) + Playfair Display (Italian Editorial) + Cinzel (Imperial) + Syne (Avant-Garde) + Plus Jakarta Sans + Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            heading: ['"Outfit"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif'],
+            display: ['"Cinzel"', 'serif'],
+            avant: ['"Syne"', 'sans-serif'],
+            mono: ['"Space Grotesk"', 'monospace'],
+          },
+          colors: {
+            noir: {
+              950: '#04060a',
+              900: '#070b12',
+              850: '#0b111c',
+              800: '#101826',
+              750: '#152033',
+              700: '#1a2638',
+            },
+            champagne: {
+              100: '#fffbf5',
+              200: '#fef3e2',
+              300: '#fbe4be',
+              400: '#f6cf92',
+              500: '#e5b869',
+              600: '#c8953c',
+              700: '#9b6f26',
+            },
+            tealbrand: {
+              950: '#02161a',
+              900: '#05272e',
+              800: '#0b3e47',
+              700: '#115561',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-serif: 'Playfair Display', Georgia, serif;
+      --font-brand: 'Cinzel', serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background-color: #04060a;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      selection-background-color: #f6cf92;
+      selection-color: #04060a;
+    }
+
+    /* Headings map to active luxury typography */
+    h1, h2, h3, .font-serif, .font-heading {
+      font-family: var(--font-heading) !important;
+      letter-spacing: -0.022em;
+    }
+
+    /* Editorial accents in Playfair italic */
+    .italic-accent, i, em {
+      font-family: var(--font-serif) !important;
+      font-style: italic;
+    }
+
+    .font-brand {
+      font-family: var(--font-brand) !important;
+      letter-spacing: 0.15em;
+    }
+
+    /* Subtle background noise texture */
+    .bg-noise {
+      background-image: radial-gradient(rgba(246, 207, 146, 0.05) 1px, transparent 1px);
+      background-size: 36px 36px;
+    }
+
+    /* Custom high-end scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #04060a; }
+    ::-webkit-scrollbar-thumb { background: #1a2638; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #c8953c; }
+
+    /* Double-Bezel Hardware Architecture (Nested Card) */
+    .bezel-shell {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(246, 207, 146, 0.08) 100%);
+      border: 1px solid rgba(246, 207, 146, 0.18);
+      border-radius: 2rem;
+      padding: 0.375rem;
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.85);
+      transition: all 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .bezel-shell:hover {
+      border-color: rgba(246, 207, 146, 0.45);
+      box-shadow: 0 35px 70px -10px rgba(0, 0, 0, 0.95), 0 0 30px rgba(246, 207, 146, 0.12);
+      transform: translateY(-4px);
+    }
+    .bezel-core {
+      background: rgba(7, 11, 18, 0.94);
+      border-radius: calc(2rem - 0.375rem);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12);
+    }
+
+    /* Ambient Gold Halo */
+    .gold-halo {
+      filter: drop-shadow(0 0 35px rgba(246, 207, 146, 0.35));
+    }
+    
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #ffffff 0%, #f6cf92 50%, #e5b869 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* ============================================================ */
+    /* LUXURY BOUTIQUE HOTEL BUTTON ARCHITECTURE                     */
+    /* ============================================================ */
+    .btn-gold, .btn-luxury {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background: linear-gradient(135deg, #eed8b0 0%, #d8b877 50%, #bf9a53 100%) !important;
+      color: #05080e !important;
+      font-family: 'Outfit', sans-serif !important;
+      font-size: 0.72rem !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.14em !important;
+      text-transform: uppercase !important;
+      border-radius: 9999px !important;
+      padding: 0.68rem 1.45rem !important;
+      border: 1px solid rgba(255, 255, 255, 0.5) !important;
+      box-shadow: 0 4px 18px -2px rgba(191, 154, 83, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.75) !important;
+      transition: all 0.35s cubic-bezier(0.32, 0.72, 0, 1) !important;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-gold:hover, .btn-luxury:hover {
+      background: linear-gradient(135deg, #faebd0 0%, #e2c589 50%, #cfaa5d 100%) !important;
+      box-shadow: 0 6px 24px -1px rgba(216, 184, 119, 0.5), inset 0 1px 0 #ffffff !important;
+      transform: translateY(-2px);
+      color: #000000 !important;
+    }
+    .btn-gold:active, .btn-luxury:active {
+      transform: translateY(0) scale(0.98);
+    }
+    .btn-gold .btn-arrow, .btn-luxury .btn-arrow, .btn-gold .arrow, .btn-luxury .arrow {
+      display: inline-block;
+      font-size: 0.95rem;
+      line-height: 1;
+      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .btn-gold:hover .btn-arrow, .btn-luxury:hover .btn-arrow, .btn-gold:hover .arrow, .btn-luxury:hover .arrow {
+      transform: translateX(4px);
+    }
+    /* Neutralize legacy dark circular arrow container */
+    .btn-icon {
+      display: none !important;
+    }
+
+    /* Secondary Ghost Button */
+    .btn-ghost-gold {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: rgba(7, 11, 18, 0.65);
+      backdrop-filter: blur(12px);
+      color: #eed8b0 !important;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      border-radius: 9999px;
+      padding: 0.68rem 1.45rem;
+      border: 1px solid rgba(238, 216, 176, 0.35);
+      box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.6);
+      transition: all 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-ghost-gold:hover {
+      background: rgba(238, 216, 176, 0.15);
+      border-color: rgba(238, 216, 176, 0.75);
+      color: #ffffff !important;
+      transform: translateY(-2px);
+    }
+
+    /* Image zoom hover effect */
+    .img-zoom-box {
+      overflow: hidden;
+    }
+    .img-zoom-box img {
+      transition: transform 0.8s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .img-zoom-box:hover img {
+      transform: scale(1.06);
+    }
+
+    /* Floating Island Nav */
+    .island-nav {
+      background: rgba(7, 11, 18, 0.85);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8);
+    }
+  </style>
+</head>
+<body class="bg-noise min-h-screen flex flex-col">
+
+  <!-- ============================================================== -->
+  <!-- TOP VIP STATUS BAR                                             -->
+  <!-- ============================================================== -->
+  <aside class="bg-noir-950 border-b border-white/5 py-1.5 px-4 text-[11px] text-slate-400 hidden lg:block z-50">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <span class="flex items-center space-x-1 text-champagne-400 font-mono">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Jr. Moquegua 657, Ilo • Perú</span>
+        </span>
+        <span class="text-white/20">|</span>
+        <span class="text-slate-300">★ 4.4 en Google (+440 reseñas)</span>
+        <span class="text-white/20">|</span>
+        <span>Piscina al Aire Libre • Bar Lounge • Salón de Billar</span>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button onclick="toggleCurrency()" id="currencySelectorBtn" class="bg-noir-900 hover:bg-noir-850 px-2.5 py-0.5 rounded-full text-champagne-400 font-mono font-bold border border-champagne-400/30 transition-all">
+          Moneda: PEN (S/.)
+        </button>
+        <span class="text-white/20">|</span>
+        <a href="presentacion.html" class="text-champagne-400 hover:text-white font-semibold transition-colors flex items-center space-x-1">
+          <span>🎬 Keynote Ejecutiva</span>
+        </a>
+        <span class="text-white/20">|</span>
+        <a href="admin.html" class="hover:text-white transition-colors">PMS Recepción</a>
+        <span class="text-white/20">|</span>
+        <a href="portal.html" class="hover:text-white transition-colors">Portal Suite</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================================================== -->
+  <!-- FLOATING ISLAND NAVIGATION BAR                                 -->
+  <!-- ============================================================== -->
+  <header class="sticky top-4 z-40 px-4 sm:px-8 w-full max-w-7xl mx-auto">
+    <nav class="island-nav rounded-full px-5 py-2.5 sm:py-3 flex items-center justify-between transition-all duration-300">
+      
+      <!-- Brandmark: Pure Transparent Logo, NO Green Box -->
+      <a href="#" class="flex items-center space-x-3 group">
+        <img src="assets/logo_transparent.png" alt="Sunrise Hotel Ilo Logo" class="h-9 sm:h-11 w-auto object-contain gold-halo group-hover:scale-105 transition-transform">
+        <div class="hidden sm:block border-l border-white/10 pl-3">
+          <span class="font-serif font-bold text-base sm:text-lg tracking-wider text-white block leading-none">SUNRISE HOTEL</span>
+          <div class="flex items-center space-x-1 mt-0.5">
+            <span class="text-[9px] text-champagne-400 tracking-[0.2em] uppercase font-mono font-semibold">★★★★ Ilo, Perú</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <div class="hidden md:flex items-center space-x-7 text-xs font-medium text-slate-300 tracking-wide">
+        <a href="#habitaciones" class="hover:text-champagne-400 transition-colors">Habitaciones</a>
+        <a href="#piscina-daypass" class="hover:text-champagne-400 transition-colors">Piscina & Pasadías</a>
+        <a href="#bar-lounge" class="hover:text-champagne-400 transition-colors">Bar Lounge & Billar</a>
+        <a href="#corporativo" class="hover:text-champagne-400 transition-colors">Convenios Empresas</a>
+        <a href="#ubicacion" class="hover:text-champagne-400 transition-colors">Ubicación</a>
+      </div>
+
+      <!-- Actions: WhatsApp Direct & Reserve CTA -->
+      <div class="flex items-center space-x-3">
+        <a href="https://wa.me/51994342040?text=Hola%20Sunrise%20Hotel,%20quisiera%20consultar%20disponibilidad%20de%20habitaciones" target="_blank" class="hidden sm:inline-flex items-center space-x-2 px-3.5 py-2 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25 text-xs font-bold transition-all">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>WhatsApp Concierge</span>
+        </a>
+
+        <button onclick="scrollToSearch()" class="btn-gold">
+          <span>Reservar</span>
+          <span class="btn-arrow">→</span>
+        </button>
+
+        <!-- Mobile Menu Toggle Button -->
+        <button onclick="toggleMobileMenu()" class="md:hidden w-10 h-10 rounded-full bg-noir-850 border border-white/10 flex items-center justify-center text-slate-300">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+        </button>
+      </div>
+
+    </nav>
+
+    <!-- Mobile Drawer Overlay Menu -->
+    <div id="mobileMenu" class="hidden md:hidden mt-3 p-5 rounded-3xl island-nav flex flex-col space-y-4 text-sm font-medium">
+      <a href="#habitaciones" onclick="toggleMobileMenu()" class="text-slate-200 hover:text-champagne-400 py-1">Habitaciones & Suites</a>
+      <a href="#piscina-daypass" onclick="toggleMobileMenu()" class="text-slate-200 hover:text-champagne-400 py-1">Piscina & Pasadías Sunset</a>
+      <a href="#bar-lounge" onclick="toggleMobileMenu()" class="text-slate-200 hover:text-champagne-400 py-1">Bar Lounge & Salón de Billar</a>
+      <a href="#corporativo" onclick="toggleMobileMenu()" class="text-slate-200 hover:text-champagne-400 py-1">Convenios Empresas (Mineras / Pesqueras)</a>
+      <a href="#ubicacion" onclick="toggleMobileMenu()" class="text-slate-200 hover:text-champagne-400 py-1">Ubicación & Playas</a>
+      <div class="pt-3 border-t border-white/10 flex justify-between items-center text-xs">
+        <a href="presentacion.html" class="text-champagne-400 font-bold">Presentación Keynote</a>
+        <a href="portal.html" class="text-slate-400">Portal Maestro</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- HERO SECTION: CINEMATIC REFUGE OF ILO                          -->
+  <!-- ============================================================== -->
+  <section class="relative pt-12 pb-24 sm:pt-20 sm:pb-36 overflow-hidden">
+    
+    <!-- Background Ambient Gradients & Glows -->
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[450px] bg-gradient-to-b from-champagne-400/10 via-tealbrand-800/10 to-transparent blur-[140px] rounded-full"></div>
+      <div class="absolute -top-24 right-10 w-96 h-96 bg-amber-500/10 blur-[120px] rounded-full"></div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 text-center space-y-8">
+      
+      <!-- Micro-Tag Eyebrow -->
+      <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-noir-850/90 border border-champagne-400/30 text-champagne-400 text-xs font-mono uppercase tracking-[0.25em] shadow-xl">
+        <span class="w-1.5 h-1.5 rounded-full bg-champagne-400"></span>
+        <span>ILO • MOQUEGUA • RESERVAS DIRECTAS SIN COMISIONES OTA</span>
+      </div>
+
+      <!-- 2-Line High-Impact Luxury Headline -->
+      <div class="max-w-5xl mx-auto">
+        <h1 class="font-serif text-4xl sm:text-6xl md:text-7xl font-bold text-white tracking-tight leading-[1.08]">
+          El Refugio Costero de Ilo.<br>
+          <span class="gold-gradient-text italic font-normal">
+            Bienestar & Confort Cuatro Estrellas.
+          </span>
+        </h1>
+      </div>
+
+      <!-- Concise Luxury Subtitle -->
+      <p class="max-w-2xl mx-auto text-sm sm:text-base text-slate-300 font-light leading-relaxed">
+        Piscina al aire libre con sol todo el año, suites amobladas de alta gama, salón de billar y coctelería de autor en pleno centro histórico de Ilo. Desayuno buffet incluido.
+      </p>
+
+      <!-- Highlights Bar -->
+      <div class="flex flex-wrap justify-center items-center gap-3 sm:gap-6 text-xs text-slate-400 pt-2 font-medium">
+        <span class="flex items-center space-x-1.5 bg-noir-900/60 px-3 py-1 rounded-full border border-white/5">
+          <span class="text-champagne-400">🏊</span>
+          <span>Piscina al Aire Libre</span>
+        </span>
+        <span class="flex items-center space-x-1.5 bg-noir-900/60 px-3 py-1 rounded-full border border-white/5">
+          <span class="text-champagne-400">☕</span>
+          <span>Desayuno Buffet Incluido</span>
+        </span>
+        <span class="flex items-center space-x-1.5 bg-noir-900/60 px-3 py-1 rounded-full border border-white/5">
+          <span class="text-champagne-400">🎱</span>
+          <span>Bar & Salón de Billar</span>
+        </span>
+        <span class="flex items-center space-x-1.5 bg-noir-900/60 px-3 py-1 rounded-full border border-white/5">
+          <span class="text-champagne-400">📍</span>
+          <span>A 3 min del Malecón</span>
+        </span>
+      </div>
+
+      <!-- ========================================================== -->
+      <!-- LIVE RESERVATION CAPSULE (DOUBLE-BEZEL HARDWARE)           -->
+      <!-- ========================================================== -->
+      <div id="searchCapsule" class="max-w-4xl mx-auto pt-6">
+        <div class="bezel-shell">
+          <div class="bezel-core p-4 sm:p-6">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
+              
+              <!-- Check-In Date -->
+              <div class="space-y-1.5 bg-noir-950/60 p-3 rounded-2xl border border-white/5 focus-within:border-champagne-400/40 transition-colors">
+                <label class="text-[10px] uppercase font-mono tracking-wider text-slate-400 flex items-center space-x-1">
+                  <span>📅</span>
+                  <span>Llegada (Check-In)</span>
+                </label>
+                <input type="date" id="dateCheckIn" class="w-full bg-transparent text-white font-mono text-sm focus:outline-none cursor-pointer">
+              </div>
+
+              <!-- Check-Out Date -->
+              <div class="space-y-1.5 bg-noir-950/60 p-3 rounded-2xl border border-white/5 focus-within:border-champagne-400/40 transition-colors">
+                <label class="text-[10px] uppercase font-mono tracking-wider text-slate-400 flex items-center space-x-1">
+                  <span>📅</span>
+                  <span>Salida (Check-Out)</span>
+                </label>
+                <input type="date" id="dateCheckOut" class="w-full bg-transparent text-white font-mono text-sm focus:outline-none cursor-pointer">
+              </div>
+
+              <!-- Guests Selector -->
+              <div class="space-y-1.5 bg-noir-950/60 p-3 rounded-2xl border border-white/5 focus-within:border-champagne-400/40 transition-colors">
+                <label class="text-[10px] uppercase font-mono tracking-wider text-slate-400 flex items-center space-x-1">
+                  <span>👥</span>
+                  <span>Huéspedes</span>
+                </label>
+                <select id="selectGuests" class="w-full bg-transparent text-white font-sans text-sm focus:outline-none cursor-pointer">
+                  <option value="2" class="bg-noir-900 text-white">2 Adultos (Pareja / Negocios)</option>
+                  <option value="1" class="bg-noir-900 text-white">1 Huésped Individual</option>
+                  <option value="3" class="bg-noir-900 text-white">3 Huéspedes</option>
+                  <option value="4" class="bg-noir-900 text-white">4 Huéspedes (Familiar)</option>
+                </select>
+              </div>
+
+              <!-- Action Button -->
+              <div class="flex items-center">
+                <button onclick="handleSearchRooms()" class="btn-gold w-full h-full min-h-[52px] !rounded-2xl">
+                  <span>Buscar Habitaciones</span>
+                  <span class="btn-arrow">→</span>
+                </button>
+              </div>
+
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 gap-2">
+              <div class="flex items-center space-x-2">
+                <span class="text-emerald-400 font-bold">✓ Mejor Tarifa Garantizada:</span>
+                <span>Hasta 20% de ahorro frente a Booking.com</span>
+              </div>
+              <div class="flex items-center space-x-3">
+                <span class="text-champagne-400">⚡ Confirmación Inmediata vía WhatsApp</span>
+                <span>•</span>
+                <span>Yape / Plin / Tarjetas</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- ROOMS SHOWCASE: DOUBLE-BEZEL ARCHITECTURE                      -->
+  <!-- ============================================================== -->
+  <section id="habitaciones" class="py-24 sm:py-32 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      
+      <!-- Section Header -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
+        <div>
+          <span class="text-xs font-mono uppercase tracking-[0.25em] text-champagne-400 block mb-2">Colección de Alojamiento</span>
+          <h2 class="text-3xl sm:text-5xl font-serif font-bold text-white tracking-tight">Suites Diseñadas para el Descanso</h2>
+          <p class="text-slate-400 text-xs sm:text-sm mt-2 max-w-xl">
+            Todas nuestras habitaciones incluyen desayuno buffet criollo diario, acceso irrestricto a piscina, Wi-Fi de alta velocidad y amenities premium.
+          </p>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="flex flex-wrap gap-2 text-xs font-mono">
+          <button onclick="filterRooms('all')" class="room-tab-btn active px-4 py-2 rounded-full bg-champagne-400 text-slate-950 font-bold border border-champagne-400 transition-all">
+            Todas (4)
+          </button>
+          <button onclick="filterRooms('matrimonial')" class="room-tab-btn px-4 py-2 rounded-full bg-noir-850 text-slate-300 hover:text-white border border-white/10 transition-all">
+            Suites Parejas
+          </button>
+          <button onclick="filterRooms('ejecutiva')" class="room-tab-btn px-4 py-2 rounded-full bg-noir-850 text-slate-300 hover:text-white border border-white/10 transition-all">
+            Ejecutivas
+          </button>
+          <button onclick="filterRooms('familiar')" class="room-tab-btn px-4 py-2 rounded-full bg-noir-850 text-slate-300 hover:text-white border border-white/10 transition-all">
+            Familiares
+          </button>
+        </div>
+      </div>
+
+      <!-- 4 High-End Double-Bezel Room Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <!-- ROOM 1: Suite Presidencial Vista al Mar & Piscina -->
+        <div class="room-card matrimonial bezel-shell" data-category="matrimonial">
+          <div class="bezel-core p-6 flex flex-col justify-between h-full space-y-6">
+            
+            <div class="space-y-4">
+              <!-- Visual Gallery Box -->
+              <div class="relative rounded-2xl overflow-hidden img-zoom-box aspect-[16/10] bg-noir-900">
+                <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80" alt="Suite Presidencial Sunrise Hotel Ilo" class="w-full h-full object-cover">
+                <div class="absolute top-3 left-3 bg-noir-950/80 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider text-champagne-400 border border-champagne-400/30">
+                  ★ Suite Insignia
+                </div>
+                <div class="absolute bottom-3 right-3 bg-noir-950/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-right">
+                  <span class="text-[10px] text-slate-400 block uppercase font-mono">Desde</span>
+                  <span class="text-xl font-mono font-bold text-white room-price" data-pen="290">S/ 290</span>
+                  <span class="text-[10px] text-slate-400">/ noche</span>
+                </div>
+              </div>
+
+              <!-- Title & Meta -->
+              <div>
+                <div class="flex items-center space-x-2 text-[11px] font-mono text-slate-400 mb-1">
+                  <span>48 m²</span>
+                  <span>•</span>
+                  <span>Cama King Ortopédica</span>
+                  <span>•</span>
+                  <span>Capacidad: 2 Huéspedes</span>
+                </div>
+                <h3 class="text-2xl font-serif font-bold text-white">Master Suite Ejecutiva Sunrise</h3>
+                <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                  Dos ambientes independientes con sala lounge, tina de hidromasaje / jacuzzi para dos, cafetera Nespresso, balcón panorámico y Smart TV de 65" con streaming activo.
+                </p>
+              </div>
+
+              <!-- Amenity Pills -->
+              <div class="flex flex-wrap gap-2 text-[11px] text-slate-300">
+                <span class="px-2.5 py-1 rounded-lg bg-noir-850 border border-white/5">🛁 Tina Hidromasaje</span>
+                <span class="px-2.5 py-1 rounded-lg bg-noir-850 border border-white/5">☕ Cafetera Express</span>
+                <span class="px-2.5 py-1 rounded-lg bg-noir-850 border border-white/5">📶 Wi-Fi 200 Mbps</span>
+                <span class="px-2.5 py-1 rounded-lg bg-noir-850 border border-white/5">🥐 Desayuno Buffet</span>
+              </div>
+            </div>
+
+            <!-- Card Bottom Actions -->
+            <div class="pt-4 border-t border-white/5 flex items-center justify-between gap-4">
+              <button onclick="openBookingDrawer('Master Suite Ejecutiva Sunrise', 290, 'King')" class="text-xs text-slate-400 hover:text-champagne-400 underline transition-colors">
+                Ver Detalles Completos →
+              </button>
+              <button onclick="openBookingDrawer('Master Suite Ejecutiva Sunrise', 290, 'King')" class="btn-gold">
+                <span>Reservar Suite</span>
+                <span class="btn-arrow">→</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ROOM 2: Suite Matrimonial Deluxe -->
+        <div class="room-card matrimonial bezel-shell" data-category="matrimonial">
+          <div class="bezel-core p-6 flex flex-col justify-between h-full space-y-6">
+            
+            <div class="space-y-4">
+              <div class="relative rounded-2xl overflow-hidden img-zoom-box aspect-[16/10] bg-noir-900">
+                <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80" alt="Matrimonial Superior Marina" class="w-full h-full object-cover">
+                <div class="absolute top-3 left-3 bg-noir-950/80 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider text-champagne-400 border border-champagne-400/30">
+                  Favorita Parejas
+                </div>
+                <div class="absolute bottom-3 right-3 bg-noir-950/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-right">
+                  <span class="text-[10px] text-slate-400 block uppercase font-mono">Desde</span>
+                  <span class="text-xl font-mono font-bold text-white room-price" data-pen="220">S/ 220</span>
+                  <span class="text-[10px] text-slate-400">/ noche</span>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex items-center space-x-2 text-[11px] font-mono text-slate-400 mb-1">
+                  <span>32 m²</span>
+                  <span>•</span>
+                  <span>Cama King Ortopédica</span>
+                  <span>•</span>
+                  <span>Balcón Privado</span>
+                </div>
+                <h3 class="text-2xl font-serif font-bold text-white">Matrimonial Superior Marina</h3>
+                <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                  Ambiente romántico y acogedor con iluminación dimmeable, balcón amoblado con brisa costera, ducha española a presión y climatización independiente.
+                </p>
+              </div>
+
+              <div class="flex flex-wrap gap-2 text-[11px] text-slate-300">
+                <span class="px-2.5 py-1 rounded-lg bg-noir-850 border border-white/5">🌅 Balcón Privado</span>
+                <span class="px-2.5 py-1 rounded-lg bg-noir-850 border border-white/5">❄️ A/C Inverter</span>
+                <span class="px-2.5 py-1 rounded-lg bg-noir-850 border border-white/5">🍷 Minibar Equipado</span>
+                <span class="px-2.5 py-1 rounded-lg bg-noir-850 border border-white/5">🥐 Desayuno Buffet</span>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-white/5 flex items-center justify-between gap-4">
+              <button onclick="openBookingDrawer('Matrimonial Superior Marina', 220, 'King')" class="text-xs text-slate-400 hover:text-champagne-400 underline transition-colors">
+                Ver Detalles Completos →
+              </button>
+              <button onclick="openBookingDrawer('Matrimonial Superior Marina', 220, 'King')" class="btn-gold">
+                <span>Reservar Suite</span>
+                <span class="btn-arrow">→</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ROOM 3: Habitación Doble Ejecutiva -->
+        <div class="room-card ejecutiva bezel-shell" data-category="ejecutiva">
+          <div class="bezel-core p-6 flex flex-col justify-between h-full space-y-6">
+            
+            <div class="space-y-4">
+              <div class="relative rounded-2xl overflow-hidden img-zoom-box aspect-[16/10] bg-noir-900">
+                <img src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1200&q=80" alt="Habitación Doble Ejecutiva" class="w-full h-full object-cover">
+                <div class="absolute top-3 left-3 bg-noir-950/80 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider text-sky-400 border border-sky-400/30">
+                  Ideal Empresas
+                </div>
+                <div class="absolute bottom-3 right-3 bg-noir-950/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-right">
+                  <span class="text-[10px] text-slate-400 block uppercase font-mono">Desde</span>
+                  <span class="text-xl font-mono font-bold text-white room-price" data-pen="190">S/ 190</span>
+                  <span class="text-[10px] text-slate-400">/ noche</span>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex items-center space-x-2 text-[11px] font-mono text-slate-400 mb-1">
+                  <span>28 m²</span>
+                  <span>•</span>
+                  <span>2 Camas 1.5 Plazas</span>
+                  <span>•</span>
+                  <span>Escritorio de Trabajo</span>
+                </div>
+                <h3 class="text-2xl font-serif font-bold text-white">Doble Ejecutiva Corporativa</h3>
+                <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                  Configuración optimizada para ingenieros, consultores y contratistas mineros. Conexión a internet dedicada de alta velocidad, escritorio amplio y silencio absoluto para descansar.
+                </p>
+              </div>
+
+              <div class="flex flex-wrap gap-2 text-[11px] text-slate-300">
+                <span class="px-2.5 py-1 rounded-lg bg-noir-850 border border-white/5">⚡ Conexión LAN / Wi-Fi</span>
+                <span class="px-2.5 py-1 rounded-lg bg-noir-850 border border-white/5">🧾 Factura RUC Inmediata</span>
+                <span class="px-2.5 py-1 rounded-lg bg-noir-850 border border-white/5">🧊 Frigobar</span>
+                <span class="px-2.5 py-1 rounded-lg bg-noir-850 border border-white/5">🥐 Desayuno desde 6 AM</span>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-white/5 flex items-center justify-between gap-4">
+              <button onclick="openBookingDrawer('Doble Ejecutiva Corporativa', 190, '2 Camas')" class="text-xs text-slate-400 hover:text-champagne-400 underline transition-colors">
+                Ver Detalles Completos →
+              </button>
+              <button onclick="openBookingDrawer('Doble Ejecutiva Corporativa', 190, '2 Camas')" class="btn-gold">
+                <span>Reservar Habitación</span>
+                <span class="btn-arrow">→</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ROOM 4: Habitación Familiar Superior -->
+        <div class="room-card familiar bezel-shell" data-category="familiar">
+          <div class="bezel-core p-6 flex flex-col justify-between h-full space-y-6">
+            
+            <div class="space-y-4">
+              <div class="relative rounded-2xl overflow-hidden img-zoom-box aspect-[16/10] bg-noir-900">
+                <img src="https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=1200&q=80" alt="Familiar Superior Marina" class="w-full h-full object-cover">
+                <div class="absolute top-3 left-3 bg-noir-950/80 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider text-emerald-400 border border-emerald-400/30">
+                  Capacidad 4 Personas
+                </div>
+                <div class="absolute bottom-3 right-3 bg-noir-950/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-right">
+                  <span class="text-[10px] text-slate-400 block uppercase font-mono">Desde</span>
+                  <span class="text-xl font-mono font-bold text-white room-price" data-pen="270">S/ 270</span>
+                  <span class="text-[10px] text-slate-400">/ noche</span>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex items-center space-x-2 text-[11px] font-mono text-slate-400 mb-1">
+                  <span>40 m²</span>
+                  <span>•</span>
+                  <span>2 Camas Queen</span>
+                  <span>•</span>
+                  <span>Para 4 Personas</span>
+                </div>
+                <h3 class="text-2xl font-serif font-bold text-white">Familiar Superior Marina</h3>
+                <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                  Espacio generoso para familias de Moquegua, Tacna y Arequipa. Dos amplias camas Queen, guardarropa integral y acceso libre a piscina y desayuno buffet para los 4 miembros.
+                </p>
+              </div>
+
+              <div class="flex flex-wrap gap-2 text-[11px] text-slate-300">
+                <span class="px-2.5 py-1 rounded-lg bg-noir-850 border border-white/5">👨‍👩‍👧‍👦 Capacidad x4</span>
+                <span class="px-2.5 py-1 rounded-lg bg-noir-850 border border-white/5">🏊 Acceso Piscina</span>
+                <span class="px-2.5 py-1 rounded-lg bg-noir-850 border border-white/5">📺 Smart TV 55"</span>
+                <span class="px-2.5 py-1 rounded-lg bg-noir-850 border border-white/5">🥐 4 Desayunos Buffet</span>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-white/5 flex items-center justify-between gap-4">
+              <button onclick="openBookingDrawer('Familiar Superior Marina', 270, '2 Queen')" class="text-xs text-slate-400 hover:text-champagne-400 underline transition-colors">
+                Ver Detalles Completos →
+              </button>
+              <button onclick="openBookingDrawer('Familiar Superior Marina', 270, '2 Queen')" class="btn-gold">
+                <span>Reservar Habitación</span>
+                <span class="btn-arrow">→</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- POOL CLUB & DAY PASS SECTION                                   -->
+  <!-- ============================================================== -->
+  <section id="piscina-daypass" class="py-24 sm:py-32 bg-noir-900/50 border-y border-white/5 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      
+      <div class="max-w-3xl mx-auto text-center space-y-3">
+        <span class="text-xs font-mono uppercase tracking-[0.25em] text-champagne-400">Exclusividad Abierta</span>
+        <h2 class="text-3xl sm:text-5xl font-serif font-bold text-white">Sunset Pool Club & Pasadías</h2>
+        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+          No necesitas estar hospedado para vivir la experiencia Sunrise. Pasa el día bajo el sol de Ilo, disfruta de reposeras, toallas y <strong>crédito consumible en nuestra carta de cócteles y piqueos marinos</strong>.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Day Pass 1: Adulto -->
+        <div class="bezel-shell">
+          <div class="bezel-core p-6 sm:p-8 flex flex-col justify-between h-full space-y-6">
+            <div class="space-y-4">
+              <div class="flex justify-between items-center">
+                <span class="px-3 py-1 rounded-full bg-champagne-400/20 text-champagne-300 text-xs font-mono font-bold">INDIVIDUAL ADULTO</span>
+                <span class="text-2xl font-mono font-bold text-white">S/ 45</span>
+              </div>
+              <h3 class="text-xl font-bold text-white font-serif">Pasadía Sunset Clásico</h3>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Acceso completo al área de piscina de 10:00 AM a 6:30 PM.
+              </p>
+              <ul class="text-xs text-slate-300 space-y-2.5">
+                <li class="flex items-center space-x-2">
+                  <span class="text-emerald-400 font-bold">✓</span>
+                  <span><strong>S/ 25 en crédito de consumo</strong> para bar / cocina.</span>
+                </li>
+                <li class="flex items-center space-x-2">
+                  <span class="text-emerald-400 font-bold">✓</span>
+                  <span>Servicio de toalla higienizada y reposera.</span>
+                </li>
+                <li class="flex items-center space-x-2">
+                  <span class="text-emerald-400 font-bold">✓</span>
+                  <span>Acceso a duchas, cambiadores y Wi-Fi de cortesía.</span>
+                </li>
+              </ul>
+            </div>
+
+            <button onclick="openDayPassModal('Pasadía Sunset Adulto', 45, 25)" class="btn-ghost-gold w-full">
+              <span>Comprar Pasadía Adulto</span>
+              <span class="btn-arrow">→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Day Pass 2: Infantil -->
+        <div class="bezel-shell">
+          <div class="bezel-core p-6 sm:p-8 flex flex-col justify-between h-full space-y-6">
+            <div class="space-y-4">
+              <div class="flex justify-between items-center">
+                <span class="px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 text-xs font-mono font-bold">NIÑOS (3 A 12 AÑOS)</span>
+                <span class="text-2xl font-mono font-bold text-white">S/ 25</span>
+              </div>
+              <h3 class="text-xl font-bold text-white font-serif">Pasadía Infantil Splash</h3>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Diseñado para los más pequeños de la familia con total seguridad.
+              </p>
+              <ul class="text-xs text-slate-300 space-y-2.5">
+                <li class="flex items-center space-x-2">
+                  <span class="text-emerald-400 font-bold">✓</span>
+                  <span><strong>S/ 15 en crédito de consumo</strong> (bebidas o snacks).</span>
+                </li>
+                <li class="flex items-center space-x-2">
+                  <span class="text-emerald-400 font-bold">✓</span>
+                  <span>Paleta de helado artesanal de bienvenida.</span>
+                </li>
+                <li class="flex items-center space-x-2">
+                  <span class="text-emerald-400 font-bold">✓</span>
+                  <span>Área de piscina infantil con poca profundidad.</span>
+                </li>
+              </ul>
+            </div>
+
+            <button onclick="openDayPassModal('Pasadía Infantil Splash', 25, 15)" class="btn-ghost-gold w-full">
+              <span>Comprar Pasadía Infantil</span>
+              <span class="btn-arrow">→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Day Pass 3: Cabaña VIP Lounge -->
+        <div class="bezel-shell border-champagne-400/40">
+          <div class="bezel-core p-6 sm:p-8 flex flex-col justify-between h-full space-y-6 bg-noir-850">
+            <div class="space-y-4">
+              <div class="flex justify-between items-center">
+                <span class="px-3 py-1 rounded-full bg-champagne-400/15 border border-champagne-400/40 text-champagne-300 text-xs font-mono font-bold">GRUPO VIP (x4)</span>
+                <span class="text-2xl font-mono font-bold text-champagne-400">S/ 160</span>
+              </div>
+              <h3 class="text-xl font-bold text-white font-serif">Cabaña Lounge VIP</h3>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Experiencia premium para grupos de amigos o familias de 4 personas.
+              </p>
+              <ul class="text-xs text-slate-300 space-y-2.5">
+                <li class="flex items-center space-x-2">
+                  <span class="text-champagne-400 font-bold">★</span>
+                  <span><strong>Cabaña privada techada</strong> con cojines lounge exclusivos.</span>
+                </li>
+                <li class="flex items-center space-x-2">
+                  <span class="text-champagne-400 font-bold">★</span>
+                  <span>Fuente grande de piqueos marinos o tequeños de la casa.</span>
+                </li>
+                <li class="flex items-center space-x-2">
+                  <span class="text-champagne-400 font-bold">★</span>
+                  <span><strong>4 Cócteles de autor</strong> o jarra de sangría helada.</span>
+                </li>
+              </ul>
+            </div>
+
+            <button onclick="openDayPassModal('Cabaña Lounge VIP (4 Personas)', 160, 90)" class="btn-gold w-full">
+              <span>Reservar Cabaña VIP</span>
+              <span class="btn-arrow">→</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- GASTRONOMY, BARS & BILLIARDS SECTION                           -->
+  <!-- ============================================================== -->
+  <section id="bar-lounge" class="py-24 sm:py-32 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      
+      <div class="max-w-3xl space-y-3">
+        <span class="text-xs font-mono uppercase tracking-[0.25em] text-champagne-400">Ocio & Esparcimiento</span>
+        <h2 class="text-3xl sm:text-5xl font-serif font-bold text-white">Sunset Bar, Billar & Gastronomía</h2>
+        <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">
+          Diseñado para que las tardes y noches en Ilo sean memorables. Cócteles elaborados con los mejores piscos de la región, mesas de billar de torneo y piqueos frescos del puerto.
+        </p>
+      </div>
+
+      <!-- Bento Grid for Amenities -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Bento 1: Coctelería -->
+        <div class="bezel-shell">
+          <div class="bezel-core p-6 space-y-4 h-full flex flex-col justify-between">
+            <div class="space-y-3">
+              <div class="rounded-xl overflow-hidden aspect-[4/3] bg-noir-900 img-zoom-box">
+                <img src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800&q=80" alt="Coctelería Sunset Sunrise Hotel" class="w-full h-full object-cover">
+              </div>
+              <h3 class="text-xl font-serif font-bold text-white">Coctelería de Autor</h3>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Pisco Sour macerado con ciruela de Ilo, Chilcano Marino con toques cítricos, y cervezas heladas servidas al costado de la piscina o en el lounge interior.
+              </p>
+            </div>
+            <div class="text-[11px] text-champagne-400 font-mono">
+              Carta disponible de 12:00 PM a 11:00 PM
+            </div>
+          </div>
+        </div>
+
+        <!-- Bento 2: Salón de Billar -->
+        <div class="bezel-shell">
+          <div class="bezel-core p-6 space-y-4 h-full flex flex-col justify-between">
+            <div class="space-y-3">
+              <div class="rounded-xl overflow-hidden aspect-[4/3] bg-noir-900 img-zoom-box">
+                <img src="https://images.unsplash.com/photo-1542385151-efd9000785a0?auto=format&fit=crop&w=800&q=80" alt="Salón de Billar Sunrise Hotel" class="w-full h-full object-cover">
+              </div>
+              <h3 class="text-xl font-serif font-bold text-white">Salón de Billar & Entretenimiento</h3>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Mesas reglamentarias para disputar partidas con amigos o colegas de trabajo, acompañadas de pantalla gigante para eventos deportivos y música seleccionada.
+              </p>
+            </div>
+            <div class="text-[11px] text-champagne-400 font-mono">
+              Acceso libre para huéspedes y clientes del bar
+            </div>
+          </div>
+        </div>
+
+        <!-- Bento 3: Sabores del Puerto & Desayuno -->
+        <div class="bezel-shell">
+          <div class="bezel-core p-6 space-y-4 h-full flex flex-col justify-between">
+            <div class="space-y-3">
+              <div class="rounded-xl overflow-hidden aspect-[4/3] bg-noir-900 img-zoom-box">
+                <img src="https://images.unsplash.com/photo-1535400255456-984241443b29?auto=format&fit=crop&w=800&q=80" alt="Gastronomía y Piqueos" class="w-full h-full object-cover">
+              </div>
+              <h3 class="text-xl font-serif font-bold text-white">Piqueos & Desayuno Buffet</h3>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Ceviche fresco del día de la pesca artesanal de Ilo, pulpo al olivo con aceitunas de Moquegua, tequeños rellenos y el clásico buffet matutino caliente.
+              </p>
+            </div>
+            <div class="text-[11px] text-champagne-400 font-mono">
+              Buffet: 6:30 AM a 10:00 AM
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- CORPORATE & MINING CONTRACTS SECTION                          -->
+  <!-- ============================================================== -->
+  <section id="corporativo" class="py-24 sm:py-32 bg-noir-900/40 border-y border-white/5 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="bezel-shell">
+        <div class="bezel-core p-8 sm:p-12">
+          
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            
+            <div class="space-y-6">
+              <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 text-xs font-mono uppercase tracking-wider">
+                <span>Solución B2B para Empresas</span>
+              </div>
+              
+              <h2 class="text-3xl sm:text-4xl font-serif font-bold text-white leading-tight">
+                Convenios Corporativos para Mineras, Pesqueras y Contratistas
+              </h2>
+
+              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                En Sunrise Hotel brindamos servicio formalizado a equipos de <strong>Southern Perú Copper Corporation, Anglo American Quellaveco, ENAPU, Terminal Portuario</strong> y proveedores de servicios en Ilo.
+              </p>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs">
+                <div class="p-3.5 rounded-xl bg-noir-950 border border-white/5 space-y-1">
+                  <span class="text-sky-400 font-bold block">✓ Facturación RUC Express</span>
+                  <span class="text-slate-400 text-[11px]">Emisión electrónica instantánea al check-out o cierre de quincena.</span>
+                </div>
+                <div class="p-3.5 rounded-xl bg-noir-950 border border-white/5 space-y-1">
+                  <span class="text-sky-400 font-bold block">✓ Horarios Flexibles</span>
+                  <span class="text-slate-400 text-[11px]">Desayuno adelantado desde las 6:00 AM para salidas a faena.</span>
+                </div>
+                <div class="p-3.5 rounded-xl bg-noir-950 border border-white/5 space-y-1">
+                  <span class="text-sky-400 font-bold block">✓ Crédito Quincenal / Mensual</span>
+                  <span class="text-slate-400 text-[11px]">Línea de crédito para empresas acreditadas con orden de servicio.</span>
+                </div>
+                <div class="p-3.5 rounded-xl bg-noir-950 border border-white/5 space-y-1">
+                  <span class="text-sky-400 font-bold block">✓ Salón de Reuniones</span>
+                  <span class="text-slate-400 text-[11px]">Espacio para juntas de trabajo, capacitaciones y presentaciones.</span>
+                </div>
+              </div>
+
+              <div class="pt-4 flex flex-wrap gap-4 items-center">
+                <a href="https://wa.me/51994342040?text=Hola%20Sunrise%20Hotel,%20quisiera%20solicitar%20un%20Convenio%20Corporativo%20para%20mi%20empresa." target="_blank" class="btn-gold">
+                  <span>Solicitar Tarifario Corporativo</span>
+                  <span class="btn-arrow">→</span>
+                </a>
+                <span class="text-xs text-slate-400">Atención inmediata a Gerencias de RRHH y Logística</span>
+              </div>
+            </div>
+
+            <!-- Corporate Stats & Badge -->
+            <div class="bg-noir-950/80 rounded-3xl p-6 sm:p-8 border border-white/10 space-y-6">
+              <span class="text-xs font-mono uppercase tracking-widest text-champagne-400 block">Capacidad Hotelera</span>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 rounded-2xl bg-noir-900 border border-white/5">
+                  <span class="text-3xl font-mono font-black text-white">35</span>
+                  <span class="text-xs text-slate-400 block mt-1">Habitaciones Totales</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-noir-900 border border-white/5">
+                  <span class="text-3xl font-mono font-black text-emerald-400">70+</span>
+                  <span class="text-xs text-slate-400 block mt-1">Capacidad de Huéspedes</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-noir-900 border border-white/5">
+                  <span class="text-3xl font-mono font-black text-sky-400">200</span>
+                  <span class="text-xs text-slate-400 block mt-1">Mbps Fibra Óptica</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-noir-900 border border-white/5">
+                  <span class="text-3xl font-mono font-black text-amber-400">24/7</span>
+                  <span class="text-xs text-slate-400 block mt-1">Recepción & Seguridad</span>
+                </div>
+              </div>
+              <div class="p-4 rounded-2xl bg-sky-950/40 border border-sky-500/20 text-xs text-sky-300 leading-relaxed">
+                "Ubicación céntrica ideal en Jr. Moquegua 657, a minutos de los muelles pesqueros, puerto y oficinas del gobierno regional."
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- LOCATION & TOURIST CONCIERGE GUIDE                            -->
+  <!-- ============================================================== -->
+  <section id="ubicacion" class="py-24 sm:py-32 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
+        <div>
+          <span class="text-xs font-mono uppercase tracking-[0.25em] text-champagne-400 block mb-2">Entorno & Conectividad</span>
+          <h2 class="text-3xl sm:text-5xl font-serif font-bold text-white tracking-tight">El Corazón Histórico de Ilo</h2>
+          <p class="text-slate-400 text-xs sm:text-sm mt-2 max-w-xl">
+            Estratégicamente ubicado en Jirón Moquegua 657, permitiéndote caminar al Malecón Costero en 3 minutos o llegar a las mejores playas del sur en corto trayecto.
+          </p>
+        </div>
+        <a href="https://maps.google.com/?q=Jirón+Moquegua+657,+Ilo,+Peru" target="_blank" class="text-xs text-champagne-400 hover:text-white font-bold flex items-center space-x-1 underline">
+          <span>Abrir en Google Maps</span>
+          <span>↗</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="p-6 rounded-3xl bg-noir-850 border border-white/10 space-y-3">
+          <div class="text-champagne-400 text-xl font-bold font-mono">01. Malecón Costero & Glorieta</div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            A 300 metros del hotel. Pasea por la histórica Glorieta José Gálvez, contempla las puestas de sol sobre el Océano Pacífico y disfruta de la gastronomía marina de los muelles.
+          </p>
+          <div class="text-[11px] text-emerald-400 font-bold">3 minutos caminando</div>
+        </div>
+
+        <div class="p-6 rounded-3xl bg-noir-850 border border-white/10 space-y-3">
+          <div class="text-champagne-400 text-xl font-bold font-mono">02. Plaza de Armas & Catedral</div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Centro cívico, bancos (BCP, BBVA, Interbank, Banco de la Nación), restaurantes y comercios locales a pasos de recepción.
+          </p>
+          <div class="text-[11px] text-emerald-400 font-bold">2 minutos caminando</div>
+        </div>
+
+        <div class="p-6 rounded-3xl bg-noir-850 border border-white/10 space-y-3">
+          <div class="text-champagne-400 text-xl font-bold font-mono">03. Playas Pozo de Lizas & Boca del Río</div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Las playas más emblemáticas de la costa sur peruana: arena dorada, mar tranquilo y quioscos gastronómicos de mariscos frescos.
+          </p>
+          <div class="text-[11px] text-emerald-400 font-bold">12 minutos en vehículo</div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- FAQ ACCORDION                                                  -->
+  <!-- ============================================================== -->
+  <section class="py-20 bg-noir-900/50 border-t border-white/5">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 space-y-8">
+      
+      <div class="text-center space-y-2">
+        <span class="text-xs font-mono uppercase tracking-[0.25em] text-champagne-400">Dudas Frecuentes</span>
+        <h2 class="text-3xl font-serif font-bold text-white">Todo lo que Necesitas Saber</h2>
+      </div>
+
+      <div class="space-y-4">
+        
+        <div class="faq-item p-5 rounded-2xl bg-noir-850 border border-white/10 cursor-pointer" onclick="toggleFaq(this)">
+          <div class="flex justify-between items-center">
+            <h4 class="text-sm sm:text-base font-bold text-white">¿Cuáles son los horarios de Check-in y Check-out?</h4>
+            <span class="faq-icon text-champagne-400 text-lg font-bold">+</span>
+          </div>
+          <div class="faq-body hidden mt-3 pt-3 border-t border-white/10 text-xs text-slate-300 leading-relaxed">
+            El Check-in es a partir de las 2:00 PM y el Check-out hasta las 12:00 PM (mediodía). Si llegas antes o requieres salir más tarde, ofrecemos custodia de equipaje gratuita y opción de Late Check-out sujeto a disponibilidad.
+          </div>
+        </div>
+
+        <div class="faq-item p-5 rounded-2xl bg-noir-850 border border-white/10 cursor-pointer" onclick="toggleFaq(this)">
+          <div class="flex justify-between items-center">
+            <h4 class="text-sm sm:text-base font-bold text-white">¿El desayuno buffet está incluido en el precio de la habitación?</h4>
+            <span class="faq-icon text-champagne-400 text-lg font-bold">+</span>
+          </div>
+          <div class="faq-body hidden mt-3 pt-3 border-t border-white/10 text-xs text-slate-300 leading-relaxed">
+            Sí, todas nuestras tarifas web incluyen desayuno buffet diario para los ocupantes registrados, servido diariamente de 6:30 AM a 10:00 AM en el comedor del hotel.
+          </div>
+        </div>
+
+        <div class="faq-item p-5 rounded-2xl bg-noir-850 border border-white/10 cursor-pointer" onclick="toggleFaq(this)">
+          <div class="flex justify-between items-center">
+            <h4 class="text-sm sm:text-base font-bold text-white">¿Cómo funciona el pago con Yape o Plin al reservar?</h4>
+            <span class="faq-icon text-champagne-400 text-lg font-bold">+</span>
+          </div>
+          <div class="faq-body hidden mt-3 pt-3 border-t border-white/10 text-xs text-slate-300 leading-relaxed">
+            Al seleccionar tu habitación o pasadía en nuestro motor de reservas, podrás abonar mediante el código QR oficial de Yape / Plin al número <strong>994 342 040</strong>. Tu reserva se confirma al instante con un comprobante digital directo a nuestro canal de WhatsApp.
+          </div>
+        </div>
+
+        <div class="faq-item p-5 rounded-2xl bg-noir-850 border border-white/10 cursor-pointer" onclick="toggleFaq(this)">
+          <div class="flex justify-between items-center">
+            <h4 class="text-sm sm:text-base font-bold text-white">¿Tienen estacionamiento y seguridad para vehículos?</h4>
+            <span class="faq-icon text-champagne-400 text-lg font-bold">+</span>
+          </div>
+          <div class="faq-body hidden mt-3 pt-3 border-t border-white/10 text-xs text-slate-300 leading-relaxed">
+            Sí, contamos con cocheras privadas bajo vigilancia de circuito cerrado (CCTV) las 24 horas para huéspedes particulares y camionetas de flotas corporativas.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- HIGH-END FOOTER WITH CLEAN TRANSPARENT LOGO                     -->
+  <!-- ============================================================== -->
+  <footer class="bg-noir-950 border-t border-white/10 py-16 px-4 sm:px-8">
+    <div class="max-w-7xl mx-auto space-y-12">
+      
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        
+        <!-- Brand Column -->
+        <div class="space-y-4 md:col-span-1">
+          <img src="assets/logo_transparent.png" alt="Sunrise Hotel Logo" class="h-16 w-auto object-contain gold-halo">
+          <p class="text-xs text-slate-400 leading-relaxed">
+            El ícono de la hospitalidad en el puerto de Ilo. Descanso, confort costero y experiencias frente al Pacífico.
+          </p>
+          <div class="text-[11px] font-mono text-champagne-400">
+            Jirón Moquegua 657, Ilo, Moquegua - Perú
+          </div>
+        </div>
+
+        <!-- Links Column -->
+        <div class="space-y-3 text-xs">
+          <span class="text-white font-bold tracking-wider uppercase font-mono block">Ecosistema Hotelero</span>
+          <ul class="space-y-2 text-slate-400">
+            <li><a href="#habitaciones" class="hover:text-champagne-400 transition-colors">Habitaciones & Suites</a></li>
+            <li><a href="#piscina-daypass" class="hover:text-champagne-400 transition-colors">Piscina & Pasadías</a></li>
+            <li><a href="#bar-lounge" class="hover:text-champagne-400 transition-colors">Sunset Bar & Billar</a></li>
+            <li><a href="#corporativo" class="hover:text-champagne-400 transition-colors">Convenios Empresas</a></li>
+            <li><a href="#ubicacion" class="hover:text-champagne-400 transition-colors">Guía de Playas de Ilo</a></li>
+          </ul>
+        </div>
+
+        <!-- Portals Column -->
+        <div class="space-y-3 text-xs">
+          <span class="text-white font-bold tracking-wider uppercase font-mono block">Módulos Especiales</span>
+          <ul class="space-y-2 text-slate-400">
+            <li><a href="presentacion.html" class="text-champagne-400 font-bold hover:underline">🎬 Presentación Keynote 2026</a></li>
+            <li><a href="admin.html" class="hover:text-white transition-colors">🖥️ PMS Recepción (Check-in/Out)</a></li>
+            <li><a href="dashboard.html" class="hover:text-white transition-colors">📊 Métricas RevPAR & Analytics</a></li>
+            <li><a href="portal.html" class="hover:text-white transition-colors">⚡ Portal Maestro Suite</a></li>
+          </ul>
+        </div>
+
+        <!-- Direct Contact Column -->
+        <div class="space-y-3 text-xs">
+          <span class="text-white font-bold tracking-wider uppercase font-mono block">Contacto & Central</span>
+          <p class="text-slate-400 text-xs">
+            Atención telefónica y WhatsApp 24/7:
+          </p>
+          <a href="tel:+51994342040" class="text-sm font-mono font-bold text-white block hover:text-champagne-400 transition-colors">
+            📞 +51 994 342 040
+          </a>
+          <a href="https://wa.me/51994342040" target="_blank" class="inline-flex items-center space-x-2 text-emerald-400 font-bold hover:underline">
+            <span>💬 Escribir al WhatsApp Oficial</span>
+          </a>
+        </div>
+
+      </div>
+
+      <div class="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-4">
+        <div>
+          © 2026 Sunrise Hotel Ilo ★★★★. Todos los derechos reservados.
+        </div>
+        <div class="flex items-center space-x-4">
+          <span>RUC: 20498188172</span>
+          <span>•</span>
+          <a href="#" onclick="alert('Libro de Reclamaciones disponible en la recepción física del hotel en Jr. Moquegua 657, Ilo.'); return false;" class="hover:text-slate-400">Libro de Reclamaciones</a>
+          <span>•</span>
+          <span>Política de Privacidad</span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE-IN CHECKOUT DRAWER (INSTANT BOOKING)                     -->
+  <!-- ============================================================== -->
+  <div id="bookingDrawer" class="fixed inset-0 z-50 pointer-events-none transition-opacity duration-300 opacity-0">
+    <!-- Backdrop Blur -->
+    <div onclick="closeBookingDrawer()" class="absolute inset-0 bg-black/80 backdrop-blur-md pointer-events-auto"></div>
+
+    <!-- Drawer Panel -->
+    <div id="drawerPanel" class="absolute inset-y-0 right-0 max-w-xl w-full bg-noir-900 border-l border-champagne-400/30 p-6 sm:p-8 overflow-y-auto pointer-events-auto transform translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col justify-between">
+      
+      <div class="space-y-6">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-4 border-b border-white/10">
+          <div>
+            <span class="text-[10px] uppercase font-mono tracking-widest text-champagne-400 block">Reserva Oficial Directa</span>
+            <h3 class="text-2xl font-serif font-bold text-white mt-0.5">Completar Reservación</h3>
+          </div>
+          <button onclick="closeBookingDrawer()" class="w-9 h-9 rounded-full bg-noir-850 border border-white/10 text-slate-400 hover:text-white flex items-center justify-center text-lg">
+            ✕
+          </button>
+        </div>
+
+        <!-- Selected Room Summary Capsule -->
+        <div class="p-4 rounded-2xl bg-noir-950 border border-champagne-400/20 space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-sm font-bold text-white" id="drawerRoomTitle">Master Suite Ejecutiva Sunrise</span>
+            <span class="text-base font-mono font-bold text-champagne-400" id="drawerRoomPricePerNight">S/ 290</span>
+          </div>
+          <div class="text-xs text-slate-400 flex items-center space-x-2" id="drawerDatesSummary">
+            <span>2 noches seleccionadas</span>
+          </div>
+          <div class="text-[11px] text-emerald-400 flex items-center space-x-1">
+            <span>✓ Desayuno Buffet Criollo incluido para todos los huéspedes</span>
+          </div>
+        </div>
+
+        <!-- Guest Details Form -->
+        <div class="space-y-4">
+          <h4 class="text-xs font-mono uppercase tracking-wider text-slate-400">1. Datos del Titular</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <label class="text-[11px] text-slate-400">Nombres y Apellidos *</label>
+              <input type="text" id="guestName" placeholder="Ej. Carlos Mendoza" class="w-full bg-noir-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-champagne-400 focus:outline-none">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[11px] text-slate-400">DNI o Pasaporte *</label>
+              <input type="text" id="guestDoc" placeholder="Ej. 45892012" class="w-full bg-noir-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-champagne-400 focus:outline-none">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[11px] text-slate-400">WhatsApp / Teléfono *</label>
+              <input type="tel" id="guestPhone" placeholder="Ej. +51 952 123 456" class="w-full bg-noir-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-champagne-400 focus:outline-none">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[11px] text-slate-400">Correo Electrónico</label>
+              <input type="email" id="guestEmail" placeholder="correo@ejemplo.com" class="w-full bg-noir-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-champagne-400 focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Optional Add-ons -->
+        <div class="space-y-3">
+          <h4 class="text-xs font-mono uppercase tracking-wider text-slate-400">2. Servicios Adicionales (Opcional)</h4>
+          
+          <label class="flex items-center justify-between p-3 rounded-xl bg-noir-950 border border-white/5 cursor-pointer hover:border-white/10">
+            <div class="flex items-center space-x-3">
+              <input type="checkbox" id="addonWine" onchange="updateDrawerTotal()" class="w-4 h-4 rounded accent-amber-400">
+              <span class="text-xs text-slate-300">Botella de Vino Tinto / Blanco en Habitación</span>
+            </div>
+            <span class="text-xs font-mono text-champagne-400 font-bold">+S/ 60</span>
+          </label>
+
+          <label class="flex items-center justify-between p-3 rounded-xl bg-noir-950 border border-white/5 cursor-pointer hover:border-white/10">
+            <div class="flex items-center space-x-3">
+              <input type="checkbox" id="addonLateCheckout" onchange="updateDrawerTotal()" class="w-4 h-4 rounded accent-amber-400">
+              <span class="text-xs text-slate-300">Late Check-Out Garantizado hasta las 4:00 PM</span>
+            </div>
+            <span class="text-xs font-mono text-champagne-400 font-bold">+S/ 45</span>
+          </label>
+        </div>
+
+        <!-- Payment Method Tabs -->
+        <div class="space-y-3">
+          <h4 class="text-xs font-mono uppercase tracking-wider text-slate-400">3. Método de Pago</h4>
+          <div class="grid grid-cols-3 gap-2 text-xs text-center">
+            <button onclick="selectPaymentMethod('yape')" id="payTabYape" class="p-2.5 rounded-xl border border-purple-500 bg-purple-950/40 text-purple-300 font-bold">
+              Yape / Plin
+            </button>
+            <button onclick="selectPaymentMethod('card')" id="payTabCard" class="p-2.5 rounded-xl border border-slate-700 bg-slate-950 text-slate-400 font-medium">
+              Tarjeta
+            </button>
+            <button onclick="selectPaymentMethod('hotel')" id="payTabHotel" class="p-2.5 rounded-xl border border-slate-700 bg-slate-950 text-slate-400 font-medium">
+              En Hotel
+            </button>
+          </div>
+
+          <!-- Yape View -->
+          <div id="paymentViewYape" class="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/30 text-center space-y-3">
+            <div class="inline-block p-2 bg-white rounded-xl">
+              <!-- QR Code Mockup -->
+              <div class="w-32 h-32 bg-slate-900 rounded-lg flex flex-col items-center justify-center p-2 text-white text-[10px]">
+                <span class="text-purple-400 font-bold text-xs">YAPE / PLIN</span>
+                <span class="text-[9px] text-slate-400 mt-1">994 342 040</span>
+                <span class="text-[8px] text-slate-500 mt-2">Sunrise Hotel Ilo</span>
+              </div>
+            </div>
+            <div class="text-xs text-purple-200">
+              Número oficial: <strong class="text-white font-mono text-sm">994 342 040</strong>
+              <button onclick="navigator.clipboard.writeText('994342040'); alert('¡Número copiado: 994342040!');" class="ml-2 text-[10px] bg-purple-500/30 px-2 py-0.5 rounded text-purple-300 hover:bg-purple-500/50">Copiar</button>
+            </div>
+          </div>
+
+          <!-- Card View -->
+          <div id="paymentViewCard" class="hidden p-4 rounded-2xl bg-sky-950/20 border border-sky-500/30 text-xs text-slate-300 space-y-2">
+            <span>Aceptamos todas las tarjetas Visa, Mastercard, Diners y Amex sin recargo adicional. El pago se procesa al confirmar vía enlace seguro.</span>
+          </div>
+
+          <!-- Hotel View -->
+          <div id="paymentViewHotel" class="hidden p-4 rounded-2xl bg-amber-950/20 border border-amber-500/30 text-xs text-slate-300 space-y-2">
+            <span>Garantiza tu habitación ahora y paga en recepción en efectivo, POS o transferencia al hacer Check-in.</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Drawer Bottom: Total & Trigger -->
+      <div class="pt-6 border-t border-white/10 space-y-4">
+        <div class="flex items-baseline justify-between">
+          <span class="text-xs text-slate-400 font-mono uppercase">Total Estimado:</span>
+          <span class="text-2xl font-mono font-black text-champagne-400" id="drawerTotalPrice">S/ 580</span>
+        </div>
+
+        <button onclick="confirmBooking()" class="btn-gold w-full !py-3.5 !rounded-full">
+          <span>Confirmar y Enviar a WhatsApp</span>
+          <span class="btn-arrow">→</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- VOUCHER MODAL (CONFIRMED BOOKING)                              -->
+  <!-- ============================================================== -->
+  <div id="voucherModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div onclick="document.getElementById('voucherModal').classList.add('hidden')" class="absolute inset-0 bg-black/85 backdrop-blur-md"></div>
+    <div class="relative z-10 max-w-md w-full bezel-shell">
+      <div class="bezel-core p-6 sm:p-8 space-y-6 text-center">
+        
+        <img src="assets/logo_transparent.png" alt="Sunrise Hotel" class="h-12 w-auto mx-auto object-contain gold-halo">
+        
+        <div class="space-y-1">
+          <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-mono font-bold">RESERVA REGISTRADA CON ÉXITO</span>
+          <h3 class="text-2xl font-serif font-bold text-white pt-2">Voucher Digital Oficial</h3>
+          <p class="text-xs text-slate-400 font-mono" id="voucherCode">SUN-ILO-8492</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-noir-950 border border-white/10 text-left space-y-2 text-xs">
+          <div class="flex justify-between">
+            <span class="text-slate-400">Titular:</span>
+            <span class="text-white font-bold" id="voucherGuestName">Carlos Mendoza</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Habitación:</span>
+            <span class="text-champagne-400 font-bold" id="voucherRoomName">Master Suite Ejecutiva</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Ubicación:</span>
+            <span class="text-white">Jr. Moquegua 657, Ilo</span>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <a id="btnSendWspVoucher" href="#" target="_blank" class="w-full py-3.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg flex items-center justify-center space-x-2">
+            <span>Abrir en WhatsApp del Hotel</span>
+            <span>💬</span>
+          </a>
+          <button onclick="document.getElementById('voucherModal').classList.add('hidden')" class="text-xs text-slate-400 hover:text-white underline">
+            Cerrar Ventana
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- DAY PASS BOOKING MODAL                                         -->
+  <!-- ============================================================== -->
+  <div id="dayPassModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div onclick="closeDayPassModal()" class="absolute inset-0 bg-black/85 backdrop-blur-md"></div>
+    <div class="relative z-10 max-w-md w-full bezel-shell">
+      <div class="bezel-core p-6 sm:p-8 space-y-5 text-center">
+        
+        <div class="space-y-1">
+          <span class="text-[10px] font-mono uppercase tracking-widest text-champagne-400">Piscina Sunrise Hotel Ilo</span>
+          <h3 class="text-2xl font-serif font-bold text-white" id="dpModalTitle">Pasadía Sunset Clásico</h3>
+          <p class="text-xs text-slate-300" id="dpModalSubtitle">Incluye crédito de consumo</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-noir-950 border border-white/10 text-left space-y-3 text-xs">
+          <div class="space-y-1">
+            <label class="text-[11px] text-slate-400">Fecha de tu Pasadía</label>
+            <input type="date" id="dpDate" class="w-full bg-noir-900 border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none">
+          </div>
+          <div class="space-y-1">
+            <label class="text-[11px] text-slate-400">Nombre del Titular</label>
+            <input type="text" id="dpName" placeholder="Tu Nombre Completo" class="w-full bg-noir-900 border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none">
+          </div>
+          <div class="space-y-1">
+            <label class="text-[11px] text-slate-400">Cantidad de Pasadas</label>
+            <input type="number" id="dpQuantity" value="1" min="1" max="10" onchange="updateDayPassTotal()" class="w-full bg-noir-900 border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none">
+          </div>
+          <div class="flex justify-between items-center pt-2 border-t border-white/5">
+            <span class="text-slate-400">Total a Pagar:</span>
+            <span class="text-lg font-mono font-bold text-champagne-400" id="dpTotalAmount">S/ 45</span>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <button onclick="confirmDayPass()" class="btn-gold w-full !py-3.5 !rounded-full">
+            <span>Confirmar y Pagar por Yape / WhatsApp</span>
+            <span class="btn-arrow">→</span>
+          </button>
+          <button onclick="closeDayPassModal()" class="text-xs text-slate-400 hover:text-white underline">
+            Cancelar
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- REAL-TIME SOCIAL PROOF TOAST                                   -->
+  <!-- ============================================================== -->
+  <div id="socialToast" class="fixed bottom-6 left-6 z-40 max-w-sm bg-noir-900/90 border border-champagne-400/30 rounded-2xl p-4 shadow-2xl backdrop-blur-xl flex items-center space-x-3 transition-all duration-700 transform translate-y-20 opacity-0 pointer-events-none">
+    <div class="w-9 h-9 rounded-full bg-champagne-400/20 text-champagne-400 flex items-center justify-center text-base flex-shrink-0">
+      ⚡
+    </div>
+    <div class="text-xs">
+      <span class="text-white font-bold block" id="toastText">Carlos M. de Tacna acaba de reservar la Master Suite</span>
+      <span class="text-[10px] text-slate-400">Hace 4 minutos vía web oficial</span>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- JAVASCRIPT CORE INTERACTIVE ENGINE                             -->
+  <!-- ============================================================== -->
+  <script>
+    // State management
+    let currentCurrency = 'PEN';
+    const EXCHANGE_RATE = 3.80; // S/. 3.80 por USD $1
+    let selectedRoomTitle = 'Master Suite Ejecutiva Sunrise';
+    let selectedRoomPricePEN = 290;
+    let currentDayPassUnit = 45;
+
+    // Live Typography Switcher (Outfit / Playfair / Cinzel / Syne)
+    function setFontStyle(style) {
+      const root = document.documentElement;
+      const styles = ['outfit', 'playfair', 'cinzel', 'syne'];
+      
+      styles.forEach(s => {
+        const btn = document.getElementById('fontBtn_' + s);
+        if (btn) {
+          btn.className = 'px-2 py-0.5 rounded-full font-medium text-slate-400 hover:text-white transition-all';
+        }
+      });
+
+      const active = document.getElementById('fontBtn_' + style);
+      if (active) {
+        active.className = 'px-2 py-0.5 rounded-full font-bold bg-champagne-400 text-slate-950 transition-all';
+      }
+
+      if (style === 'outfit') {
+        root.style.setProperty('--font-heading', "'Outfit', -apple-system, BlinkMacSystemFont, sans-serif");
+        root.style.setProperty('--font-serif', "'Playfair Display', Georgia, serif");
+        root.style.setProperty('--font-brand', "'Outfit', sans-serif");
+      } else if (style === 'playfair') {
+        root.style.setProperty('--font-heading', "'Playfair Display', Georgia, serif");
+        root.style.setProperty('--font-serif', "'Playfair Display', Georgia, serif");
+        root.style.setProperty('--font-brand', "'Cinzel', serif");
+      } else if (style === 'cinzel') {
+        root.style.setProperty('--font-heading', "'Cinzel', serif");
+        root.style.setProperty('--font-serif', "'Cinzel', serif");
+        root.style.setProperty('--font-brand', "'Cinzel', serif");
+      } else if (style === 'syne') {
+        root.style.setProperty('--font-heading', "'Syne', sans-serif");
+        root.style.setProperty('--font-serif', "'Playfair Display', Georgia, serif");
+        root.style.setProperty('--font-brand', "'Syne', sans-serif");
+      }
+
+      try { localStorage.setItem('sunrise_font_theme', style); } catch (e) {}
+    }
+
+    // Initialize Default Dates & Saved Font
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedFont = localStorage.getItem('sunrise_font_theme') || 'outfit';
+      setFontStyle(savedFont);
+
+      const today = new Date();
+      const afterTomorrow = new Date();
+      afterTomorrow.setDate(today.getDate() + 2);
+
+      const fmt = d => d.toISOString().split('T')[0];
+      const inEl = document.getElementById('dateCheckIn');
+      const outEl = document.getElementById('dateCheckOut');
+      const dpDateEl = document.getElementById('dpDate');
+
+      if (inEl) inEl.value = fmt(today);
+      if (outEl) outEl.value = fmt(afterTomorrow);
+      if (dpDateEl) dpDateEl.value = fmt(today);
+
+      updateDrawerDatesSummary();
+    });
+
+    // Toggle Currency (PEN / USD)
+    function toggleCurrency() {
+      currentCurrency = currentCurrency === 'PEN' ? 'USD' : 'PEN';
+      const btn = document.getElementById('currencySelectorBtn');
+      if (btn) btn.innerText = `Moneda: ${currentCurrency} (${currentCurrency === 'PEN' ? 'S/.' : '$'})`;
+
+      document.querySelectorAll('.room-price').forEach(el => {
+        const pen = parseFloat(el.getAttribute('data-pen'));
+        if (currentCurrency === 'PEN') {
+          el.innerText = 'S/ ' + pen;
+        } else {
+          el.innerText = '$ ' + Math.round(pen / EXCHANGE_RATE);
+        }
+      });
+
+      updateDrawerTotal();
+    }
+
+    // Scroll to Search Capsule
+    function scrollToSearch() {
+      const el = document.getElementById('searchCapsule');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // Search Rooms trigger
+    function handleSearchRooms() {
+      const inVal = document.getElementById('dateCheckIn').value;
+      const outVal = document.getElementById('dateCheckOut').value;
+      updateDrawerDatesSummary();
+      const roomsEl = document.getElementById('habitaciones');
+      if (roomsEl) roomsEl.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Filter Rooms Category
+    function filterRooms(category) {
+      document.querySelectorAll('.room-tab-btn').forEach(b => {
+        b.className = 'room-tab-btn px-4 py-2 rounded-full bg-noir-850 text-slate-300 hover:text-white border border-white/10 transition-all';
+      });
+      event.target.className = 'room-tab-btn active px-4 py-2 rounded-full bg-champagne-400 text-slate-950 font-bold border border-champagne-400 transition-all';
+
+      const cards = document.querySelectorAll('.room-card');
+      cards.forEach(c => {
+        if (category === 'all' || c.getAttribute('data-category') === category) {
+          c.classList.remove('hidden');
+        } else {
+          c.classList.add('hidden');
+        }
+      });
+    }
+
+    // Calculate Nights
+    function getNightsCount() {
+      const inVal = document.getElementById('dateCheckIn').value;
+      const outVal = document.getElementById('dateCheckOut').value;
+      if (!inVal || !outVal) return 2;
+      const d1 = new Date(inVal);
+      const d2 = new Date(outVal);
+      const diffTime = d2 - d1;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays > 0 ? diffDays : 1;
+    }
+
+    function updateDrawerDatesSummary() {
+      const nights = getNightsCount();
+      const inVal = document.getElementById('dateCheckIn').value;
+      const outVal = document.getElementById('dateCheckOut').value;
+      const el = document.getElementById('drawerDatesSummary');
+      if (el) el.innerText = `${inVal} al ${outVal} (${nights} ${nights === 1 ? 'Noche' : 'Noches'})`;
+    }
+
+    // Open Booking Drawer
+    function openBookingDrawer(roomTitle, pricePEN, bedType) {
+      selectedRoomTitle = roomTitle;
+      selectedRoomPricePEN = pricePEN;
+
+      document.getElementById('drawerRoomTitle').innerText = roomTitle;
+      document.getElementById('drawerRoomPricePerNight').innerText = currentCurrency === 'PEN' ? 'S/ ' + pricePEN : '$ ' + Math.round(pricePEN / EXCHANGE_RATE);
+
+      updateDrawerDatesSummary();
+      updateDrawerTotal();
+
+      const drawer = document.getElementById('bookingDrawer');
+      const panel = document.getElementById('drawerPanel');
+      drawer.classList.remove('opacity-0', 'pointer-events-none');
+      panel.classList.remove('translate-x-full');
+    }
+
+    // Close Booking Drawer
+    function closeBookingDrawer() {
+      const drawer = document.getElementById('bookingDrawer');
+      const panel = document.getElementById('drawerPanel');
+      panel.classList.add('translate-x-full');
+      setTimeout(() => {
+        drawer.classList.add('opacity-0', 'pointer-events-none');
+      }, 300);
+    }
+
+    // Update Drawer Total with Addons & Nights
+    function updateDrawerTotal() {
+      const nights = getNightsCount();
+      let totalPEN = selectedRoomPricePEN * nights;
+
+      const wineChecked = document.getElementById('addonWine')?.checked;
+      const lateChecked = document.getElementById('addonLateCheckout')?.checked;
+
+      if (wineChecked) totalPEN += 60;
+      if (lateChecked) totalPEN += 45;
+
+      const el = document.getElementById('drawerTotalPrice');
+      if (el) {
+        el.innerText = currentCurrency === 'PEN' ? 'S/ ' + totalPEN : '$ ' + Math.round(totalPEN / EXCHANGE_RATE);
+      }
+    }
+
+    // Payment method tabs
+    function selectPaymentMethod(method) {
+      document.getElementById('paymentViewYape').classList.add('hidden');
+      document.getElementById('paymentViewCard').classList.add('hidden');
+      document.getElementById('paymentViewHotel').classList.add('hidden');
+
+      document.getElementById('payTabYape').className = 'p-2.5 rounded-xl border border-slate-700 bg-slate-950 text-slate-400 font-medium';
+      document.getElementById('payTabCard').className = 'p-2.5 rounded-xl border border-slate-700 bg-slate-950 text-slate-400 font-medium';
+      document.getElementById('payTabHotel').className = 'p-2.5 rounded-xl border border-slate-700 bg-slate-950 text-slate-400 font-medium';
+
+      if (method === 'yape') {
+        document.getElementById('paymentViewYape').classList.remove('hidden');
+        document.getElementById('payTabYape').className = 'p-2.5 rounded-xl border border-purple-500 bg-purple-950/40 text-purple-300 font-bold';
+      } else if (method === 'card') {
+        document.getElementById('paymentViewCard').classList.remove('hidden');
+        document.getElementById('payTabCard').className = 'p-2.5 rounded-xl border border-sky-500 bg-sky-950/40 text-sky-300 font-bold';
+      } else {
+        document.getElementById('paymentViewHotel').classList.remove('hidden');
+        document.getElementById('payTabHotel').className = 'p-2.5 rounded-xl border border-amber-500 bg-amber-950/40 text-amber-300 font-bold';
+      }
+    }
+
+    // Confirm Booking
+    function confirmBooking() {
+      const guestName = document.getElementById('guestName').value || 'Invitado Especial';
+      const guestPhone = document.getElementById('guestPhone').value || 'No especificado';
+      const randomCode = 'SUN-ILO-' + Math.floor(1000 + Math.random() * 9000);
+      const inVal = document.getElementById('dateCheckIn').value;
+      const outVal = document.getElementById('dateCheckOut').value;
+      const nights = getNightsCount();
+      const totalText = document.getElementById('drawerTotalPrice').innerText;
+
+      document.getElementById('voucherCode').innerText = randomCode;
+      document.getElementById('voucherGuestName').innerText = guestName;
+      document.getElementById('voucherRoomName').innerText = selectedRoomTitle;
+
+      const wspMsg = encodeURIComponent(
+        `*SOLICITUD DE RESERVA WEB OFICIAL*\n` +
+        `🏨 *Sunrise Hotel Ilo* (Jr. Moquegua 657)\n` +
+        `🔖 *Código:* ${randomCode}\n` +
+        `👤 *Titular:* ${guestName}\n` +
+        `📱 *Teléfono:* ${guestPhone}\n` +
+        `🛏️ *Habitación:* ${selectedRoomTitle}\n` +
+        `📅 *Fechas:* ${inVal} al ${outVal} (${nights} noches)\n` +
+        `💰 *Monto Estimado:* ${totalText}\n\n` +
+        `_Por favor confirmar disponibilidad inmediata y validación de pago._`
+      );
+
+      document.getElementById('btnSendWspVoucher').href = `https://wa.me/51994342040?text=${wspMsg}`;
+
+      closeBookingDrawer();
+      document.getElementById('voucherModal').classList.remove('hidden');
+    }
+
+    // Day Pass Handlers
+    function openDayPassModal(title, price, consumable) {
+      currentDayPassUnit = price;
+      document.getElementById('dpModalTitle').innerText = title;
+      document.getElementById('dpModalSubtitle').innerText = `Incluye S/ ${consumable} en crédito de consumo`;
+      document.getElementById('dpQuantity').value = 1;
+      updateDayPassTotal();
+      document.getElementById('dayPassModal').classList.remove('hidden');
+    }
+
+    function closeDayPassModal() {
+      document.getElementById('dayPassModal').classList.add('hidden');
+    }
+
+    function updateDayPassTotal() {
+      const qty = parseInt(document.getElementById('dpQuantity').value) || 1;
+      const total = qty * currentDayPassUnit;
+      document.getElementById('dpTotalAmount').innerText = `S/ ${total}`;
+    }
+
+    function confirmDayPass() {
+      const title = document.getElementById('dpModalTitle').innerText;
+      const date = document.getElementById('dpDate').value;
+      const name = document.getElementById('dpName').value || 'Invitado';
+      const qty = document.getElementById('dpQuantity').value;
+      const total = document.getElementById('dpTotalAmount').innerText;
+
+      const msg = encodeURIComponent(
+        `*PASADÍA DE PISCINA SUNRISE HOTEL ILO*\n` +
+        `🏊 *Pase:* ${title}\n` +
+        `📅 *Fecha:* ${date}\n` +
+        `👤 *Titular:* ${name}\n` +
+        `🎟️ *Cantidad:* ${qty} personas\n` +
+        `💰 *Total:* ${total}\n\n` +
+        `_Quisiera coordinar el pago vía Yape (994 342 040) y asegurar los cupos._`
+      );
+
+      window.open(`https://wa.me/51994342040?text=${msg}`, '_blank');
+      closeDayPassModal();
+    }
+
+    // FAQ Accordion
+    function toggleFaq(card) {
+      const body = card.querySelector('.faq-body');
+      const icon = card.querySelector('.faq-icon');
+      if (body.classList.contains('hidden')) {
+        body.classList.remove('hidden');
+        icon.innerText = '−';
+        card.classList.add('border-champagne-400/40');
+      } else {
+        body.classList.add('hidden');
+        icon.innerText = '+';
+        card.classList.remove('border-champagne-400/40');
+      }
+    }
+
+    // Mobile Menu
+    function toggleMobileMenu() {
+      const m = document.getElementById('mobileMenu');
+      m.classList.toggle('hidden');
+    }
+
+    // Social Proof Rotator
+    const toastMessages = [
+      '⚡ Familia de Moquegua reservó 4 Pasadías de Piscina para el sábado.',
+      '🏨 Ingeniero de Quellaveco confirmó la Doble Ejecutiva por 3 noches.',
+      '💍 Pareja de Tacna reservó la Master Suite con Jacuzzi para este viernes.',
+      '🏊 Carlos M. acaba de adquirir el Day Pass Sunset Clásico.',
+      '💼 Southern Perú coordinó convenio corporativo para equipo de faena.'
+    ];
+    let toastIndex = 0;
+
+    function showSocialToast() {
+      const toast = document.getElementById('socialToast');
+      const text = document.getElementById('toastText');
+      if (!toast || !text) return;
+
+      text.innerText = toastMessages[toastIndex % toastMessages.length];
+      toastIndex++;
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 5000);
+    }
+
+    setTimeout(() => {
+      showSocialToast();
+      setInterval(showSocialToast, 16000);
+    }, 3500);
+  </script>
+</body>
+</html>

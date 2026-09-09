@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sunrise Hotel Ilo - Panel de Recepción & Administración (PMS)</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            admin: {
+              950: '#090e17',
+              900: '#0f172a',
+              800: '#1e293b',
+              700: '#334155',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #090e17; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body class="bg-admin-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- ============================================================== -->
+  <!-- TOP ADMIN BAR                                                  -->
+  <!-- ============================================================== -->
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 sm:px-8 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <img src="assets/logo_transparent.png" alt="Sunrise Hotel Ilo" class="h-9 w-auto object-contain">
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="font-bold text-white text-base tracking-tight">SUNRISE HOTEL ILO</span>
+          <span class="px-2 py-0.5 text-[10px] bg-sky-500/20 text-sky-300 rounded-md font-mono border border-sky-500/30">PMS Recepción v2.6</span>
+        </div>
+        <p class="text-[11px] text-slate-400">Jirón Moquegua 657 • Turno Activo: Mañana / Tarde</p>
+      </div>
+    </div>
+
+    <!-- Quick Links & Actions -->
+    <div class="flex items-center space-x-3">
+      <button onclick="openNewWalkInModal()" class="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center space-x-1.5">
+        <span>+ Nueva Reserva Mostrador</span>
+      </button>
+      <a href="index.html" target="_blank" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl border border-slate-700 transition-colors">
+        Ver Web Pública
+      </a>
+      <a href="dashboard.html" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 font-semibold text-xs rounded-xl border border-slate-700 transition-colors">
+        Analítica RevPAR
+      </a>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- MAIN CONTENT CONTAINER                                         -->
+  <!-- ============================================================== -->
+  <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6 flex-1">
+    
+    <!-- 4 OPERATIONAL KPI BADGES -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- Card 1: Ocupación Hoy -->
+      <div class="glass-panel rounded-2xl p-4 border-l-4 border-l-sky-500">
+        <span class="text-[11px] text-slate-400 uppercase tracking-wider font-bold">Ocupación Actual</span>
+        <div class="mt-1 flex items-baseline justify-between">
+          <span class="text-2xl font-black text-white font-mono" id="kpiOccupancy">26 / 35</span>
+          <span class="text-xs bg-sky-500/20 text-sky-400 px-2 py-0.5 rounded-full font-bold">74.3%</span>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1">9 habitaciones libres para venta hoy</p>
+      </div>
+
+      <!-- Card 2: Check-ins pendientes -->
+      <div class="glass-panel rounded-2xl p-4 border-l-4 border-l-amber-500">
+        <span class="text-[11px] text-slate-400 uppercase tracking-wider font-bold">Llegadas Hoy (Check-ins)</span>
+        <div class="mt-1 flex items-baseline justify-between">
+          <span class="text-2xl font-black text-amber-400 font-mono" id="kpiCheckIns">5 Pendientes</span>
+          <span class="text-xs text-slate-400">De 8 programados</span>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1">3 parejas escapada, 2 mineras</p>
+      </div>
+
+      <!-- Card 3: Pasadías Piscina Hoy -->
+      <div class="glass-panel rounded-2xl p-4 border-l-4 border-l-emerald-500">
+        <span class="text-[11px] text-slate-400 uppercase tracking-wider font-bold">Aforo Piscina (Pasadías)</span>
+        <div class="mt-1 flex items-baseline justify-between">
+          <span class="text-2xl font-black text-emerald-400 font-mono" id="kpiPoolPass">24 / 40</span>
+          <span class="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold">60% Aforo</span>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1">16 cupos disponibles para hoy</p>
+      </div>
+
+      <!-- Card 4: Facturación Hoy -->
+      <div class="glass-panel rounded-2xl p-4 border-l-4 border-l-purple-500">
+        <span class="text-[11px] text-slate-400 uppercase tracking-wider font-bold">Cobrado Hoy en Caja / Yape</span>
+        <div class="mt-1 flex items-baseline justify-between">
+          <span class="text-2xl font-black text-purple-300 font-mono" id="kpiRevenueToday">S/ 4,820</span>
+          <span class="text-xs text-slate-400">PEN</span>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1">Yape: S/ 1,950 | Tarjetas: S/ 2,870</p>
+      </div>
+
+    </div>
+
+    <!-- TABS CONTROLLER (RACK DE HABITACIONES vs BANDEJA DE RESERVAS) -->
+    <div class="flex space-x-2 border-b border-slate-800 pb-2">
+      <button onclick="switchAdminTab('reservas')" id="btnTabReservas" class="px-4 py-2 text-xs font-bold rounded-xl bg-amber-500 text-slate-950 transition-colors">
+        📥 Reservas Entrantes Web & WhatsApp (En Vivo)
+      </button>
+      <button onclick="switchAdminTab('rack')" id="btnTabRack" class="px-4 py-2 text-xs font-bold rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">
+        🏨 Rack de Habitaciones (Pisos 1 al 4)
+      </button>
+      <button onclick="switchAdminTab('pasadias')" id="btnTabPasadias" class="px-4 py-2 text-xs font-bold rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">
+        🏊 Control de Piscina & Pasadías
+      </button>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 1: BANDEJA DE RESERVAS ENTRANTES                          -->
+    <!-- ============================================================== -->
+    <div id="viewReservas" class="glass-panel rounded-2xl p-6 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h3 class="text-lg font-bold text-white">Bandeja de Reservas Online & Pagos por Confirmar</h3>
+          <p class="text-xs text-slate-400">Haz clic en cualquier reserva para validar su comprobante de Yape o emitir la confirmación</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <input type="text" id="filterInput" onkeyup="filterTable()" placeholder="Buscar por huésped, DNI o código..." class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs font-mono">
+          <thead class="bg-slate-900/90 text-slate-400 text-[11px] uppercase tracking-wider font-sans">
+            <tr>
+              <th class="p-3 rounded-l-lg">Código</th>
+              <th class="p-3">Huésped / Titular</th>
+              <th class="p-3">Habitación / Plan</th>
+              <th class="p-3">Fechas</th>
+              <th class="p-3">Total</th>
+              <th class="p-3">Método de Pago</th>
+              <th class="p-3">Estado</th>
+              <th class="p-3 rounded-r-lg text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="bookingsTableBody" class="divide-y divide-slate-800/80 text-slate-300">
+            <!-- Row 1 -->
+            <tr class="hover:bg-slate-900/50 transition-colors">
+              <td class="p-3 font-bold text-amber-400">SUN-ILO-9482</td>
+              <td class="p-3 font-sans font-medium text-white">
+                Carlos Mendoza V.
+                <span class="text-[10px] text-slate-400 block font-mono">DNI: 45892147 • Tacna</span>
+              </td>
+              <td class="p-3 font-sans">
+                Matrimonial Superior Marina
+                <span class="text-[10px] text-sky-400 block">+ Botella de Vino</span>
+              </td>
+              <td class="p-3">Vie 11 al Dom 13 (2 N)</td>
+              <td class="p-3 font-bold text-white">S/ 485.00</td>
+              <td class="p-3">
+                <span class="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-500/40">Yape (Op: 89412)</span>
+              </td>
+              <td class="p-3">
+                <span class="status-badge px-2 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 font-sans font-semibold">
+                  ⏳ Por Validar
+                </span>
+              </td>
+              <td class="p-3 text-center space-x-1">
+                <button onclick="approveBooking(this, 'SUN-ILO-9482', 'Carlos Mendoza')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[10px] font-sans font-bold">
+                  ✓ Validar Yape
+                </button>
+                <a href="https://wa.me/51994342040?text=Hola%20Carlos,%20tu%20reserva%20SUN-ILO-9482%20esta%20confirmada." target="_blank" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[10px] font-sans">
+                  WhatsApp
+                </a>
+              </td>
+            </tr>
+
+            <!-- Row 2 -->
+            <tr class="hover:bg-slate-900/50 transition-colors">
+              <td class="p-3 font-bold text-amber-400">SUN-ILO-8731</td>
+              <td class="p-3 font-sans font-medium text-white">
+                Ing. Luis Valdivia
+                <span class="text-[10px] text-slate-400 block font-mono">RUC: 20458912341 (Consorcio Minero)</span>
+              </td>
+              <td class="p-3 font-sans">
+                Individual Ejecutiva
+                <span class="text-[10px] text-emerald-400 block">Factura con RUC</span>
+              </td>
+              <td class="p-3">Lun 07 al Jue 10 (3 N)</td>
+              <td class="p-3 font-bold text-white">S/ 450.00</td>
+              <td class="p-3">
+                <span class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-500/40">Tarjeta Visa</span>
+              </td>
+              <td class="p-3">
+                <span class="status-badge px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-sans font-semibold">
+                  ✓ Confirmada
+                </span>
+              </td>
+              <td class="p-3 text-center space-x-1">
+                <button onclick="doCheckIn(this, 'SUN-ILO-8731', 'Luis Valdivia', 'Hab 204')" class="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-[10px] font-sans font-bold">
+                  Check-in
+                </button>
+              </td>
+            </tr>
+
+            <!-- Row 3 -->
+            <tr class="hover:bg-slate-900/50 transition-colors">
+              <td class="p-3 font-bold text-amber-400">SUN-ILO-7104</td>
+              <td class="p-3 font-sans font-medium text-white">
+                Familia Quispe Ramos
+                <span class="text-[10px] text-slate-400 block font-mono">DNI: 00481923 • Moquegua</span>
+              </td>
+              <td class="p-3 font-sans">
+                Doble Familiar Marina
+                <span class="text-[10px] text-sky-400 block">4 Huéspedes</span>
+              </td>
+              <td class="p-3">Sáb 12 al Dom 13 (1 N)</td>
+              <td class="p-3 font-bold text-white">S/ 270.00</td>
+              <td class="p-3">
+                <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-500/40">Pago en Hotel</span>
+              </td>
+              <td class="p-3">
+                <span class="status-badge px-2 py-0.5 rounded-full text-[10px] bg-sky-500/20 text-sky-300 border border-sky-500/30 font-sans font-semibold">
+                  Pendiente Pago
+                </span>
+              </td>
+              <td class="p-3 text-center space-x-1">
+                <button onclick="confirmHotelPayment(this, 'SUN-ILO-7104')" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-slate-950 rounded-lg text-[10px] font-sans font-bold">
+                  Cobrar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 2: RACK VISUAL DE HABITACIONES (PISOS 1 AL 4)             -->
+    <!-- ============================================================== -->
+    <div id="viewRack" class="glass-panel rounded-2xl p-6 space-y-6 hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-lg font-bold text-white">Plano de Habitaciones (Rack Visual en Tiempo Real)</h3>
+          <p class="text-xs text-slate-400">Haz clic en cualquier habitación para cambiar su estado (Disponible, Ocupada, Limpieza)</p>
+        </div>
+        <!-- Legend -->
+        <div class="flex flex-wrap gap-2 text-[11px]">
+          <span class="flex items-center space-x-1"><span class="w-3 h-3 rounded bg-emerald-500"></span><span>Disponible</span></span>
+          <span class="flex items-center space-x-1"><span class="w-3 h-3 rounded bg-sky-600"></span><span>Ocupada (Corp)</span></span>
+          <span class="flex items-center space-x-1"><span class="w-3 h-3 rounded bg-purple-600"></span><span>Escapada Pareja</span></span>
+          <span class="flex items-center space-x-1"><span class="w-3 h-3 rounded bg-amber-500"></span><span>Limpieza</span></span>
+        </div>
+      </div>
+
+      <!-- Floors Container -->
+      <div class="space-y-6">
+        
+        <!-- Floor 4: Suites Vista al Mar -->
+        <div>
+          <span class="text-xs font-bold text-amber-400 uppercase tracking-widest block mb-2">Piso 4: Master Suites Panorámicas Vista al Mar</span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 text-xs" id="floor4Rack">
+            <div onclick="toggleRoomStatus(this, '401')" class="p-3 rounded-xl bg-purple-950/60 border border-purple-500 cursor-pointer hover:scale-105 transition-transform">
+              <span class="font-bold text-white block">Hab 401</span>
+              <span class="text-[10px] text-purple-300 block">Master Suite</span>
+              <span class="text-[9px] text-slate-400 block mt-1">C. Mendoza (Tacna)</span>
+            </div>
+            <div onclick="toggleRoomStatus(this, '402')" class="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500 cursor-pointer hover:scale-105 transition-transform">
+              <span class="font-bold text-white block">Hab 402</span>
+              <span class="text-[10px] text-emerald-300 block">Master Suite</span>
+              <span class="text-[9px] text-emerald-400 block mt-1">DISPONIBLE</span>
+            </div>
+            <div onclick="toggleRoomStatus(this, '403')" class="p-3 rounded-xl bg-sky-950/60 border border-sky-500 cursor-pointer hover:scale-105 transition-transform">
+              <span class="font-bold text-white block">Hab 403</span>
+              <span class="text-[10px] text-sky-300 block">Superior Marina</span>
+              <span class="text-[9px] text-slate-400 block mt-1">Gerencia Southern</span>
+            </div>
+            <div onclick="toggleRoomStatus(this, '404')" class="p-3 rounded-xl bg-amber-950/60 border border-amber-500 cursor-pointer hover:scale-105 transition-transform">
+              <span class="font-bold text-white block">Hab 404</span>
+              <span class="text-[10px] text-amber-300 block">Superior Marina</span>
+              <span class="text-[9px] text-amber-400 block mt-1">LIMPIEZA</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floor 3 & 2: Matrimoniales y Familiares -->
+        <div>
+          <span class="text-xs font-bold text-sky-400 uppercase tracking-widest block mb-2">Piso 3 & 2: Matrimoniales Confort & Dobles Familiares</span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 text-xs">
+            <div onclick="toggleRoomStatus(this, '301')" class="p-3 rounded-xl bg-sky-950/60 border border-sky-500 cursor-pointer hover:scale-105 transition-transform">
+              <span class="font-bold text-white block">Hab 301</span>
+              <span class="text-[10px] text-sky-300 block">Matrimonial</span>
+              <span class="text-[9px] text-slate-400 block mt-1">Superv. Quellaveco</span>
+            </div>
+            <div onclick="toggleRoomStatus(this, '302')" class="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500 cursor-pointer hover:scale-105 transition-transform">
+              <span class="font-bold text-white block">Hab 302</span>
+              <span class="text-[10px] text-emerald-300 block">Doble Familiar</span>
+              <span class="text-[9px] text-emerald-400 block mt-1">DISPONIBLE</span>
+            </div>
+            <div onclick="toggleRoomStatus(this, '303')" class="p-3 rounded-xl bg-purple-950/60 border border-purple-500 cursor-pointer hover:scale-105 transition-transform">
+              <span class="font-bold text-white block">Hab 303</span>
+              <span class="text-[10px] text-purple-300 block">Escapada Pareja</span>
+              <span class="text-[9px] text-slate-400 block mt-1">R. Castro (Moquegua)</span>
+            </div>
+            <div onclick="toggleRoomStatus(this, '304')" class="p-3 rounded-xl bg-sky-950/60 border border-sky-500 cursor-pointer hover:scale-105 transition-transform">
+              <span class="font-bold text-white block">Hab 304</span>
+              <span class="text-[10px] text-sky-300 block">Individual Corp</span>
+              <span class="text-[9px] text-slate-400 block mt-1">ENAPU Puerto</span>
+            </div>
+            <div onclick="toggleRoomStatus(this, '305')" class="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500 cursor-pointer hover:scale-105 transition-transform">
+              <span class="font-bold text-white block">Hab 305</span>
+              <span class="text-[10px] text-emerald-300 block">Matrimonial</span>
+              <span class="text-[9px] text-emerald-400 block mt-1">DISPONIBLE</span>
+            </div>
+            <div onclick="toggleRoomStatus(this, '306')" class="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500 cursor-pointer hover:scale-105 transition-transform">
+              <span class="font-bold text-white block">Hab 306</span>
+              <span class="text-[10px] text-emerald-300 block">Doble Familiar</span>
+              <span class="text-[9px] text-emerald-400 block mt-1">DISPONIBLE</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 3: CONTROL DE PISCINA & PASADÍAS (DAY PASS)               -->
+    <!-- ============================================================== -->
+    <div id="viewPasadias" class="glass-panel rounded-2xl p-6 space-y-6 hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+        <div>
+          <h3 class="text-lg font-bold text-white">Gestión de Pasadías de Piscina (Day Pass Sábados y Domingos)</h3>
+          <p class="text-xs text-slate-400">Control de aforo máximo (40 personas) y emisión de tickets de consumo de bar/restaurante</p>
+        </div>
+        <button onclick="sellPoolPassModal()" class="px-4 py-2 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-500 text-white font-bold text-xs rounded-xl shadow flex items-center space-x-1.5">
+          <span>+ Vender Pasadía en Puerta (S/ 65)</span>
+        </button>
+      </div>
+
+      <!-- Pool Meter -->
+      <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+        <div class="flex justify-between text-xs font-semibold">
+          <span class="text-slate-300">Aforo de Piscina Ocupado: 24 de 40 personas</span>
+          <span class="text-sky-400 font-bold">16 Reposeras Libres</span>
+        </div>
+        <div class="w-full h-3 rounded-full bg-slate-800 overflow-hidden">
+          <div class="h-full bg-gradient-to-r from-sky-500 to-emerald-400 rounded-full" style="width: 60%"></div>
+        </div>
+      </div>
+
+      <!-- Day pass list table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs font-mono">
+          <thead class="bg-slate-900/90 text-slate-400 text-[11px] uppercase tracking-wider font-sans">
+            <tr>
+              <th class="p-3 rounded-l-lg">Ticket</th>
+              <th class="p-3">Titular</th>
+              <th class="p-3">Personas</th>
+              <th class="p-3">Crédito Bar / Comida</th>
+              <th class="p-3">Estado</th>
+              <th class="p-3 rounded-r-lg text-center">Acción</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/80 text-slate-300">
+            <tr>
+              <td class="p-3 font-bold text-sky-400">PAS-041</td>
+              <td class="p-3 font-sans font-medium text-white">Mariana Flores (Ilo)</td>
+              <td class="p-3">3 Adultos</td>
+              <td class="p-3 font-bold text-emerald-400">S/ 120.00 consumibles</td>
+              <td class="p-3"><span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">En Piscina</span></td>
+              <td class="p-3 text-center">
+                <button onclick="alert('Ticket de consumo reimpreso para Restaurante/Bar.')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[10px]">Reimprimir Ticket</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold text-sky-400">PAS-042</td>
+              <td class="p-3 font-sans font-medium text-white">Jorge Cáceres (Moquegua)</td>
+              <td class="p-3">2 Adultos + 1 Niño</td>
+              <td class="p-3 font-bold text-emerald-400">S/ 80.00 consumibles</td>
+              <td class="p-3"><span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">En Piscina</span></td>
+              <td class="p-3 text-center">
+                <button onclick="alert('Ticket de consumo reimpreso para Restaurante/Bar.')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[10px]">Reimprimir Ticket</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- JAVASCRIPT LOGIC                                               -->
+  <!-- ============================================================== -->
+  <script>
+    function switchAdminTab(tab) {
+      document.getElementById('viewReservas').classList.add('hidden');
+      document.getElementById('viewRack').classList.add('hidden');
+      document.getElementById('viewPasadias').classList.add('hidden');
+
+      document.getElementById('btnTabReservas').className = 'px-4 py-2 text-xs font-bold rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors';
+      document.getElementById('btnTabRack').className = 'px-4 py-2 text-xs font-bold rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors';
+      document.getElementById('btnTabPasadias').className = 'px-4 py-2 text-xs font-bold rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors';
+
+      if (tab === 'reservas') {
+        document.getElementById('viewReservas').classList.remove('hidden');
+        document.getElementById('btnTabReservas').className = 'px-4 py-2 text-xs font-bold rounded-xl bg-amber-500 text-slate-950 transition-colors';
+      } else if (tab === 'rack') {
+        document.getElementById('viewRack').classList.remove('hidden');
+        document.getElementById('btnTabRack').className = 'px-4 py-2 text-xs font-bold rounded-xl bg-amber-500 text-slate-950 transition-colors';
+      } else {
+        document.getElementById('viewPasadias').classList.remove('hidden');
+        document.getElementById('btnTabPasadias').className = 'px-4 py-2 text-xs font-bold rounded-xl bg-amber-500 text-slate-950 transition-colors';
+      }
+    }
+
+    function approveBooking(btn, code, name) {
+      const row = btn.closest('tr');
+      const badge = row.querySelector('.status-badge');
+      badge.className = 'status-badge px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-sans font-semibold';
+      badge.innerText = '✓ Yape Confirmado';
+      btn.innerText = 'Emitir Llave';
+      btn.className = 'px-2.5 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-[10px] font-sans font-bold';
+      btn.onclick = () => alert(`¡Reserva ${code} de ${name} confirmada! Voucher validado en caja.`);
+    }
+
+    function doCheckIn(btn, code, guest, room) {
+      btn.innerText = 'Huésped en Habitación';
+      btn.className = 'px-2.5 py-1 bg-slate-800 text-slate-400 rounded-lg text-[10px] font-sans cursor-default';
+      btn.disabled = true;
+      alert(`Check-in exitoso para ${guest} en ${room}. Registro emitido.`);
+    }
+
+    function confirmHotelPayment(btn, code) {
+      btn.innerText = '✓ Cobrado';
+      btn.className = 'px-2.5 py-1 bg-emerald-600 text-white rounded-lg text-[10px] font-sans';
+      alert(`Cobro de reserva ${code} registrado en caja general.`);
+    }
+
+    function toggleRoomStatus(card, num) {
+      if (card.classList.contains('border-emerald-500')) {
+        // Change to occupied
+        card.classList.remove('border-emerald-500', 'bg-emerald-950/60');
+        card.classList.add('border-purple-500', 'bg-purple-950/60');
+        card.querySelector('span:last-child').innerText = 'OCUPADA';
+        card.querySelector('span:last-child').className = 'text-[9px] text-purple-300 block mt-1';
+      } else if (card.classList.contains('border-purple-500')) {
+        // Change to cleaning
+        card.classList.remove('border-purple-500', 'bg-purple-950/60');
+        card.classList.add('border-amber-500', 'bg-amber-950/60');
+        card.querySelector('span:last-child').innerText = 'LIMPIEZA';
+        card.querySelector('span:last-child').className = 'text-[9px] text-amber-300 block mt-1';
+      } else {
+        // Change to available
+        card.classList.remove('border-amber-500', 'bg-amber-950/60', 'border-sky-500', 'bg-sky-950/60');
+        card.classList.add('border-emerald-500', 'bg-emerald-950/60');
+        card.querySelector('span:last-child').innerText = 'DISPONIBLE';
+        card.querySelector('span:last-child').className = 'text-[9px] text-emerald-400 block mt-1';
+      }
+    }
+
+    function openNewWalkInModal() {
+      const guest = prompt('Ingrese Nombre del Huésped / Empresa:');
+      if (!guest) return;
+      const room = prompt('Número de Habitación asignada (ej: 402):');
+      alert(`Reserva de mostrador registrada con éxito para ${guest} en Habitación ${room}.`);
+    }
+
+    function sellPoolPassModal() {
+      const name = prompt('Nombre del visitante para Pasadía:');
+      if (!name) return;
+      alert(`¡Pasadía emitido para ${name}!\nCobro: S/ 65.00.\nEntregar toalla y ticket con S/ 40.00 de consumo en bar.`);
+    }
+
+    function filterTable() {
+      const q = document.getElementById('filterInput').value.toLowerCase();
+      document.querySelectorAll('#bookingsTableBody tr').forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>

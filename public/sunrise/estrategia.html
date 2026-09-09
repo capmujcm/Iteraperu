@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sunrise Hotel Ilo - Plan Maestro de Crecimiento Comercial B2C</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+              800: '#0c4a6e',
+              900: '#082f49',
+            },
+            accent: {
+              gold: '#f59e0b',
+              amber: '#d97706',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .active-tab {
+      border-bottom: 3px solid #f59e0b;
+      color: #f59e0b !important;
+      background: rgba(245, 158, 11, 0.05);
+    }
+    .chat-bubble-received {
+      background: #1e293b;
+      color: #f8fafc;
+      border-bottom-left-radius: 4px;
+    }
+    .chat-bubble-sent {
+      background: #005c4b;
+      color: #e9edef;
+      border-bottom-right-radius: 4px;
+    }
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.85; }
+    }
+    .pulse-glow {
+      animation: pulse-subtle 2s infinite;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen">
+
+  <!-- TOP STATUS BAR / HEADER -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo & Brand -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-sky-500 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-amber-500/20">
+            S
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-bold text-lg text-white tracking-tight">SUNRISE HOTEL</span>
+              <span class="px-2 py-0.5 text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full font-semibold">3 Estrellas Premium</span>
+              <span class="px-2 py-0.5 text-xs bg-sky-500/20 text-sky-400 border border-sky-500/30 rounded-full">Ilo, Perú</span>
+            </div>
+            <p class="text-xs text-slate-400 hidden sm:block">Plan de Expansión Comercial B2C: Fines de Semana, Piscina & Bar</p>
+          </div>
+        </div>
+
+        <!-- Metric Badges & Action Buttons -->
+        <div class="flex items-center space-x-3">
+          <div class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs text-slate-300">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Google: <strong>4.4 ★</strong> (+440 reseñas)</span>
+          </div>
+          <a href="dashboard.html" class="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-extrabold text-xs rounded-lg shadow-md shadow-emerald-600/20 transition-all flex items-center space-x-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            <span>Analítica & RevPAR</span>
+          </a>
+          <a href="booking.html" class="px-3.5 py-1.5 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-500 text-white font-extrabold text-xs rounded-lg shadow-md shadow-sky-500/20 transition-all flex items-center space-x-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+            <span>Web de Reservas</span>
+          </a>
+          <button onclick="switchTab('calculadora')" class="hidden sm:flex px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs rounded-lg shadow-md shadow-amber-500/10 transition-all items-center space-x-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+            <span>Ver ROI</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- NAVIGATION TABS -->
+      <nav class="flex space-x-2 overflow-x-auto pb-1 text-sm border-t border-slate-800/60 pt-1" id="navTabs">
+        <button onclick="switchTab('diagnostico')" id="tab-diagnostico" class="tab-btn px-4 py-2.5 font-medium text-slate-400 hover:text-slate-200 transition-colors whitespace-nowrap active-tab">
+          1. Diagnóstico & Estrategia
+        </button>
+        <button onclick="switchTab('prototipo-web')" id="tab-prototipo-web" class="tab-btn px-4 py-2.5 font-medium text-slate-400 hover:text-slate-200 transition-colors whitespace-nowrap">
+          2. Prototipo Web Móvil
+        </button>
+        <button onclick="switchTab('prototipo-whatsapp')" id="tab-prototipo-whatsapp" class="tab-btn px-4 py-2.5 font-medium text-slate-400 hover:text-slate-200 transition-colors whitespace-nowrap">
+          3. Simulador WhatsApp Bot (Reserva en 90s)
+        </button>
+        <button onclick="switchTab('calculadora')" id="tab-calculadora" class="tab-btn px-4 py-2.5 font-medium text-slate-400 hover:text-slate-200 transition-colors whitespace-nowrap">
+          4. Calculadora de Ingresos (ROI)
+        </button>
+        <button onclick="switchTab('campanas-ads')" id="tab-campanas-ads" class="tab-btn px-4 py-2.5 font-medium text-slate-400 hover:text-slate-200 transition-colors whitespace-nowrap">
+          5. Anuncios Meta Ads (Tacna, Moquegua, Ilo)
+        </button>
+        <button onclick="switchTab('hoja-ruta')" id="tab-hoja-ruta" class="tab-btn px-4 py-2.5 font-medium text-slate-400 hover:text-slate-200 transition-colors whitespace-nowrap">
+          6. Hoja de Ruta (30 Días)
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- ============================================================== -->
+    <!-- TAB 1: DIAGNÓSTICO & ESTRATEGIA                                -->
+    <!-- ============================================================== -->
+    <section id="pane-diagnostico" class="tab-pane space-y-8">
+      <!-- Hero Banner -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-sky-950 via-slate-900 to-amber-950/40 p-8 border border-slate-800 shadow-2xl">
+        <div class="relative z-10 max-w-3xl">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-sky-500/20 text-sky-400 text-xs font-semibold mb-4 border border-sky-500/30">
+            <span>Diagnóstico Comercial Quirúrgico</span>
+          </div>
+          <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+            Cómo monetizar los fines de semana en Sunrise Hotel Ilo sin perder el cliente corporativo
+          </h1>
+          <p class="mt-4 text-slate-300 text-base leading-relaxed">
+            Hoy en día, el hotel tiene una sólida reputación en el Jirón Moquegua con clientes de minería y puerto, pero sus <strong>costes fijos (personal, energía, mantenimiento de piscina y bar) ya están pagados de lunes a jueves</strong>. Todo lo que facturemos entre viernes, sábado y domingo va casi directo al <strong>margen neto de utilidad</strong>.
+          </p>
+          <div class="mt-6 flex flex-wrap gap-4 text-sm font-semibold">
+            <div class="flex items-center space-x-2 bg-slate-800/80 px-4 py-2 rounded-lg border border-slate-700">
+              <span class="text-amber-400">Piscina activa</span>
+              <span class="text-slate-500">|</span>
+              <span class="text-slate-300">Activo clave para Pasadías (Day Pass)</span>
+            </div>
+            <div class="flex items-center space-x-2 bg-slate-800/80 px-4 py-2 rounded-lg border border-slate-700">
+              <span class="text-sky-400">Salones de Esparcimiento & Bar</span>
+              <span class="text-slate-500">|</span>
+              <span class="text-slate-300">Billar, cócteles y piqueos para locales y parejas</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 Pillars Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Card 1 -->
+        <div class="glass-card rounded-2xl p-6 relative overflow-hidden group hover:border-amber-500/40 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-4 border border-amber-500/20">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">1. La Fuga de Dinero Actual</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Solo tener Facebook y un correo de Yahoo genera una barrera brutal. El público particular y los turistas de fin de semana compran en la noche desde el celular. Si no hay respuesta inmediata o enlace directo a pagar con <strong>Yape, Plin o tarjeta</strong>, esa reserva se pierde en 3 minutos.
+          </p>
+          <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-rose-400 flex items-center space-x-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <span>Pérdida estimada: 40% a 55% de ocupación en fin de semana</span>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="glass-card rounded-2xl p-6 relative overflow-hidden group hover:border-sky-500/40 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center mb-4 border border-sky-500/20">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">2. El Mercado Regional a 1-2 Horas</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Ilo tiene un mercado natural garantizado:
+            <strong>Moquegua ciudad (1h)</strong> busca playa y piscina los sábados porque en su valle hace calor pero no tienen mar.
+            <strong>Tacna (1.5h - 2h)</strong> busca escapadas tranquilas por la Costanera. Sunrise es el hotel ideal para ellos.
+          </p>
+          <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-sky-400 flex items-center space-x-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span>Público con auto y capacidad de gasto lista</span>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="glass-card rounded-2xl p-6 relative overflow-hidden group hover:border-emerald-500/40 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-4 border border-emerald-500/20">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">3. El "Pasadía" y Bar Local</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Las familias y jóvenes de Ilo no necesitan alquilar habitación para dejar dinero en el hotel. El <strong>"Pasadía Piscina + Consumo"</strong> y las <strong>Noches de Pisco & Chilcano en el Bar y Salón</strong> convierten las áreas comunes en un centro de consumo recurrente para los residentes.
+          </p>
+          <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-emerald-400 flex items-center space-x-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>Flujo de caja inmediato sábado y domingo</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cuadro comparativo: Modelo Actual vs Modelo Propuesto -->
+      <div class="glass-card rounded-2xl p-6 sm:p-8">
+        <h3 class="text-xl font-bold text-white mb-6 flex items-center space-x-2">
+          <span>Transformación Comercial: De Hotel Industrial a Máquina Híbrida</span>
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-800/80 text-xs uppercase tracking-wider text-slate-400">
+              <tr>
+                <th class="p-4 rounded-l-lg">Dimensión</th>
+                <th class="p-4 text-rose-300">Situación Actual (Solo Corporativo)</th>
+                <th class="p-4 rounded-r-lg text-emerald-300">Estrategia B2C Propuesta</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60 text-slate-300">
+              <tr>
+                <td class="p-4 font-semibold text-white">Canal de Venta</td>
+                <td class="p-4 text-slate-400">Solo teléfono, correo Yahoo y Facebook desatendido.</td>
+                <td class="p-4 text-emerald-400 font-medium">WhatsApp Business automatizado con catálogo + Web móvil con motor de reservas y Yape/Plin.</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold text-white">Ocupación Viernes-Domingo</td>
+                <td class="p-4 text-slate-400">Cae drásticamente al 20% - 35% tras salida de contratistas.</td>
+                <td class="p-4 text-emerald-400 font-medium">Sube a 65% - 85% con paquetes de escapada para Tacna/Moquegua y planes Bleisure.</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold text-white">Uso de la Piscina</td>
+                <td class="p-4 text-slate-400">Casi vacía de día, genera gasto de cloro y mantenimiento sin ingreso extra.</td>
+                <td class="p-4 text-emerald-400 font-medium">"Pasadía Sunrise": S/ 60 a S/ 80 por persona (S/ 40 consumibles en comida/bebida).</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold text-white">Salón de Esparcimiento & Bar</td>
+                <td class="p-4 text-slate-400">Uso ocasional para reuniones empresariales o cerrado de noche.</td>
+                <td class="p-4 text-emerald-400 font-medium">Noches de Pisco & Chilcanos, torneos de billar/juegos de salón y piqueos marinos para locales.</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold text-white">Marketing & Anuncios</td>
+                <td class="p-4 text-slate-400">Cero pauta publicitaria. Esperan que el cliente los encuentre.</td>
+                <td class="p-4 text-emerald-400 font-medium">Meta Ads geolocalizados ($5 a $7/día) mostrados de miércoles a viernes en Tacna y Moquegua.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 2: PROTOTIPO WEB MÓVIL (EXPERIENCIAS & RESERVAS)           -->
+    <!-- ============================================================== -->
+    <section id="pane-prototipo-web" class="tab-pane hidden space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/60 p-6 rounded-2xl border border-slate-800">
+        <div>
+          <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Prototipo de Interfaz</span>
+          <h2 class="text-2xl font-black text-white">Nueva Web Móvil de Experiencias & Venta Directa</h2>
+          <p class="text-sm text-slate-400 mt-1">Así interactuará el cliente particular desde su celular: rápido, visual, con precios claros en Soles y botón directo de compra.</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button onclick="document.getElementById('mobilePreviewFrame').classList.toggle('max-w-md')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-xl border border-slate-700 transition-all text-slate-200">
+            Alternar Vista Móvil / Escritorio
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Mockup Container -->
+      <div id="mobilePreviewFrame" class="mx-auto max-w-md transition-all duration-300 rounded-3xl border-4 border-slate-800 bg-slate-950 shadow-2xl overflow-hidden">
+        
+        <!-- Mobile Top Notch Bar -->
+        <div class="bg-slate-900 px-6 py-2.5 flex items-center justify-between text-xs text-slate-400 border-b border-slate-800">
+          <span>9:41</span>
+          <div class="flex items-center space-x-1 font-bold text-slate-200">
+            <span>sunrisehotelilo.pe</span>
+          </div>
+          <div class="flex items-center space-x-1">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
+            <span class="text-[10px] font-bold">100%</span>
+          </div>
+        </div>
+
+        <!-- Web App Content -->
+        <div class="p-4 space-y-4 max-h-[640px] overflow-y-auto">
+          
+          <!-- Mockup Header -->
+          <div class="flex items-center justify-between py-2">
+            <div class="flex items-center space-x-2">
+              <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-slate-950 font-black text-sm">S</div>
+              <div>
+                <div class="font-bold text-sm text-white leading-none">SUNRISE HOTEL</div>
+                <span class="text-[10px] text-amber-400 font-semibold">★★★ ILO • FRENTE AL MAR</span>
+              </div>
+            </div>
+            <a href="https://wa.me/51994342040" target="_blank" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full text-xs font-bold flex items-center space-x-1">
+              <span>WhatsApp</span>
+            </a>
+          </div>
+
+          <!-- Hero Promo Card -->
+          <div class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-sky-900 to-slate-900 border border-sky-500/30 p-4">
+            <div class="absolute top-2 right-2 px-2 py-0.5 bg-amber-500 text-slate-950 font-extrabold text-[10px] rounded-full uppercase">
+              Fin de Semana
+            </div>
+            <span class="text-[10px] font-bold text-sky-300 uppercase tracking-wider">Escapada Marina</span>
+            <h3 class="text-lg font-black text-white leading-tight mt-1">Desconecta con vista al océano y piscina</h3>
+            <p class="text-xs text-slate-300 mt-1">Habitación superior + Desayuno buffet + Acceso a piscina y cóctel de bienvenida.</p>
+            <div class="mt-3 flex items-baseline space-x-2">
+              <span class="text-xs text-slate-400">Desde</span>
+              <span class="text-xl font-extrabold text-amber-400">S/ 210</span>
+              <span class="text-[10px] text-slate-400">/ noche por pareja</span>
+            </div>
+            <button onclick="simulateBooking('Escapada Marina')" class="mt-3 w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-amber-500/20 active:scale-95 transition-transform">
+              Reservar Escapada Ahora
+            </button>
+          </div>
+
+          <!-- Quick Selector Tabs -->
+          <div class="grid grid-cols-3 gap-2 text-center text-xs">
+            <div class="p-2.5 rounded-xl bg-slate-900 border border-amber-500/30 text-amber-400 font-semibold cursor-pointer">
+              🏊 Pasadía Piscina
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-400 font-semibold cursor-pointer">
+              🍸 Bar & Salón
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-400 font-semibold cursor-pointer">
+              🛏️ Habitaciones
+            </div>
+          </div>
+
+          <!-- Card: Pasadía Piscina (Day Pass) -->
+          <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 space-y-2">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-[10px] bg-sky-500/20 text-sky-300 px-2 py-0.5 rounded-md font-bold">10:00 AM - 6:00 PM</span>
+                <h4 class="font-bold text-sm text-white mt-1">Pasadía Sunrise (Piscina + Bar)</h4>
+              </div>
+              <div class="text-right">
+                <span class="text-base font-black text-amber-400">S/ 65</span>
+                <p class="text-[9px] text-slate-400">por persona</p>
+              </div>
+            </div>
+            <p class="text-xs text-slate-400">Incluye uso de piscina al aire libre, reposera, toalla y <strong>S/ 40 consumibles</strong> en nuestra carta de bebidas y piqueos marinos.</p>
+            <button onclick="simulateBooking('Pasadía Piscina')" class="w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg border border-slate-700">
+              Comprar Pasadía para este Sábado/Domingo
+            </button>
+          </div>
+
+          <!-- Card: Noches de Bar & Salón de Esparcimiento -->
+          <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 space-y-2">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-md font-bold">Viernes & Sábados</span>
+                <h4 class="font-bold text-sm text-white mt-1">Noche de Chilcanos & Juegos de Salón</h4>
+              </div>
+              <div class="text-right">
+                <span class="text-xs font-bold text-emerald-400">Entrada Libre</span>
+              </div>
+            </div>
+            <p class="text-xs text-slate-400">Disfruta de nuestros salones de esparcimiento: mesa de billar, cócteles de autor con pisco moqueguano y piqueos para compartir entre amigos.</p>
+            <button onclick="simulateBooking('Reserva Mesa Bar')" class="w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg border border-slate-700">
+              Reservar Mesa en el Lounge Bar
+            </button>
+          </div>
+
+          <!-- Social Proof / Reviews -->
+          <div class="rounded-xl bg-slate-900/40 border border-slate-800/80 p-3 text-center">
+            <div class="flex justify-center text-amber-400 text-xs mb-1">★★★★★</div>
+            <p class="text-[11px] text-slate-300 italic">"Excelente ubicación en Jr. Moquegua, la piscina muy limpia y el desayuno buffet super completo. Ideal para descansar."</p>
+            <span class="text-[10px] text-slate-500 mt-1 block">— Carlos M. (Opinión de Google Maps)</span>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 3: SIMULADOR WHATSAPP BOT (RESERVA EN 90 SEGUNDOS)        -->
+    <!-- ============================================================== -->
+    <section id="pane-prototipo-whatsapp" class="tab-pane hidden space-y-6">
+      <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800">
+        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Simulador de Conversión Inmediata</span>
+        <h2 class="text-2xl font-black text-white">Embudo Interactivo de WhatsApp Business</h2>
+        <p class="text-sm text-slate-400 mt-1">
+          Prueba tú mismo cómo un cliente potencial que hace clic en un anuncio de Facebook o busca el hotel reserva su paquete o pasadía en <strong>menos de 90 segundos con Yape / Plin</strong> sin hacer esperar a nadie.
+        </p>
+      </div>
+
+      <!-- Interactive Phone Mockup -->
+      <div class="max-w-md mx-auto rounded-[40px] border-8 border-slate-800 bg-[#0b141a] shadow-2xl overflow-hidden flex flex-col h-[680px]">
+        
+        <!-- WhatsApp Header -->
+        <div class="bg-[#202c33] px-4 py-3 flex items-center justify-between text-white border-b border-[#2a3942]">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-sky-500 flex items-center justify-center font-black text-slate-950 text-sm">
+              S
+            </div>
+            <div>
+              <div class="font-bold text-sm flex items-center space-x-1">
+                <span>Sunrise Hotel Ilo</span>
+                <svg class="w-3.5 h-3.5 text-sky-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+              </div>
+              <span class="text-[11px] text-emerald-400 font-medium">Cuenta Comercial Oficial • En línea</span>
+            </div>
+          </div>
+          <button onclick="resetWhatsApp()" class="text-xs text-slate-400 hover:text-white px-2 py-1 bg-[#111b21] rounded-md">
+            Reiniciar Chat
+          </button>
+        </div>
+
+        <!-- Chat Message Area -->
+        <div id="chatMessages" class="flex-1 p-4 space-y-3 overflow-y-auto bg-[radial-gradient(#1f2c34_1px,transparent_1px)] [background-size:16px_16px] text-sm">
+          
+          <!-- Message from Hotel -->
+          <div class="flex items-start space-x-2">
+            <div class="max-w-[85%] chat-bubble-received p-3 rounded-2xl shadow">
+              <p class="font-bold text-amber-400 text-xs mb-1">Sunrise Hotel Ilo ★★★</p>
+              <p class="text-xs text-slate-200">¡Hola! 🌊 Bienvenido al único hotel con piscina y salones de esparcimiento en pleno centro de Ilo. ¿Qué plan te gustaría disfrutar?</p>
+              <div class="mt-2 text-[10px] text-slate-400 text-right">10:02 AM</div>
+            </div>
+          </div>
+
+          <!-- Interactive Choice Buttons from Bot -->
+          <div id="botMenuOptions" class="space-y-1.5 pl-2">
+            <button onclick="sendUserOption('1. Quiero el Pasadía Piscina (Day Pass)')" class="w-full text-left p-2.5 rounded-xl bg-[#202c33] hover:bg-[#2a3942] border border-slate-700 text-xs text-sky-300 font-semibold transition-colors flex items-center justify-between">
+              <span>🏊 1. Pasadía de Piscina (S/ 65 con consumo)</span>
+              <span class="text-slate-400 text-[10px]">Elegir →</span>
+            </button>
+            <button onclick="sendUserOption('2. Paquete Fin de Semana Pareja (Escapada)')" class="w-full text-left p-2.5 rounded-xl bg-[#202c33] hover:bg-[#2a3942] border border-slate-700 text-xs text-amber-300 font-semibold transition-colors flex items-center justify-between">
+              <span>🛏️ 2. Escapada Pareja + Buffet (S/ 210)</span>
+              <span class="text-slate-400 text-[10px]">Elegir →</span>
+            </button>
+            <button onclick="sendUserOption('3. Reservar Mesa en el Bar & Salón')" class="w-full text-left p-2.5 rounded-xl bg-[#202c33] hover:bg-[#2a3942] border border-slate-700 text-xs text-emerald-300 font-semibold transition-colors flex items-center justify-between">
+              <span>🍸 3. Noche de Bar, Billar & Chilcanos</span>
+              <span class="text-slate-400 text-[10px]">Elegir →</span>
+            </button>
+            <button onclick="sendUserOption('4. Consultar Tarifa Corporativa / Empresa')" class="w-full text-left p-2.5 rounded-xl bg-[#202c33] hover:bg-[#2a3942] border border-slate-700 text-xs text-slate-300 font-medium transition-colors flex items-center justify-between">
+              <span>💼 4. Tarifas con Factura para Empresas</span>
+              <span class="text-slate-400 text-[10px]">Elegir →</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Chat Input Footer -->
+        <div class="bg-[#202c33] p-2.5 flex items-center space-x-2 border-t border-[#2a3942]">
+          <div class="flex-1 bg-[#2a3942] text-xs text-slate-400 px-3 py-2 rounded-full">
+            Selecciona una opción del menú arriba...
+          </div>
+          <div class="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs">
+            ➤
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 4: CALCULADORA DE INGRESOS (ROI)                           -->
+    <!-- ============================================================== -->
+    <section id="pane-calculadora" class="tab-pane hidden space-y-8">
+      <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800">
+        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Simulador Financiero en Tiempo Real</span>
+        <h2 class="text-2xl font-black text-white">Calculadora de Ingresos Adicionales de Fin de Semana</h2>
+        <p class="text-sm text-slate-400 mt-1">
+          Mueve los controles para estimar cuánto dinero líquido nuevo ingresará a Sunrise Hotel al activar la venta al público particular los fines de semana.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Controls (Left 7 Cols) -->
+        <div class="lg:col-span-7 glass-card rounded-2xl p-6 sm:p-8 space-y-6">
+          <h3 class="text-lg font-bold text-white border-b border-slate-800 pb-3 flex items-center space-x-2">
+            <span>Parámetros de Ventas B2C</span>
+          </h3>
+
+          <!-- Slider 1: Habitaciones de Fin de Semana -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm">
+              <label class="font-semibold text-slate-200">Habitaciones extra vendidas por fin de semana:</label>
+              <span id="labelHabs" class="font-mono font-black text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/30 text-base">8 habs</span>
+            </div>
+            <input type="range" id="rangeHabs" min="2" max="25" value="8" step="1" oninput="calculateRevenue()" class="w-full accent-amber-500 cursor-pointer">
+            <div class="flex justify-between text-[11px] text-slate-500">
+              <span>2 habs (mínimo)</span>
+              <span>Tarifa promedio: S/ 210/noche</span>
+              <span>25 habs (alta demanda)</span>
+            </div>
+          </div>
+
+          <!-- Slider 2: Pasadías Piscina por fin de semana -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm">
+              <label class="font-semibold text-slate-200">Pasadías de Piscina vendidos por semana (Sáb + Dom):</label>
+              <span id="labelPasadias" class="font-mono font-black text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-lg border border-sky-500/30 text-base">30 personas</span>
+            </div>
+            <input type="range" id="rangePasadias" min="0" max="100" value="30" step="5" oninput="calculateRevenue()" class="w-full accent-sky-500 cursor-pointer">
+            <div class="flex justify-between text-[11px] text-slate-500">
+              <span>0 (sin pasadía)</span>
+              <span>Ticket: S/ 65 (incluye consumo)</span>
+              <span>100 personas</span>
+            </div>
+          </div>
+
+          <!-- Slider 3: Consumo adicional en Bar & Salones -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm">
+              <label class="font-semibold text-slate-200">Consumo extra en Bar, Billar & Salón por fin de semana:</label>
+              <span id="labelBar" class="font-mono font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/30 text-base">S/ 1,200</span>
+            </div>
+            <input type="range" id="rangeBar" min="300" max="6000" value="1200" step="100" oninput="calculateRevenue()" class="w-full accent-emerald-500 cursor-pointer">
+            <div class="flex justify-between text-[11px] text-slate-500">
+              <span>S/ 300 / finde</span>
+              <span>Cócteles, piqueos marinos, bebidas</span>
+              <span>S/ 6,000 / finde</span>
+            </div>
+          </div>
+
+          <!-- Note on Fixed Costs -->
+          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-400 leading-relaxed">
+            <strong class="text-slate-200">¿Por qué este dinero es casi 100% ganancia neta?</strong><br>
+            Porque la recepción, el vigilante, el agua de la piscina y los salones ya tienen el costo pagado por la operación semanal con empresas. El coste marginal de una habitación extra o un cóctel vendido en fin de semana es inferior al 18%.
+          </div>
+        </div>
+
+        <!-- KPI Cards / Output (Right 5 Cols) -->
+        <div class="lg:col-span-5 space-y-6">
+          <!-- Monthly Extra Revenue -->
+          <div class="glass-card rounded-2xl p-6 border-amber-500/30 bg-gradient-to-b from-amber-500/10 to-slate-900 shadow-xl">
+            <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Ingreso Extra Estimado al Mes</span>
+            <div class="mt-2 flex items-baseline space-x-2">
+              <span id="outMensualSoles" class="text-4xl sm:text-5xl font-black text-white tracking-tight">S/ 26,040</span>
+            </div>
+            <div class="text-xs text-slate-400 mt-1">
+              Aprox. <strong id="outMensualUSD" class="text-amber-300 font-semibold">$6,850 USD</strong> mensuales de facturación nueva
+            </div>
+          </div>
+
+          <!-- Annual Extra Revenue -->
+          <div class="glass-card rounded-2xl p-6 border-sky-500/30 bg-gradient-to-b from-sky-500/10 to-slate-900 shadow-xl">
+            <span class="text-xs font-bold text-sky-400 uppercase tracking-wider">Proyección Extra al Año</span>
+            <div class="mt-2 flex items-baseline space-x-2">
+              <span id="outAnualSoles" class="text-3xl sm:text-4xl font-black text-white tracking-tight">S/ 312,480</span>
+            </div>
+            <div class="text-xs text-slate-400 mt-1">
+              Aprox. <strong id="outAnualUSD" class="text-sky-300 font-semibold">$82,200 USD</strong> al año en ingresos B2C
+            </div>
+          </div>
+
+          <!-- Breakdown Breakdown -->
+          <div class="glass-card rounded-2xl p-5 space-y-3 text-xs">
+            <span class="font-bold text-slate-300">Desglose Mensual Estimado:</span>
+            <div class="flex justify-between text-slate-400 border-b border-slate-800 pb-1.5">
+              <span>Hospedaje de Fin de Semana:</span>
+              <strong id="breakHospedaje" class="text-white">S/ 13,440</strong>
+            </div>
+            <div class="flex justify-between text-slate-400 border-b border-slate-800 pb-1.5">
+              <span>Pasadías de Piscina (Day Pass):</span>
+              <strong id="breakPasadias" class="text-white">S/ 7,800</strong>
+            </div>
+            <div class="flex justify-between text-slate-400">
+              <span>Bar, Salón & Consumos Extras:</span>
+              <strong id="breakBar" class="text-white">S/ 4,800</strong>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 5: ANUNCIOS META ADS (TACNA, MOQUEGUA, ILO)               -->
+    <!-- ============================================================== -->
+    <section id="pane-campanas-ads" class="tab-pane hidden space-y-6">
+      <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800">
+        <span class="text-xs font-bold text-sky-400 uppercase tracking-wider">Estrategia Publicitaria Dirigida</span>
+        <h2 class="text-2xl font-black text-white">Anuncios en Redes Sociales con Segmentación Quirúrgica</h2>
+        <p class="text-sm text-slate-400 mt-1">
+          En lugar de publicar afiches con mucho texto en Facebook que nadie lee, creamos anuncios específicos para cada público que generan clics directos a WhatsApp.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Ad 1: Público Tacna & Moquegua -->
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden flex flex-col">
+          <div class="p-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-xs">
+            <span class="font-bold text-amber-400">Campaña Regional: Escapada</span>
+            <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-400">Tacna & Moquegua</span>
+          </div>
+          <div class="p-4 flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center font-bold text-slate-950 text-xs">S</div>
+            <div>
+              <div class="text-xs font-bold text-white">Sunrise Hotel Ilo</div>
+              <div class="text-[10px] text-slate-400">Publicidad • Dirigido a 25-55 años</div>
+            </div>
+          </div>
+          <div class="px-4 pb-3 text-xs text-slate-300">
+            ¿Fin de semana libre? Escápate al mar. 🌊 A solo 1 hora de Moquegua y hora y media de Tacna. Piscina, habitaciones frente al océano y desayuno buffet incluido. ☀️
+          </div>
+          <!-- Visual Creative Banner -->
+          <div class="bg-gradient-to-tr from-sky-900 via-slate-800 to-amber-900/60 h-44 flex flex-col items-center justify-center p-4 text-center border-y border-slate-800 relative">
+            <span class="text-xs font-black tracking-widest text-amber-400 uppercase">ESCAPADA DE FIN DE SEMANA</span>
+            <span class="text-lg font-extrabold text-white mt-1">PISCINA • VISTA AL MAR • DESAYUNO BUFFET</span>
+            <span class="mt-2 text-xs bg-black/60 px-3 py-1 rounded-full text-slate-200 border border-white/10">Paquete Parejas desde S/ 210</span>
+          </div>
+          <div class="p-3 bg-slate-900/90 flex items-center justify-between mt-auto">
+            <div>
+              <span class="text-[10px] text-slate-400 block uppercase">sunrisehotelilo.pe</span>
+              <span class="text-xs font-bold text-white">Cupos Limitados este Finde</span>
+            </div>
+            <a href="https://wa.me/51994342040" target="_blank" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow">
+              Reservar WhatsApp
+            </a>
+          </div>
+        </div>
+
+        <!-- Ad 2: Público Local Ilo (Pasadía Piscina) -->
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden flex flex-col">
+          <div class="p-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-xs">
+            <span class="font-bold text-sky-400">Campaña Local: Pasadía</span>
+            <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-400">Solo Ciudad de Ilo</span>
+          </div>
+          <div class="p-4 flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center font-bold text-slate-950 text-xs">S</div>
+            <div>
+              <div class="text-xs font-bold text-white">Sunrise Hotel Ilo</div>
+              <div class="text-[10px] text-slate-400">Publicidad • Dirigido a Ilo</div>
+            </div>
+          </div>
+          <div class="px-4 pb-3 text-xs text-slate-300">
+            ¿Sabías que no necesitas estar hospedado para disfrutar de nuestra piscina? 🏊 Ven este sábado o domingo con tu familia o amigos. ¡Pasadía con consumo incluido! 🍹
+          </div>
+          <!-- Visual Creative Banner -->
+          <div class="bg-gradient-to-tr from-cyan-950 via-slate-900 to-sky-900 h-44 flex flex-col items-center justify-center p-4 text-center border-y border-slate-800 relative">
+            <span class="text-xs font-black tracking-widest text-sky-400 uppercase">PASADÍA SUNRISE</span>
+            <span class="text-lg font-extrabold text-white mt-1">PISCINA + CONSUMO EN BAR</span>
+            <span class="mt-2 text-xs bg-sky-950/80 px-3 py-1 rounded-full text-sky-300 border border-sky-500/30">S/ 65 por persona (S/ 40 consumibles)</span>
+          </div>
+          <div class="p-3 bg-slate-900/90 flex items-center justify-between mt-auto">
+            <div>
+              <span class="text-[10px] text-slate-400 block uppercase">Jirón Moquegua 657, Ilo</span>
+              <span class="text-xs font-bold text-white">Sábados y Domingos 10am-6pm</span>
+            </div>
+            <a href="https://wa.me/51994342040" target="_blank" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow">
+              Comprar Pase
+            </a>
+          </div>
+        </div>
+
+        <!-- Ad 3: Salón, Billar & Chilcanos (Noche Social) -->
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden flex flex-col">
+          <div class="p-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-xs">
+            <span class="font-bold text-emerald-400">Campaña Lounge & Bar</span>
+            <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-400">Viernes & Sábados</span>
+          </div>
+          <div class="p-4 flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center font-bold text-slate-950 text-xs">S</div>
+            <div>
+              <div class="text-xs font-bold text-white">Sunrise Hotel Ilo</div>
+              <div class="text-[10px] text-slate-400">Publicidad • Mayores de 23 años</div>
+            </div>
+          </div>
+          <div class="px-4 pb-3 text-xs text-slate-300">
+            Un plan diferente en Ilo para tus noches de fin de semana: mesa de billar, piqueos criollos y marinos, y los mejores chilcanos y cócteles de autor. 🎱🥂
+          </div>
+          <!-- Visual Creative Banner -->
+          <div class="bg-gradient-to-tr from-slate-950 via-amber-950/40 to-slate-900 h-44 flex flex-col items-center justify-center p-4 text-center border-y border-slate-800 relative">
+            <span class="text-xs font-black tracking-widest text-amber-400 uppercase">LOUNGE & SALÓN DE JUEGOS</span>
+            <span class="text-lg font-extrabold text-white mt-1">BILLAR • PISCO BAR • PIQUEOS</span>
+            <span class="mt-2 text-xs bg-slate-900/80 px-3 py-1 rounded-full text-slate-300 border border-slate-700">Entrada Libre • Reservas de Mesa</span>
+          </div>
+          <div class="p-3 bg-slate-900/90 flex items-center justify-between mt-auto">
+            <div>
+              <span class="text-[10px] text-slate-400 block uppercase">El mejor ambiente del centro</span>
+              <span class="text-xs font-bold text-white">Abierto al Público</span>
+            </div>
+            <a href="https://wa.me/51994342040" target="_blank" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow">
+              Reservar Mesa
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 6: HOJA DE RUTA (30 DÍAS)                                  -->
+    <!-- ============================================================== -->
+    <section id="pane-hoja-ruta" class="tab-pane hidden space-y-6">
+      <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800">
+        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Plan de Acción Ejecutable</span>
+        <h2 class="text-2xl font-black text-white">Cronograma de Implementación a 30 Días</h2>
+        <p class="text-sm text-slate-400 mt-1">
+          Paso a paso estructurado para poner a operar la máquina de ventas sin interferir con la atención diaria de los clientes corporativos.
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        
+        <!-- Fase 1 -->
+        <div class="glass-card rounded-2xl p-6 border-l-4 border-l-amber-500 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 bg-amber-500/20 text-amber-400 text-xs font-bold rounded-lg border border-amber-500/30">Semana 1: Configuración & WhatsApp</span>
+            <span class="text-xs text-slate-400">Días 1 al 7</span>
+          </div>
+          <h3 class="text-base font-bold text-white">Parche Inmediato de Captación</h3>
+          <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside">
+            <li>Cambiar el botón principal de la página de Facebook de Sunrise a <strong>WhatsApp Business</strong>.</li>
+            <li>Cargar el catálogo oficial en WhatsApp con los 3 paquetes: <em>Escapada Fin de Semana, Pasadía Piscina y Noche de Bar & Billar</em>.</li>
+            <li>Configurar respuestas rápidas para cotizar y enviar el código QR de <strong>Yape / Plin</strong> en segundos.</li>
+            <li>Eliminar o reemplazar el correo Yahoo de la vista pública para profesionalizar la imagen.</li>
+          </ul>
+        </div>
+
+        <!-- Fase 2 -->
+        <div class="glass-card rounded-2xl p-6 border-l-4 border-l-sky-500 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 bg-sky-500/20 text-sky-400 text-xs font-bold rounded-lg border border-sky-500/30">Semana 2: Activación de Pasadía & Bar</span>
+            <span class="text-xs text-slate-400">Días 8 al 15</span>
+          </div>
+          <h3 class="text-base font-bold text-white">Lanzamiento Local en la Ciudad de Ilo</h3>
+          <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside">
+            <li>Definir la carta especial de fin de semana para piscina y bar (chilcanos, cerveza artesanal, ceviche de pescado fresco, tequeños, alitas).</li>
+            <li>Imprimir el flyer o tarjeta de recepción: <em>"¿Te quedas en Ilo este finde? Invita a tu pareja con tarifa preferencial"</em> (para contratistas de Southern/Quellaveco).</li>
+            <li>Lanzar el primer anuncio en Facebook e Instagram para Ilo anunciando el <strong>Pasadía Sunrise</strong> para los sábados y domingos.</li>
+          </ul>
+        </div>
+
+        <!-- Fase 3 -->
+        <div class="glass-card rounded-2xl p-6 border-l-4 border-l-emerald-500 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/30">Semana 3: Campaña Regional (Tacna & Moquegua)</span>
+            <span class="text-xs text-slate-400">Días 16 al 22</span>
+          </div>
+          <h3 class="text-base font-bold text-white">Atracción del Turista de Fin de Semana</h3>
+          <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside">
+            <li>Activar anuncios pagados en Meta Ads ($5 USD diarios) segmentados en Moquegua capital y Tacna.</li>
+            <li>Optimizar el perfil de <strong>Google Business / Google Maps</strong> del hotel: subir fotos de la piscina iluminada, el desayuno buffet y el bar en alta calidad.</li>
+            <li>Comenzar a cargar inventario en plataformas globales como <strong>Booking.com</strong> para captar al viajero de paso.</li>
+          </ul>
+        </div>
+
+        <!-- Fase 4 -->
+        <div class="glass-card rounded-2xl p-6 border-l-4 border-l-indigo-500 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 bg-indigo-500/20 text-indigo-400 text-xs font-bold rounded-lg border border-indigo-500/30">Semana 4: Evaluación & Escalamiento</span>
+            <span class="text-xs text-slate-400">Días 23 al 30</span>
+          </div>
+          <h3 class="text-base font-bold text-white">Consolidación del Modelo Híbrido</h3>
+          <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside">
+            <li>Medir el retorno de inversión: cuántas reservas llegaron por WhatsApp y cuántos pasadías se vendieron.</li>
+            <li>Lanzar una landing page web móvil propia con dominio oficial (`sunrisehotelilo.pe`) para automatizar cobros con pasarela de tarjeta de crédito/débito.</li>
+            <li>Ajustar precios dinámicos según temporada (verano vs invierno).</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-800/80 bg-slate-950 py-8 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 space-y-2">
+      <p class="font-bold text-slate-400">Estrategia Comercial Diseñada para Sunrise Hotel (Jirón Moquegua 657, Ilo, Moquegua, Perú)</p>
+      <p>Transformación de canal corporativo tradicional a modelo híbrido de alto rendimiento B2C.</p>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // Tab Switching Logic
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active-tab'));
+      
+      const pane = document.getElementById('pane-' + tabId);
+      const tab = document.getElementById('tab-' + tabId);
+      if (pane && tab) {
+        pane.classList.remove('hidden');
+        tab.classList.add('active-tab');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Interactive WhatsApp Chat Logic
+    function sendUserOption(text) {
+      const chatArea = document.getElementById('chatMessages');
+      const menu = document.getElementById('botMenuOptions');
+      
+      // Add user's selected message
+      const userMsgDiv = document.createElement('div');
+      userMsgDiv.className = 'flex justify-end';
+      userMsgDiv.innerHTML = `
+        <div class="max-w-[85%] chat-bubble-sent p-3 rounded-2xl shadow text-xs">
+          <p>${text}</p>
+          <div class="mt-1 text-[10px] text-slate-300 text-right">Ahora ✓✓</div>
+        </div>
+      `;
+      chatArea.appendChild(userMsgDiv);
+      menu.classList.add('hidden');
+      chatArea.scrollTop = chatArea.scrollHeight;
+
+      // Simulated Bot typing delay
+      setTimeout(() => {
+        const botReplyDiv = document.createElement('div');
+        botReplyDiv.className = 'flex items-start space-x-2';
+        
+        let responseContent = '';
+        if (text.includes('Pasadía')) {
+          responseContent = `
+            <p class="font-bold text-amber-400 text-xs mb-1">¡Excelente elección! 🏊</p>
+            <p class="text-xs text-slate-200">El <strong>Pasadía Sunrise</strong> incluye:<br>
+            • Acceso a la piscina de 10:00 AM a 6:00 PM.<br>
+            • Toalla y reposera.<br>
+            • <strong>S/ 40 consumibles</strong> en nuestra carta de bebidas y piqueos.<br><br>
+            💰 <strong>Precio:</strong> S/ 65 por persona.<br>
+            Para asegurar tu cupo (cupos limitados por aforo), puedes pagar con <strong>Yape o Plin</strong> al <strong>994 342 040</strong>.</p>
+            <div class="mt-3 p-2 bg-[#111b21] rounded-lg border border-slate-700 text-center">
+              <span class="text-[10px] text-emerald-400 font-bold block mb-1">PAGO CON YAPE / PLIN</span>
+              <div class="text-xs font-mono text-white bg-slate-800 py-1 rounded">994 342 040</div>
+              <span class="text-[10px] text-slate-400 block mt-1">Envíanos la captura de tu pago para registrar tu ingreso directo.</span>
+            </div>
+          `;
+        } else if (text.includes('Escapada')) {
+          responseContent = `
+            <p class="font-bold text-amber-400 text-xs mb-1">Plan Escapada Marina en Pareja 🌊</p>
+            <p class="text-xs text-slate-200">¡Perfecto para desconectar este fin de semana!<br>
+            • Noche en Habitación Matrimonial Superior (con vista al mar según disponibilidad).<br>
+            • Desayuno Buffet completo incluido.<br>
+            • Acceso libre a piscina y áreas de relax.<br>
+            • 2 Cócteles de cortesía (Chilcanos de pisco) en nuestro bar.<br>
+            • Check-out extendido los domingos (hasta las 3:00 PM).<br><br>
+            💰 <strong>Tarifa especial de fin de semana:</strong> S/ 210 por noche.<br>
+            ¿Para qué fecha te gustaría confirmar?</p>
+            <button onclick="alert('¡Excelente! Este flujo conecta directamente con el recepcionista para verificar fechas.')" class="mt-2 w-full py-1.5 bg-emerald-600 text-white rounded text-xs font-bold">
+              Confirmar Fecha con Recepción
+            </button>
+          `;
+        } else if (text.includes('Bar')) {
+          responseContent = `
+            <p class="font-bold text-amber-400 text-xs mb-1">Bar & Salón de Esparcimiento 🍸🎱</p>
+            <p class="text-xs text-slate-200">Estamos ubicados en pleno centro de Ilo (Jr. Moquegua 657).<br>
+            • Mesa de billar disponible.<br>
+            • Carta de cócteles clásicos y de autor.<br>
+            • Piqueos marinos y criollos.<br><br>
+            La entrada es libre. Si vienes en grupo de más de 4 personas, te recomendamos reservar mesa con anticipación sin costo adicional.</p>
+            <button onclick="alert('Mesa solicitada. El recepcionista responderá confirmando número de personas.')" class="mt-2 w-full py-1.5 bg-sky-600 text-white rounded text-xs font-bold">
+              Apartar Mesa para este Sábado
+            </button>
+          `;
+        } else {
+          responseContent = `
+            <p class="font-bold text-amber-400 text-xs mb-1">Convenios y Reservas Corporativas 💼</p>
+            <p class="text-xs text-slate-200">Emitimos factura comercial, contamos con Wi-Fi de alta velocidad, salones para capacitaciones y estacionamiento privado para vehículos de empresa.<br><br>
+            Indícanos el nombre de tu empresa o RUC y número de noches para enviarte nuestra tarifa corporativa preferencial.</p>
+          `;
+        }
+
+        botReplyDiv.innerHTML = `
+          <div class="max-w-[85%] chat-bubble-received p-3 rounded-2xl shadow">
+            ${responseContent}
+            <div class="mt-2 text-[10px] text-slate-400 text-right">Ahora</div>
+          </div>
+        `;
+        chatArea.appendChild(botReplyDiv);
+        chatArea.scrollTop = chatArea.scrollHeight;
+      }, 700);
+    }
+
+    function resetWhatsApp() {
+      const chatArea = document.getElementById('chatMessages');
+      chatArea.innerHTML = `
+        <div class="flex items-start space-x-2">
+          <div class="max-w-[85%] chat-bubble-received p-3 rounded-2xl shadow">
+            <p class="font-bold text-amber-400 text-xs mb-1">Sunrise Hotel Ilo ★★★</p>
+            <p class="text-xs text-slate-200">¡Hola! 🌊 Bienvenido al único hotel con piscina y salones de esparcimiento en pleno centro de Ilo. ¿Qué plan te gustaría disfrutar?</p>
+            <div class="mt-2 text-[10px] text-slate-400 text-right">10:02 AM</div>
+          </div>
+        </div>
+        <div id="botMenuOptions" class="space-y-1.5 pl-2">
+          <button onclick="sendUserOption('1. Quiero el Pasadía Piscina (Day Pass)')" class="w-full text-left p-2.5 rounded-xl bg-[#202c33] hover:bg-[#2a3942] border border-slate-700 text-xs text-sky-300 font-semibold transition-colors flex items-center justify-between">
+            <span>🏊 1. Pasadía de Piscina (S/ 65 con consumo)</span>
+            <span class="text-slate-400 text-[10px]">Elegir →</span>
+          </button>
+          <button onclick="sendUserOption('2. Paquete Fin de Semana Pareja (Escapada)')" class="w-full text-left p-2.5 rounded-xl bg-[#202c33] hover:bg-[#2a3942] border border-slate-700 text-xs text-amber-300 font-semibold transition-colors flex items-center justify-between">
+            <span>🛏️ 2. Escapada Pareja + Buffet (S/ 210)</span>
+            <span class="text-slate-400 text-[10px]">Elegir →</span>
+          </button>
+          <button onclick="sendUserOption('3. Reservar Mesa en el Bar & Salón')" class="w-full text-left p-2.5 rounded-xl bg-[#202c33] hover:bg-[#2a3942] border border-slate-700 text-xs text-emerald-300 font-semibold transition-colors flex items-center justify-between">
+            <span>🍸 3. Noche de Bar, Billar & Chilcanos</span>
+            <span class="text-slate-400 text-[10px]">Elegir →</span>
+          </button>
+          <button onclick="sendUserOption('4. Consultar Tarifa Corporativa / Empresa')" class="w-full text-left p-2.5 rounded-xl bg-[#202c33] hover:bg-[#2a3942] border border-slate-700 text-xs text-slate-300 font-medium transition-colors flex items-center justify-between">
+            <span>💼 4. Tarifas con Factura para Empresas</span>
+            <span class="text-slate-400 text-[10px]">Elegir →</span>
+          </button>
+        </div>
+      `;
+    }
+
+    // Revenue Simulator Calculation
+    function calculateRevenue() {
+      const habs = parseInt(document.getElementById('rangeHabs').value);
+      const pasadias = parseInt(document.getElementById('rangePasadias').value);
+      const bar = parseInt(document.getElementById('rangeBar').value);
+
+      document.getElementById('labelHabs').innerText = habs + ' habs';
+      document.getElementById('labelPasadias').innerText = pasadias + ' personas';
+      document.getElementById('labelBar').innerText = 'S/ ' + bar.toLocaleString();
+
+      // Calculation:
+      // Habitaciones: habs * 2 noches (viernes y sabado) * S/ 210 promedio * 4 fines de semana al mes
+      const ingresoHabsMensual = habs * 2 * 210 * 4;
+      // Pasadías: pasadias * S/ 65 * 4 fines de semana
+      const ingresoPasadiasMensual = pasadias * 65 * 4;
+      // Bar extra: bar * 4 semanas
+      const ingresoBarMensual = bar * 4;
+
+      const totalMensual = ingresoHabsMensual + ingresoPasadiasMensual + ingresoBarMensual;
+      const totalAnual = totalMensual * 12;
+
+      const tipoCambio = 3.80; // S/. por USD
+      const totalMensualUSD = Math.round(totalMensual / tipoCambio);
+      const totalAnualUSD = Math.round(totalAnual / tipoCambio);
+
+      // DOM Update
+      document.getElementById('outMensualSoles').innerText = 'S/ ' + totalMensual.toLocaleString();
+      document.getElementById('outMensualUSD').innerText = '$' + totalMensualUSD.toLocaleString() + ' USD';
+      
+      document.getElementById('outAnualSoles').innerText = 'S/ ' + totalAnual.toLocaleString();
+      document.getElementById('outAnualUSD').innerText = '$' + totalAnualUSD.toLocaleString() + ' USD';
+
+      document.getElementById('breakHospedaje').innerText = 'S/ ' + ingresoHabsMensual.toLocaleString();
+      document.getElementById('breakPasadias').innerText = 'S/ ' + ingresoPasadiasMensual.toLocaleString();
+      document.getElementById('breakBar').innerText = 'S/ ' + ingresoBarMensual.toLocaleString();
+    }
+
+    function simulateBooking(packageName) {
+      alert('¡Simulación de Reserva Activada!\n\nHas seleccionado: ' + packageName + '.\nEn la versión operativa real, esto abre la pasarela de pago para transferir por Yape/Plin o pagar con tarjeta de crédito/débito.');
+    }
+
+    // Init on load
+    window.addEventListener('DOMContentLoaded', () => {
+      calculateRevenue();
+    });
+  </script>
+</body>
+</html>
