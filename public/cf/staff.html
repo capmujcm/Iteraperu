@@ -256,6 +256,11 @@
           <div class="field"><label for="pu-color">Color</label><input type="color" id="pu-color" value="#E60067" style="height:42px;padding:.2rem;"></div>
         </div>
         <div class="field"><label for="pu-condicion">Condición para la insignia</label><input type="text" id="pu-condicion" maxlength="500" placeholder="Compra mínima S/ 30" autocomplete="off"></div>
+        <div class="field">
+          <label for="pu-telefono">Celular del responsable (opcional)</label>
+          <input type="tel" id="pu-telefono" maxlength="30" placeholder="9xx xxx xxx" autocomplete="off">
+          <p class="tiny muted" style="margin-top:.25rem;">Si lo pones, podrás enviarle sus credenciales por WhatsApp con un botón.</p>
+        </div>
         <div class="row">
           <button class="btn btn-accent" type="submit" style="flex:1;">Crear</button>
           <button class="btn btn-line" type="button" id="btnCancelarPuesto">Cancelar</button>
@@ -694,9 +699,11 @@
     const boton = this.querySelector('button[type="submit"]');
     await conBoton(boton, 'Creando…', async function () {
       try {
+        const telefono = el('pu-telefono').value.trim();
         const r = await API.crearPuesto({
           nombre: nombre,
           usuario: el('pu-usuario').value.trim().toLowerCase(),
+          telefono: telefono,
           rubro: el('pu-rubro').value.trim(),
           stand: el('pu-stand').value.trim(),
           emoji: el('pu-emoji').value.trim(),
@@ -710,19 +717,15 @@
         // sitio, así que si se pierde hay que reponerla desde la ficha.
         el('puestosResult').innerHTML =
           '<div class="flash good">✓ Puesto creado</div>' +
-          '<div class="card" style="margin-top:.6rem;">' +
-            '<h4 style="font-size:.9rem;margin-bottom:.5rem;">Acceso para el responsable del puesto</h4>' +
-            '<div class="kv"><span>Entra en</span><span class="mono">/negocios/' + esc(slugEvento) + '</span></div>' +
-            '<div class="kv"><span>Usuario</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' +
-              esc(r.acceso.usuario) + '</span></div>' +
-            '<div class="kv"><span>Clave temporal</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' +
-              esc(r.acceso.password_temporal) + '</span></div>' +
-            '<div class="kv"><span>Válida</span><span>' + esc(String(r.acceso.dias_validez)) + ' días</span></div>' +
-          '</div>' +
-          '<div class="note n-warn tiny" style="margin-top:.6rem;">' +
-            '<b>Anótala ahora.</b> Esta clave no se vuelve a mostrar. Si se pierde, ' +
-            'genera una nueva desde la ficha del puesto. Con ella el puesto sube su logo, ' +
-            'que es la imagen de la insignia.</div>';
+          bloqueCredenciales({
+            nombre: nombre,
+            usuario: r.acceso.usuario,
+            clave: r.acceso.password_temporal,
+            dias: r.acceso.dias_validez,
+            telefono: telefono
+          });
+        activarCopiar('puestosResult');
+        window.scrollTo(0, 0);
 
         await pintarPuestos();
       } catch (e) {
@@ -815,6 +818,84 @@
   // Repone la clave del puesto. Cierra sus sesiones abiertas: se hace cuando
   // cambia el responsable o se perdió la clave, y en ambos casos conviene
   // expulsar a quien la tuviera.
+  /* --------------------------------------------------------------------- */
+  /* entrega de credenciales                                               */
+  /* --------------------------------------------------------------------- */
+  // Mensaje listo para copiar o mandar. Transcribir "K7M2PQR4" a mano es donde
+  // se cuelan las confusiones, así que el objetivo es que nadie teclee nada.
+  function mensajeCredenciales(nombre, usuario, clave, dias) {
+    return 'Hola' + (nombre ? ' ' + nombre : '') + ' 👋\n\n' +
+      'Ya tienes tu acceso al panel de tu puesto en Country Fest.\n\n' +
+      'Entra aquí: https://' + location.host + '/negocios/' + slugEvento + '\n' +
+      'Usuario: ' + usuario + '\n' +
+      'Contraseña: ' + clave + '\n\n' +
+      'La contraseña es temporal: vence en ' + dias + ' días y al entrar el sistema ' +
+      'te pedirá elegir una propia.\n\n' +
+      'Desde ahí puedes subir tu logo (es la insignia que se lleva la gente que ' +
+      'visita tu puesto) y ver cuántas entregaste.';
+  }
+
+  // Bloque de credenciales con los botones de entrega. Se usa tanto al crear el
+  // puesto como al reponerle la clave.
+  function bloqueCredenciales(datos) {
+    const msg = mensajeCredenciales(datos.nombre, datos.usuario, datos.clave, datos.dias);
+    const wa = datos.telefono
+      ? 'https://wa.me/' + encodeURIComponent(normalizaCelular(datos.telefono)) +
+        '?text=' + encodeURIComponent(msg)
+      : null;
+
+    return '<div class="card" style="margin-top:.6rem;">' +
+        '<h4 style="font-size:.9rem;margin-bottom:.5rem;">Acceso del puesto</h4>' +
+        '<div class="kv"><span>Entra en</span><span class="mono">/negocios/' + esc(slugEvento) + '</span></div>' +
+        '<div class="kv"><span>Usuario</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' +
+          esc(datos.usuario) + '</span></div>' +
+        '<div class="kv"><span>Clave temporal</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' +
+          esc(datos.clave) + '</span></div>' +
+        '<div class="kv"><span>Válida</span><span>' + esc(String(datos.dias)) + ' días</span></div>' +
+        '<div class="row wrap" style="margin-top:.8rem;">' +
+          '<button class="btn btn-accent btn-sm" data-copiar style="flex:1;">📋 Copiar mensaje</button>' +
+          (wa ? '<a class="btn btn-wa btn-sm" style="flex:1;" target="_blank" rel="noopener" href="' +
+                esc(wa) + '">💬 Enviar por WhatsApp</a>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="note n-warn tiny" style="margin-top:.6rem;">' +
+        '<b>Anótala ahora.</b> No se vuelve a mostrar. Si se pierde, genera otra desde la ficha del puesto.' +
+      '</div>' +
+      '<textarea id="txtCredenciales" style="position:absolute;left:-9999px;" aria-hidden="true">' +
+        esc(msg) + '</textarea>';
+  }
+
+  // Celular peruano a formato internacional para el enlace de WhatsApp.
+  function normalizaCelular(v) {
+    const d = String(v || '').replace(/\D/g, '');
+    if (!d) return '';
+    if (d.indexOf('51') === 0 && d.length >= 11) return d;   // ya lleva el código de país
+    if (d.length === 9) return '51' + d;                     // celular peruano
+    return d;
+  }
+
+  // Engancha el botón de copiar del bloque recién pintado.
+  function activarCopiar(caja) {
+    const btn = el(caja).querySelector('[data-copiar]');
+    if (!btn) return;
+    btn.addEventListener('click', async function () {
+      const texto = el('txtCredenciales').value;
+      try {
+        await navigator.clipboard.writeText(texto);
+        this.textContent = '✓ Copiado';
+      } catch (e) {
+        // Sin permiso de portapapeles: se selecciona para que se copie a mano.
+        const t = el('txtCredenciales');
+        t.style.position = 'static';
+        t.style.left = 'auto';
+        t.style.width = '100%';
+        t.rows = 8;
+        t.select();
+        this.textContent = 'Copia el texto de abajo';
+      }
+    });
+  }
+
   // `caja` permite mostrar el resultado donde se pulsó: en la lista o dentro
   // de la ficha del puesto.
   async function reponerAcceso(id, caja) {
@@ -825,17 +906,17 @@
       const r = await API.pedir('/api/soporte/empresas/' + encodeURIComponent(id) + '/acceso', {
         metodo: 'POST', auth: 'staff'
       });
+      const ficha = puestosCache.find(x => x.id === id) || {};
       el(caja).innerHTML =
         '<div class="flash good">✓ Clave nueva para ' + esc(r.empresa.nombre) + '</div>' +
-        '<div class="card" style="margin-top:.6rem;">' +
-          '<div class="kv"><span>Entra en</span><span class="mono">/negocios/' + esc(slugEvento) + '</span></div>' +
-          '<div class="kv"><span>Usuario</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' +
-            esc(r.usuario) + '</span></div>' +
-          '<div class="kv"><span>Clave temporal</span><span class="mono" style="font-size:1.05rem;font-weight:700;">' +
-            esc(r.password_temporal) + '</span></div>' +
-          '<div class="kv"><span>Válida</span><span>' + esc(String(r.dias_validez)) + ' días</span></div>' +
-        '</div>' +
-        '<div class="note n-warn tiny" style="margin-top:.6rem;"><b>Anótala ahora.</b> No se vuelve a mostrar.</div>';
+        bloqueCredenciales({
+          nombre: r.empresa.nombre,
+          usuario: r.usuario,
+          clave: r.password_temporal,
+          dias: r.dias_validez,
+          telefono: ficha.telefono
+        });
+      activarCopiar(caja);
       window.scrollTo(0, 0);
       // Se refresca el listado de fondo para que el estado quede al día, pero
       // sin sacar a la persona de donde está leyendo la clave.
