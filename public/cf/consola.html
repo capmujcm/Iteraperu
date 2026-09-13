@@ -390,7 +390,7 @@
     return cv.toDataURL('image/png');
   }
 
-  $('btnCrearPrueba').addEventListener('click', async function () {
+  el('btnCrearPrueba').addEventListener('click', async function () {
     if (!confirm('Se crearán personas y puestos ficticios en la base de datos real.\n\n' +
                  'Quedan marcados y podrás borrarlos de una vez. ¿Continuar?')) return;
     const original = this.textContent;
@@ -422,7 +422,7 @@
     }
   });
 
-  $('btnBorrarPrueba').addEventListener('click', async function () {
+  el('btnBorrarPrueba').addEventListener('click', async function () {
     if (!confirm('Se borrarán TODAS las personas y puestos marcados como prueba,\n' +
                  'con sus insignias y escaneos.\n\nLos datos reales no se tocan. ¿Continuar?')) return;
     const original = this.textContent;
