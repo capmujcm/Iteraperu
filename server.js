@@ -6,6 +6,7 @@ const registrarAuth = require('./lib/routes-auth');
 const registrarInsignias = require('./lib/routes-insignias');
 const registrarEmpresa = require('./lib/routes-empresa');
 const registrarStaff = require('./lib/routes-staff');
+const registrarSorteo = require('./lib/routes-sorteo');
 
 // Logger activado: durante el evento hay que poder reconstruir que paso en la
 // puerta. `disableRequestLogging` evita una linea por peticion de asset, que
@@ -406,6 +407,7 @@ fastify.addHook('onRequest', async (req, reply) => {
   const esApi = url.startsWith('/api/') && url !== '/api/health';
   const esAppEvento = url.startsWith('/e/') || url.startsWith('/staff/') ||
                       url.startsWith('/negocios/') || url.startsWith('/consola/') ||
+                      url.startsWith('/sorteo/') ||
                       url === '/e' || url === '/entrada';
   if (esApi || esAppEvento) {
     reply.code(503).send({
@@ -770,6 +772,7 @@ fastify.get('/e/:slug', appDeEvento('asistente.html'));       // asistente
 fastify.get('/staff/:slug', appDeEvento('staff.html'));       // Punto de Ayuda
 fastify.get('/negocios/:slug', appDeEvento('negocio.html'));  // puesto participante
 fastify.get('/consola/:slug', appDeEvento('consola.html'));   // organizador
+fastify.get('/sorteo/:slug', appDeEvento('sorteo.html'));     // pantalla de proyección
 
 // Atajos sin slug, para carteles y enlaces cortos.
 fastify.get('/e', async (req, reply) => reply.redirect(302, '/e/' + evento.slug));
@@ -845,6 +848,9 @@ const start = async () => {
       registrarEmpresa(fastify, {
         store, eventoId, rateLimit,
         requireAdmin: requireOrganizador   // reponer el acceso de un puesto
+      });
+      registrarSorteo(fastify, {
+        store, eventoId, rateLimit, requireOrganizador, registrarAccion
       });
     }
 

@@ -385,3 +385,46 @@ ALTER TABLE empresas ADD COLUMN IF NOT EXISTS usuario VARCHAR(40);
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_empresas_evento_usuario
   ON empresas (evento_id, LOWER(usuario)) WHERE usuario IS NOT NULL;
+
+-- =============================================================================
+-- 21. Sorteo
+-- =============================================================================
+-- Los premios se registran ANTES de jugar y en orden. Sortear a ciegas y decidir
+-- el premio despues seria manipulable.
+CREATE TABLE IF NOT EXISTS premios (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  evento_id UUID REFERENCES eventos(id) ON DELETE CASCADE,
+  orden INT NOT NULL,
+  nombre VARCHAR(150) NOT NULL,
+  descripcion TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_premios_evento_orden
+  ON premios (evento_id, orden);
+
+-- Resultado de cada sorteo.
+--
+-- La clave unica sobre premio_id impide sortear dos veces el mismo premio:
+-- sin eso, alguien podria repetir el sorteo hasta que saliera quien quisiera.
+-- Se guardan tambien las cifras del momento y la semilla, para que el resultado
+-- sea reproducible y demostrable si alguien lo cuestiona.
+CREATE TABLE IF NOT EXISTS sorteo_resultados (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  evento_id UUID REFERENCES eventos(id) ON DELETE CASCADE,
+  premio_id UUID NOT NULL UNIQUE REFERENCES premios(id) ON DELETE CASCADE,
+  ticket_id UUID REFERENCES asistentes_tickets(id) ON DELETE SET NULL,
+  -- Fotografia del momento del sorteo.
+  boletos_ganador INT,
+  total_boletos INT,
+  total_participantes INT,
+  semilla TEXT,
+  numero_ganador INT,
+  sorteado_por VARCHAR(120),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Una persona no puede ganar dos veces: se comprueba al sortear excluyendo a
+-- los ganadores previos, y este indice lo garantiza aunque algo falle arriba.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sorteo_un_premio_por_persona
+  ON sorteo_resultados (evento_id, ticket_id) WHERE ticket_id IS NOT NULL;

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0A1128">
+<meta name="robots" content="noindex">
+<title>Country Fest · Sorteo</title>
+<link rel="icon" href="/assets/itera-mark.svg">
+<link rel="preconnect" href="https://api.fontshare.com">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap">
+<style>
+  /* =========================================================================
+     Pantalla de proyección. No reutiliza app.css: aquí todo está pensado para
+     verse desde el fondo de un recinto, no en un celular. Tipografías enormes,
+     fondo oscuro y contraste alto.
+     ====================================================================== */
+  :root{
+    --event:#E60067; --yellow:#FFDE00; --cyan:#00C2FF; --navy:#0A1128;
+    --ink:#FFFFFF; --muted:rgba(255,255,255,.62); --faint:rgba(255,255,255,.3);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    background:radial-gradient(circle at 50% 0%, #2A0A2E 0%, var(--navy) 55%, #050810 100%);
+    color:var(--ink);font-family:'Satoshi',system-ui,sans-serif;
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .oculto{display:none !important;}
+
+  /* ---- cabecera ---- */
+  .top{flex:none;display:flex;align-items:center;justify-content:space-between;
+    padding:1rem 2rem;border-bottom:1px solid rgba(255,255,255,.1);}
+  .top img{height:40px;}
+  .top .est{font-size:.85rem;color:var(--muted);}
+
+  /* ---- zona central ---- */
+  .escena{flex:1;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;padding:1rem 2rem;min-height:0;}
+
+  .premio-eyebrow{font-family:'JetBrains Mono',monospace;font-size:clamp(.8rem,1.6vw,1.1rem);
+    letter-spacing:.3em;text-transform:uppercase;color:var(--yellow);margin-bottom:.4rem;}
+  .premio-nombre{font-size:clamp(2rem,6vw,4.5rem);font-weight:900;line-height:1.05;
+    letter-spacing:-.03em;text-align:center;margin-bottom:.3rem;}
+  .premio-desc{font-size:clamp(.9rem,1.8vw,1.3rem);color:var(--muted);text-align:center;
+    margin-bottom:2rem;}
+
+  /* ---- carrete de la ruleta ---- */
+  .carrete{
+    width:min(92vw,1000px);height:clamp(90px,16vh,150px);overflow:hidden;position:relative;
+    border-radius:18px;background:rgba(255,255,255,.05);
+    border:2px solid rgba(255,255,255,.14);
+  }
+  .carrete::before,.carrete::after{
+    content:"";position:absolute;left:0;right:0;height:38%;z-index:2;pointer-events:none;}
+  .carrete::before{top:0;background:linear-gradient(180deg,rgba(10,17,40,.95),transparent);}
+  .carrete::after{bottom:0;background:linear-gradient(0deg,rgba(10,17,40,.95),transparent);}
+  .carrete .pista{position:absolute;left:0;right:0;top:0;will-change:transform;}
+  .carrete .fila{height:clamp(90px,16vh,150px);display:flex;align-items:center;
+    justify-content:center;font-size:clamp(1.4rem,4vw,3rem);font-weight:800;
+    color:var(--faint);letter-spacing:-.02em;}
+  .carrete .mira{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+    height:clamp(90px,16vh,150px);border-top:3px solid var(--event);
+    border-bottom:3px solid var(--event);z-index:3;pointer-events:none;}
+
+  /* ---- ganador ---- */
+  .ganador{text-align:center;animation:aparecer .5s cubic-bezier(.2,1.4,.4,1);}
+  @keyframes aparecer{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+  .ganador .eti{font-family:'JetBrains Mono',monospace;font-size:clamp(.9rem,2vw,1.4rem);
+    letter-spacing:.3em;text-transform:uppercase;color:var(--yellow);margin-bottom:.6rem;}
+  .ganador .nom{font-size:clamp(2.5rem,9vw,7rem);font-weight:900;line-height:1;
+    letter-spacing:-.04em;
+    background:linear-gradient(135deg,#fff 20%,var(--yellow) 60%,var(--event) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 80px rgba(255,222,0,.25);}
+  .ganador .meta{margin-top:1rem;font-size:clamp(1rem,2.2vw,1.6rem);color:var(--muted);}
+  .ganador .cod{font-family:'JetBrains Mono',monospace;color:var(--cyan);font-weight:700;}
+
+  /* ---- ganadores acumulados ---- */
+  .lista{flex:none;border-top:1px solid rgba(255,255,255,.1);padding:1rem 2rem 1.4rem;
+    max-height:34vh;overflow-y:auto;}
+  .lista h3{margin:0 0 .7rem;font-size:.8rem;letter-spacing:.25em;text-transform:uppercase;
+    color:var(--faint);font-family:'JetBrains Mono',monospace;}
+  .fila-g{display:flex;align-items:center;gap:1rem;padding:.55rem 0;
+    border-bottom:1px solid rgba(255,255,255,.07);}
+  .fila-g:last-child{border-bottom:0;}
+  .fila-g .pos{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:800;
+    color:var(--yellow);min-width:2.2rem;}
+  .fila-g .pr{flex:1;min-width:0;}
+  .fila-g .pr b{display:block;font-size:1.05rem;}
+  .fila-g .pr span{font-size:.8rem;color:var(--muted);}
+  .fila-g .tk{font-family:'JetBrains Mono',monospace;color:var(--cyan);font-size:.95rem;}
+
+  /* ---- controles ---- */
+  .barra{flex:none;display:flex;align-items:center;justify-content:center;gap:1rem;
+    padding:1rem 2rem;border-top:1px solid rgba(255,255,255,.1);
+    background:rgba(0,0,0,.25);}
+  .btn{border:0;border-radius:14px;padding:1rem 2.4rem;font-family:inherit;
+    font-size:1.1rem;font-weight:800;cursor:pointer;transition:transform .12s;}
+  .btn:active{transform:scale(.97);}
+  .btn[disabled]{opacity:.35;cursor:not-allowed;}
+  .btn-jugar{background:linear-gradient(135deg,var(--event),#FF4D94);color:#fff;
+    box-shadow:0 12px 40px -12px rgba(230,0,103,.9);}
+  .btn-sec{background:rgba(255,255,255,.1);color:#fff;font-size:.9rem;padding:.7rem 1.4rem;}
+  .barra .info{color:var(--muted);font-size:.9rem;}
+
+  /* ---- login y admin de premios ---- */
+  .panel{max-width:560px;margin:auto;padding:2rem;}
+  .panel h1{font-size:1.8rem;margin:0 0 .4rem;}
+  .panel p{color:var(--muted);margin:0 0 1.4rem;line-height:1.5;}
+  .campo{margin-bottom:1rem;}
+  .campo label{display:block;font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:.35rem;}
+  .campo input,.campo textarea{width:100%;padding:.85rem 1rem;border-radius:12px;
+    border:1.5px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);
+    color:#fff;font-family:inherit;font-size:1rem;}
+  .campo input:focus,.campo textarea:focus{outline:none;border-color:var(--event);}
+  .msg{margin-top:1rem;padding:.9rem 1.1rem;border-radius:12px;font-size:.92rem;}
+  .msg.malo{background:rgba(230,0,103,.18);border:1px solid var(--event);}
+  .msg.bien{background:rgba(15,155,108,.2);border:1px solid #0F9B6C;}
+
+  .premio-item{display:flex;align-items:center;gap:1rem;padding:.7rem 0;
+    border-bottom:1px solid rgba(255,255,255,.08);}
+  .premio-item .n{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--yellow);}
+  .premio-item .t{flex:1;min-width:0;}
+  .premio-item button{background:none;border:1px solid rgba(255,255,255,.22);color:var(--muted);
+    border-radius:9px;padding:.35rem .7rem;cursor:pointer;font-family:inherit;font-size:.8rem;}
+
+  canvas#confeti{position:fixed;inset:0;pointer-events:none;z-index:50;}
+
+  /* Quien no ha ganado se apaga: es el "efecto de perdedor" mientras la ruleta
+     descarta nombres. */
+  .apagado{opacity:.25;filter:grayscale(1);transition:opacity .4s,filter .4s;}
+</style>
+</head>
+<body>
+
+<canvas id="confeti"></canvas>
+
+<!-- ================= ingreso ================= -->
+<div id="vLogin">
+  <div class="panel">
+    <h1>Sorteo · Country Fest</h1>
+    <p>Pantalla de proyección. Entra con tu usuario de organizador.</p>
+    <form id="formLogin">
+      <div class="campo">
+        <label for="lg-usuario">Usuario</label>
+        <input type="text" id="lg-usuario" autocomplete="username" required style="text-transform:lowercase;">
+      </div>
+      <div class="campo">
+        <label for="lg-pass">Contraseña</label>
+        <input type="password" id="lg-pass" autocomplete="current-password" required>
+      </div>
+      <button class="btn btn-jugar" type="submit" style="width:100%;">Entrar</button>
+    </form>
+    <div id="loginMsg"></div>
+  </div>
+</div>
+
+<!-- ================= premios ================= -->
+<div id="vPremios" class="oculto">
+  <div class="panel">
+    <h1>Premios</h1>
+    <p>Regístralos <b>antes</b> de sortear, en el orden en que se van a entregar.
+       Un premio ya sorteado no se puede borrar.</p>
+
+    <div id="listaPremios"></div>
+
+    <form id="formPremio" style="margin-top:1.4rem;">
+      <div class="campo">
+        <label for="pr-nombre">Nombre del premio</label>
+        <input type="text" id="pr-nombre" maxlength="150" required placeholder="Ej. Televisor 55 pulgadas">
+      </div>
+      <div class="campo">
+        <label for="pr-desc">Detalle (opcional)</label>
+        <input type="text" id="pr-desc" maxlength="500" placeholder="Cortesía de…">
+      </div>
+      <button class="btn btn-jugar" type="submit" style="width:100%;">Añadir premio</button>
+    </form>
+    <div id="premioMsg"></div>
+
+    <div style="margin-top:1.6rem;display:flex;gap:.8rem;">
+      <button class="btn btn-jugar" id="btnEmpezar" style="flex:1;">Empezar el sorteo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= sorteo ================= -->
+<div id="vSorteo" class="oculto" style="display:flex;flex-direction:column;height:100%;">
+  <div class="top">
+    <img src="/assets/country-fest-logo-clean.png" alt="Country Fest">
+    <div class="est" id="estado">—</div>
+  </div>
+
+  <div class="escena">
+    <div id="zonaPremio">
+      <div class="premio-eyebrow" id="premioOrden">—</div>
+      <div class="premio-nombre" id="premioNombre">—</div>
+      <div class="premio-desc" id="premioDesc"></div>
+    </div>
+
+    <div class="carrete oculto" id="carrete">
+      <div class="pista" id="pista"></div>
+      <div class="mira"></div>
+    </div>
+
+    <div class="ganador oculto" id="zonaGanador">
+      <div class="eti">Ganador</div>
+      <div class="nom" id="gNombre">—</div>
+      <div class="meta">
+        Entrada <span class="cod" id="gCodigo">—</span>
+        · <span id="gBoletos">—</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="barra">
+    <button class="btn btn-jugar" id="btnJugar">🎲 Sortear</button>
+    <button class="btn btn-sec" id="btnPremios">Premios</button>
+    <span class="info" id="infoBombo">—</span>
+  </div>
+
+  <div class="lista" id="zonaLista">
+    <h3>Ganadores</h3>
+    <div id="listaGanadores"></div>
+  </div>
+</div>
+
+<script src="/cf/app.js"></script>
+<script>
+/* =============================================================================
+   Country Fest - pantalla de sorteo
+   =============================================================================
+   IMPORTANTE: aqui NO se decide nada. El ganador lo calcula y lo graba el
+   servidor antes de que el carrete empiece a girar; esta pantalla solo lo
+   representa. Si el sorteo se resolviera en el navegador, cualquiera con la
+   consola abierta podria elegir quien gana delante de todo el publico.
+   ============================================================================= */
+(function () {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const ver = (id, mostrar) => $(id).classList.toggle('oculto', !mostrar);
+
+  function msg(caja, tipo, texto) {
+    $(caja).innerHTML = '<div class="msg ' + tipo + '">' + esc(texto) + '</div>';
+  }
+
+  /* --------------------------------------------------------------------- */
+  /* ingreso                                                               */
+  /* --------------------------------------------------------------------- */
+  $('formLogin').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    const boton = this.querySelector('button');
+    boton.disabled = true;
+    try {
+      const datos = await API.staffLogin({
+        usuario: $('lg-usuario').value.trim().toLowerCase(),
+        password: $('lg-pass').value,
+        device_id: deviceId()
+      });
+      API.guardarSesionStaff(datos.token);
+      $('lg-pass').value = '';
+
+      if (datos.must_change_password) {
+        msg('loginMsg', 'malo', 'Primero define tu contraseña en el Punto de Ayuda y vuelve aquí.');
+        return;
+      }
+      if (datos.usuario.rol !== 'organizador') {
+        API.borrarSesionStaff();
+        msg('loginMsg', 'malo', 'El sorteo solo lo maneja un organizador.');
+        return;
+      }
+      arrancar();
+    } catch (e) {
+      msg('loginMsg', 'malo', e.message);
+    } finally {
+      boton.disabled = false;
+    }
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* premios                                                               */
+  /* --------------------------------------------------------------------- */
+  async function pintarPremios() {
+    try {
+      const r = await API.pedir('/api/sorteo/premios', { auth: 'staff' });
+      const lista = r.premios || [];
+      $('listaPremios').innerHTML = lista.length
+        ? lista.map(function (p) {
+            return '<div class="premio-item">' +
+              '<span class="n">' + esc(String(p.orden)) + 'º</span>' +
+              '<div class="t"><b>' + esc(p.nombre) + '</b>' +
+                (p.descripcion ? '<br><span style="font-size:.85rem;opacity:.6;">' + esc(p.descripcion) + '</span>' : '') +
+              '</div>' +
+              (p.sorteado
+                ? '<span style="color:#0F9B6C;font-size:.85rem;">✓ sorteado</span>'
+                : '<button data-borrar="' + esc(p.id) + '">Quitar</button>') +
+            '</div>';
+          }).join('')
+        : '<p style="opacity:.5;">Todavía no hay premios.</p>';
+
+      $('listaPremios').querySelectorAll('[data-borrar]').forEach(function (b) {
+        b.addEventListener('click', async function () {
+          try {
+            await API.pedir('/api/sorteo/premios/' + encodeURIComponent(this.dataset.borrar),
+              { metodo: 'DELETE', auth: 'staff' });
+            await pintarPremios();
+          } catch (e) { msg('premioMsg', 'malo', e.message); }
+        });
+      });
+    } catch (e) {
+      $('listaPremios').innerHTML = '<div class="msg malo">' + esc(e.message) + '</div>';
+    }
+  }
+
+  $('formPremio').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    const nombre = $('pr-nombre').value.trim();
+    if (!nombre) return msg('premioMsg', 'malo', 'Escribe el nombre del premio.');
+    try {
+      await API.pedir('/api/sorteo/premios', {
+        metodo: 'POST', auth: 'staff',
+        cuerpo: { nombre: nombre, descripcion: $('pr-desc').value.trim() }
+      });
+      $('formPremio').reset();
+      $('premioMsg').innerHTML = '';
+      await pintarPremios();
+    } catch (e) {
+      msg('premioMsg', 'malo', e.message);
+    }
+  });
+
+  $('btnEmpezar').addEventListener('click', function () {
+    ver('vPremios', false);
+    ver('vSorteo', true);
+    refrescarEstado();
+  });
+
+  $('btnPremios').addEventListener('click', function () {
+    ver('vSorteo', false);
+    ver('vPremios', true);
+    pintarPremios();
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* estado                                                                */
+  /* --------------------------------------------------------------------- */
+  let siguiente = null;
+  // Mientras se muestra un ganador, la cabecera NO se adelanta al siguiente
+  // premio: proyectado, se leería «2º premio — GANADOR Ana Torres» cuando Ana
+  // acaba de ganar el 1º. El premio avanza al pulsar Sortear otra vez.
+  let mostrandoGanador = false;
+
+  async function refrescarEstado() {
+    try {
+      const e = await API.pedir('/api/sorteo/estado', { auth: 'staff' });
+      siguiente = e.siguiente;
+
+      $('infoBombo').textContent =
+        e.participantes + ' participantes · ' + e.total_boletos + ' boletos en el bombo';
+      $('estado').textContent = e.pendientes + ' premio(s) por sortear';
+      pintarGanadores(e.ganadores || []);
+
+      if (mostrandoGanador) {
+        // Solo se decide si queda algo que sortear; la cabecera se respeta.
+        $('btnJugar').disabled = !siguiente || e.participantes === 0;
+        $('btnJugar').textContent = siguiente ? '🎲 Sortear el ' + siguiente.orden + 'º' : '🎲 Sortear';
+        return;
+      }
+
+      if (siguiente) {
+        $('premioOrden').textContent = siguiente.orden + 'º premio';
+        $('premioNombre').textContent = siguiente.nombre;
+        $('premioDesc').textContent = siguiente.descripcion || '';
+        $('btnJugar').disabled = e.participantes === 0;
+      } else {
+        $('premioOrden').textContent = 'Sorteo terminado';
+        $('premioNombre').textContent = e.premios.length ? '🎉' : 'Sin premios';
+        $('premioDesc').textContent = e.premios.length
+          ? 'Todos los premios fueron entregados'
+          : 'Registra los premios antes de empezar';
+        $('btnJugar').disabled = true;
+      }
+      $('btnJugar').textContent = siguiente ? '🎲 Sortear el ' + siguiente.orden + 'º' : '🎲 Sortear';
+    } catch (e) {
+      $('estado').textContent = 'Sin conexión';
+    }
+  }
+
+  function pintarGanadores(lista) {
+    $('listaGanadores').innerHTML = lista.length
+      ? lista.map(function (g) {
+          return '<div class="fila-g">' +
+            '<span class="pos">' + esc(String(g.orden)) + 'º</span>' +
+            '<div class="pr"><b>' + NM(g) + '</b>' +
+              '<span>' + esc(g.premio || '') + '</span></div>' +
+            '<span class="tk">' + esc(g.codigo_ticket || '') + '</span>' +
+          '</div>';
+        }).join('')
+      : '<p style="opacity:.4;font-size:.9rem;">Todavía no hay ganadores.</p>';
+  }
+
+  /* --------------------------------------------------------------------- */
+  /* la ruleta                                                             */
+  /* --------------------------------------------------------------------- */
+  const ALTO_FILA = () => $('carrete').clientHeight;
+
+  function montarPista(nombres, ganador) {
+    // Se repite el carrete para que la tirada sea larga y el nombre ganador
+    // quede al final: el frenado cae siempre sobre él porque ya está decidido.
+    const reel = [];
+    for (let v = 0; v < 6; v++) {
+      nombres.forEach(function (n) { reel.push(n); });
+    }
+    reel.push(ganador);
+    $('pista').innerHTML = reel.map(function (n) {
+      return '<div class="fila">' + esc(n) + '</div>';
+    }).join('');
+    return reel.length;
+  }
+
+  function girar(total) {
+    return new Promise(function (resolve) {
+      const pista = $('pista');
+      const alto = ALTO_FILA();
+      const destino = -(total - 1) * alto;
+
+      pista.style.transition = 'none';
+      pista.style.transform = 'translateY(0)';
+      // Fuerza el repintado antes de animar; sin esto el navegador agrupa
+      // ambos cambios y no se ve el giro.
+      void pista.offsetHeight;
+
+      const duracion = 5200;
+      pista.style.transition = 'transform ' + duracion + 'ms cubic-bezier(.12,.75,.06,1)';
+      pista.style.transform = 'translateY(' + destino + 'px)';
+      setTimeout(resolve, duracion + 150);
+    });
+  }
+
+  /* --------------------------------------------------------------------- */
+  /* jugar                                                                 */
+  /* --------------------------------------------------------------------- */
+  let jugando = false;
+
+  $('btnJugar').addEventListener('click', async function () {
+    if (jugando) return;
+    jugando = true;
+    mostrandoGanador = false;
+    $('btnJugar').disabled = true;
+    $('btnPremios').disabled = true;
+
+    try {
+      // El servidor decide y GRABA el ganador aquí. Lo que viene después es
+      // la representación de algo ya resuelto.
+      const r = await API.pedir('/api/sorteo/jugar', { metodo: 'POST', auth: 'staff' });
+
+      $('premioOrden').textContent = r.premio.orden + 'º premio';
+      $('premioNombre').textContent = r.premio.nombre;
+      $('premioDesc').textContent = r.premio.descripcion || '';
+
+      ver('zonaGanador', false);
+      ver('carrete', true);
+      $('zonaLista').classList.add('apagado');
+
+      const nombreGanador = (r.ganador.nombre || '') + ' ' +
+        String(r.ganador.apellido || '').charAt(0) + '.';
+      const carrete = (r.carrete && r.carrete.length) ? r.carrete : [nombreGanador];
+      const total = montarPista(carrete, nombreGanador);
+
+      await girar(total);
+
+      // Revelación
+      ver('carrete', false);
+      $('gNombre').textContent = ((r.ganador.nombre || '') + ' ' + (r.ganador.apellido || '')).trim();
+      $('gCodigo').textContent = r.ganador.codigo_ticket || '';
+      $('gBoletos').textContent = r.ganador.boletos === 1
+        ? '1 insignia' : r.ganador.boletos + ' insignias';
+      ver('zonaGanador', true);
+      $('zonaLista').classList.remove('apagado');
+
+      confeti();
+      // A partir de aquí la cabecera se queda con el premio recién ganado.
+      mostrandoGanador = true;
+      await refrescarEstado();
+    } catch (e) {
+      $('estado').textContent = e.message;
+      ver('carrete', false);
+      $('zonaLista').classList.remove('apagado');
+    } finally {
+      jugando = false;
+      $('btnPremios').disabled = false;
+      // refrescarEstado ya decide si queda algo por sortear.
+    }
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* confeti                                                               */
+  /* --------------------------------------------------------------------- */
+  function confeti() {
+    const cv = $('confeti');
+    const cx = cv.getContext('2d');
+    cv.width = innerWidth; cv.height = innerHeight;
+    const colores = ['#E60067', '#FFDE00', '#00C2FF', '#ffffff'];
+    const piezas = [];
+    for (let i = 0; i < 160; i++) {
+      piezas.push({
+        x: Math.random() * cv.width,
+        y: -20 - Math.random() * cv.height * 0.5,
+        w: 6 + Math.random() * 8,
+        h: 8 + Math.random() * 12,
+        vy: 2.5 + Math.random() * 4,
+        vx: -1.5 + Math.random() * 3,
+        rot: Math.random() * Math.PI,
+        vr: -0.15 + Math.random() * 0.3,
+        c: colores[(Math.random() * colores.length) | 0]
+      });
+    }
+    let frames = 0;
+    (function tick() {
+      cx.clearRect(0, 0, cv.width, cv.height);
+      piezas.forEach(function (p) {
+        p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+        cx.save();
+        cx.translate(p.x, p.y);
+        cx.rotate(p.rot);
+        cx.fillStyle = p.c;
+        cx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        cx.restore();
+      });
+      frames++;
+      if (frames < 320) requestAnimationFrame(tick);
+      else cx.clearRect(0, 0, cv.width, cv.height);
+    })();
+  }
+
+  /* --------------------------------------------------------------------- */
+  /* arranque                                                              */
+  /* --------------------------------------------------------------------- */
+  async function arrancar() {
+    ver('vLogin', false);
+    try {
+      const e = await API.pedir('/api/sorteo/estado', { auth: 'staff' });
+      // Si no hay premios, lo primero es registrarlos.
+      if (!e.premios.length) {
+        ver('vPremios', true);
+        pintarPremios();
+        return;
+      }
+      ver('vSorteo', true);
+      refrescarEstado();
+    } catch (err) {
+      ver('vLogin', true);
+      if (err.status === 403) msg('loginMsg', 'malo', 'El sorteo solo lo maneja un organizador.');
+      else if (err.status === 401) API.borrarSesionStaff();
+    }
+  }
+
+  if (API.tieneSesionStaff() || API.tieneTokenStaff()) arrancar();
+  else ver('vLogin', true);
+})();
+</script>
+</body>
+</html>
