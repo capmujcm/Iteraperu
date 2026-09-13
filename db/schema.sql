@@ -448,3 +448,7 @@ ALTER TABLE empresas ADD COLUMN IF NOT EXISTS es_prueba BOOLEAN DEFAULT false;
 -- Facebook y TikTok pesan tanto o mas.
 ALTER TABLE empresas ADD COLUMN IF NOT EXISTS facebook VARCHAR(80);
 ALTER TABLE empresas ADD COLUMN IF NOT EXISTS tiktok VARCHAR(80);
+
+-- Numero PUBLICO del puesto, para que los asistentes lo contacten. Distinto de
+-- `telefono`, que es el del responsable y solo lo ve la organizacion.
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS whatsapp VARCHAR(30);

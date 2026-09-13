@@ -142,6 +142,42 @@
       </div>
     </section>
 
+    <!-- ================= mi QR ================= -->
+    <section class="screen" data-sc="qr">
+      <div class="schead"><h2>Mi QR</h2></div>
+      <p class="tiny muted" style="margin-bottom:.9rem;">
+        <b>Este es el QR de tu puesto.</b> La gente lo escanea para ganar tu insignia.
+        Tenlo siempre a la vista: impreso, o en la pantalla de un celular o tablet.
+      </p>
+
+      <div class="card center">
+        <div style="background:#fff;padding:16px;border-radius:16px;display:inline-block;">
+          <canvas id="miQr" style="width:240px;height:240px;image-rendering:pixelated;display:block;"></canvas>
+        </div>
+        <div style="margin-top:.9rem;">
+          <div class="tiny muted">Si la cámara no lee, que tecleen este código:</div>
+          <div class="mono" id="miCodigo" style="font-size:1.6rem;font-weight:800;letter-spacing:.1em;margin-top:.2rem;">—</div>
+        </div>
+      </div>
+
+      <button class="btn btn-good btn-block" id="btnPantallaCompleta" style="margin-top:.8rem;">
+        Mostrar a pantalla completa
+      </button>
+
+      <div class="soft tiny muted" style="margin-top:.8rem;">
+        <b>Para que lo escaneen mejor:</b> súbele el brillo al celular, evita reflejos
+        del sol directo y no lo tapes con plástico brillante.
+      </div>
+    </section>
+
+    <!-- QR a pantalla completa, para mostrarlo desde un celular o tablet -->
+    <div id="qrPleno" hidden style="position:fixed;inset:0;background:#fff;z-index:100;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;padding:1.5rem;">
+      <canvas id="qrPlenoCanvas" style="width:min(80vw,80vh);height:min(80vw,80vh);image-rendering:pixelated;"></canvas>
+      <div class="mono" id="qrPlenoCodigo" style="font-size:2rem;font-weight:800;letter-spacing:.1em;color:#0B0D10;"></div>
+      <button class="btn btn-line" id="btnCerrarPleno">Cerrar</button>
+    </div>
+
     <!-- ================= ficha ================= -->
     <section class="screen" data-sc="ficha">
       <div class="schead"><h2>Mi ficha</h2></div>
@@ -163,8 +199,13 @@
         </div>
         <div class="field"><label for="fi-email">Correo</label><input type="email" id="fi-email" maxlength="150" autocomplete="off"></div>
 
-        <h4 style="font-size:.88rem;margin:1rem 0 .5rem;">Redes sociales</h4>
-        <p class="tiny muted" style="margin:-.3rem 0 .6rem;">Se muestran en tu ficha del evento.</p>
+        <h4 style="font-size:.88rem;margin:1rem 0 .5rem;">Cómo te contactan</h4>
+        <p class="tiny muted" style="margin:-.3rem 0 .6rem;">Esto <b>sí se publica</b> en tu ficha del evento.</p>
+        <div class="field">
+          <label for="fi-whatsapp">WhatsApp de contacto</label>
+          <input type="tel" id="fi-whatsapp" maxlength="30" placeholder="9xx xxx xxx" autocomplete="off">
+          <p class="tiny muted" style="margin-top:.25rem;">El número al que puede escribirte un cliente. Distinto del de arriba, que solo ve la organización.</p>
+        </div>
         <div class="field"><label for="fi-instagram">Instagram</label><input type="text" id="fi-instagram" maxlength="80" placeholder="@tupuesto" autocomplete="off"></div>
         <div class="g2">
           <div class="field"><label for="fi-facebook">Facebook</label><input type="text" id="fi-facebook" maxlength="80" placeholder="tupuesto" autocomplete="off"></div>
@@ -196,6 +237,7 @@
   </div>
 
   <nav class="vnav" id="vnav" hidden>
+    <button data-go="qr"><span class="i">🔳</span>Mi QR</button>
     <button data-go="panel"><span class="i">📊</span>Panel</button>
     <button data-go="logo"><span class="i">🏅</span>Mi logo</button>
     <button data-go="ficha"><span class="i">🏪</span>Mi ficha</button>
@@ -240,7 +282,39 @@
     pintarLogo();
     rellenarFicha();
     pintarPendientes();
+    pintarMiQr();
   }
+
+  /* --------------------------------------------------------------------- */
+  /* mi QR                                                                 */
+  /* --------------------------------------------------------------------- */
+  // El mismo contenido que imprime la organización: "CFP|<token>". Se dibuja
+  // aquí para que el puesto pueda mostrarlo desde su propio celular si pierde
+  // el cartel, sin depender de nadie.
+  function pintarMiQr() {
+    if (!empresa || !empresa.qr_token) return;
+    drawQR('CFP|' + empresa.qr_token, el('miQr'), 6);
+    el('miCodigo').textContent = empresa.codigo_corto || '—';
+  }
+
+  el('btnPantallaCompleta').addEventListener('click', function () {
+    if (!empresa || !empresa.qr_token) return;
+    drawQR('CFP|' + empresa.qr_token, el('qrPlenoCanvas'), 8);
+    el('qrPlenoCodigo').textContent = empresa.codigo_corto || '';
+    el('qrPleno').hidden = false;
+    // Se pide mantener la pantalla encendida: un QR que se apaga a los 30
+    // segundos no sirve de nada sobre el mostrador.
+    if (navigator.wakeLock && navigator.wakeLock.request) {
+      navigator.wakeLock.request('screen').then(function (w) { bloqueoPantalla = w; })
+        .catch(function () { /* el navegador no lo permite; se sigue igual */ });
+    }
+  });
+
+  let bloqueoPantalla = null;
+  el('btnCerrarPleno').addEventListener('click', function () {
+    el('qrPleno').hidden = true;
+    if (bloqueoPantalla) { try { bloqueoPantalla.release(); } catch (e) {} bloqueoPantalla = null; }
+  });
 
   // Qué le falta al puesto para estar listo, con el botón que lleva justo ahí.
   // La barra de abajo existe, pero en una pantalla alta queda lejos de la vista
@@ -329,7 +403,7 @@
       'fi-nombre': 'nombre', 'fi-rubro': 'rubro', 'fi-emoji': 'emoji',
       'fi-descripcion': 'descripcion', 'fi-condicion': 'condicion',
       'fi-responsable': 'responsable', 'fi-telefono': 'telefono',
-      'fi-email': 'email', 'fi-instagram': 'instagram',
+      'fi-email': 'email', 'fi-whatsapp': 'whatsapp', 'fi-instagram': 'instagram',
       'fi-facebook': 'facebook', 'fi-tiktok': 'tiktok'
     };
     Object.keys(campos).forEach(function (id) {
@@ -506,6 +580,7 @@
             responsable: el('fi-responsable').value,
             telefono: el('fi-telefono').value,
             email: el('fi-email').value,
+            whatsapp: el('fi-whatsapp').value,
             instagram: el('fi-instagram').value,
             facebook: el('fi-facebook').value,
             tiktok: el('fi-tiktok').value
