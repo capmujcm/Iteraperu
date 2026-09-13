@@ -266,6 +266,12 @@
       <div id="puestosLista"><div class="loading">Cargando puestos…</div></div>
     </section>
 
+    <!-- ================= un puesto: su QR y sus datos ================= -->
+    <section class="screen" data-sc="puesto-detalle">
+      <div class="schead"><button class="back" data-go="puestos" aria-label="Volver">‹</button><h2 id="pdNombre">Puesto</h2></div>
+      <div id="pdCuerpo"></div>
+    </section>
+
   </div>
 </div>
 
@@ -725,6 +731,46 @@
     });
   });
 
+  // Se guarda el último listado para no volver a pedirlo al abrir un puesto.
+  let puestosCache = [];
+
+  // Ficha de un puesto: su QR grande, listo para imprimir, y sus datos.
+  function abrirPuesto(id) {
+    const p = puestosCache.find(x => x.id === id);
+    if (!p) return;
+
+    el('pdNombre').textContent = (p.emoji || '🎪') + ' ' + p.nombre;
+    el('pdCuerpo').innerHTML =
+      '<div class="card">' +
+        '<div class="center" style="background:#fff;padding:14px;border-radius:14px;">' +
+          '<canvas id="pdQr" style="width:200px;height:200px;image-rendering:pixelated;"></canvas>' +
+        '</div>' +
+        '<p class="tiny muted center" style="margin-top:.6rem;">' +
+          'Imprime este QR y colócalo visible en el puesto.</p>' +
+      '</div>' +
+      '<div class="card" style="margin-top:.7rem;">' +
+        '<div class="kv"><span>Código impreso</span>' +
+          '<span class="mono" style="font-size:1.15rem;font-weight:700;">' + esc(p.codigo_corto) + '</span></div>' +
+        '<div class="kv"><span>Usuario de acceso</span>' +
+          '<span class="mono">' + esc(p.usuario || '—') + '</span></div>' +
+        (p.stand ? '<div class="kv"><span>Stand</span><span>' + esc(p.stand) + '</span></div>' : '') +
+        (p.rubro ? '<div class="kv"><span>Rubro</span><span>' + esc(p.rubro) + '</span></div>' : '') +
+        (p.condicion ? '<div class="kv"><span>Condición</span><span>' + esc(p.condicion) + '</span></div>' : '') +
+        '<div class="kv"><span>Logo</span><span>' + (p.tiene_logo ? '✓ subido' : '— todavía no') + '</span></div>' +
+        '<div class="kv"><span>Estado</span><span>' + (p.activo ? 'Activo' : 'Inactivo') + '</span></div>' +
+      '</div>' +
+      '<button class="btn btn-line btn-block btn-sm" id="pdAcceso" style="margin-top:.8rem;">' +
+        (p.tiene_acceso ? 'Reponer su clave de acceso' : 'Generar su clave de acceso') +
+      '</button>' +
+      '<div id="pdResult" style="margin-top:.8rem;"></div>';
+
+    // El contenido es "CFP|<token>", exactamente lo que espera el escaneo.
+    drawQR(p.qr_contenido, el('pdQr'), 5);
+
+    el('pdAcceso').addEventListener('click', function () { reponerAcceso(p.id, 'pdResult'); });
+    go('puesto-detalle');
+  }
+
   async function pintarPuestos() {
     const caja = el('puestosLista');
     try {
@@ -737,36 +783,29 @@
         return;
       }
 
-      // Se dibuja el QR de cada puesto para imprimirlo. El contenido es
-      // "CFP|<token>", que es exactamente lo que espera el escaneo.
-      caja.innerHTML = lista.map(function (p, i) {
-        return '<div class="card" style="margin-bottom:.7rem;">' +
-          '<div class="between" style="margin-bottom:.6rem;">' +
-            '<b>' + esc(p.emoji || '🎪') + ' ' + esc(p.nombre) + '</b>' +
-            (p.activo ? '<span class="pill p-good">Activo</span>' : '<span class="pill p-neutral">Inactivo</span>') +
+      // Lista compacta. Antes cada puesto se dibujaba con su QR desplegado, así
+      // que para dar de alta uno nuevo había que pasar por delante de todos.
+      // El QR se ve al abrir el puesto, que es cuando de verdad hace falta.
+      puestosCache = lista;
+
+      caja.innerHTML = '<div class="list">' + lista.map(function (p) {
+        return '<div class="item" data-puesto="' + esc(p.id) + '" style="cursor:pointer;">' +
+          '<div class="logo" style="background:' + esc(p.color || '#EEE') + '22;">' +
+            esc(p.emoji || '🎪') + '</div>' +
+          '<div class="gr">' +
+            '<b>' + esc(p.nombre) + '</b>' +
+            '<span class="mono">' + esc(p.codigo_corto) +
+              (p.stand ? ' · ' + esc(p.stand) : '') +
+              (p.tiene_logo ? '' : ' · sin logo') +
+            '</span>' +
           '</div>' +
-          '<div class="center" style="background:#fff;padding:10px;border-radius:12px;">' +
-            '<canvas id="qrPuesto' + i + '" style="width:150px;height:150px;image-rendering:pixelated;"></canvas>' +
-          '</div>' +
-          '<div class="kv" style="margin-top:.5rem;"><span>Usuario de acceso</span>' +
-            '<span class="mono">' + esc(p.usuario || '—') + '</span></div>' +
-          '<div class="kv"><span>Código impreso</span>' +
-            '<span class="mono" style="font-size:1.05rem;font-weight:700;">' + esc(p.codigo_corto) + '</span></div>' +
-          (p.stand ? '<div class="kv"><span>Stand</span><span>' + esc(p.stand) + '</span></div>' : '') +
-          (p.condicion ? '<div class="kv"><span>Condición</span><span>' + esc(p.condicion) + '</span></div>' : '') +
-          '<div class="kv"><span>Logo subido</span><span>' + (p.tiene_logo ? '✓ sí' : '— todavía no') + '</span></div>' +
-          '<button class="btn btn-line btn-block btn-sm" data-acceso="' + esc(p.id) + '" style="margin-top:.6rem;">' +
-            (p.tiene_acceso ? 'Reponer su clave de acceso' : 'Generar su clave de acceso') +
-          '</button>' +
+          (p.activo ? '' : '<span class="pill p-neutral">inactivo</span>') +
+          '<span style="color:var(--ink-mut);">›</span>' +
         '</div>';
-      }).join('');
+      }).join('') + '</div>';
 
-      lista.forEach(function (p, i) {
-        drawQR(p.qr_contenido, el('qrPuesto' + i), 4);
-      });
-
-      caja.querySelectorAll('[data-acceso]').forEach(function (b) {
-        b.addEventListener('click', function () { reponerAcceso(this.dataset.acceso); });
+      caja.querySelectorAll('[data-puesto]').forEach(function (fila) {
+        fila.addEventListener('click', function () { abrirPuesto(this.dataset.puesto); });
       });
     } catch (e) {
       caja.innerHTML = '<div class="flash bad">' + esc(e.message) + '</div>';
@@ -776,14 +815,17 @@
   // Repone la clave del puesto. Cierra sus sesiones abiertas: se hace cuando
   // cambia el responsable o se perdió la clave, y en ambos casos conviene
   // expulsar a quien la tuviera.
-  async function reponerAcceso(id) {
+  // `caja` permite mostrar el resultado donde se pulsó: en la lista o dentro
+  // de la ficha del puesto.
+  async function reponerAcceso(id, caja) {
+    caja = caja || 'puestosResult';
     if (!confirm('Se generará una clave nueva y se cerrarán las sesiones abiertas de ese puesto.\n\n¿Continuar?')) return;
-    limpiar('puestosResult');
+    limpiar(caja);
     try {
       const r = await API.pedir('/api/soporte/empresas/' + encodeURIComponent(id) + '/acceso', {
         metodo: 'POST', auth: 'staff'
       });
-      el('puestosResult').innerHTML =
+      el(caja).innerHTML =
         '<div class="flash good">✓ Clave nueva para ' + esc(r.empresa.nombre) + '</div>' +
         '<div class="card" style="margin-top:.6rem;">' +
           '<div class="kv"><span>Entra en</span><span class="mono">/negocios/' + esc(slugEvento) + '</span></div>' +
@@ -795,9 +837,11 @@
         '</div>' +
         '<div class="note n-warn tiny" style="margin-top:.6rem;"><b>Anótala ahora.</b> No se vuelve a mostrar.</div>';
       window.scrollTo(0, 0);
+      // Se refresca el listado de fondo para que el estado quede al día, pero
+      // sin sacar a la persona de donde está leyendo la clave.
       await pintarPuestos();
     } catch (e) {
-      aviso('puestosResult', 'bad', e.message);
+      aviso(caja, 'bad', e.message);
     }
   }
 
