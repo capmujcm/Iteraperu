@@ -155,6 +155,20 @@
         <div id="exportResult" style="margin-top:.6rem;"></div>
       </div>
 
+      <div class="card" style="margin-top:.7rem;">
+        <h4 style="font-size:.95rem;margin-bottom:.5rem;">Datos de prueba</h4>
+        <p class="tiny muted" style="margin-bottom:.6rem;">
+          Crea personas y puestos ficticios con insignias repartidas, para ensayar
+          el circuito y el sorteo. Quedan marcados y se borran todos de una vez.
+          <b>Bórralos antes del evento real.</b>
+        </p>
+        <div class="row wrap">
+          <button class="btn btn-line btn-sm" id="btnCrearPrueba">Generar datos de prueba</button>
+          <button class="btn btn-line btn-sm" id="btnBorrarPrueba">Borrar datos de prueba</button>
+        </div>
+        <div id="pruebaResult" style="margin-top:.6rem;"></div>
+      </div>
+
       <div class="soft tiny muted" style="margin-top:.7rem;">
         Para dar de alta puestos, validar ingresos o restablecer contraseñas, usa el
         <b>Punto de Ayuda</b>.
@@ -348,6 +362,81 @@
         this.textContent = original;
       }
     });
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* datos de prueba                                                       */
+  /* --------------------------------------------------------------------- */
+  // Los logos de los puestos de prueba se dibujan aquí, en un canvas, y se
+  // suben como PNG reales. Generarlos en el servidor habría significado
+  // escribir un codificador de PNG a mano, que es código binario imposible de
+  // probar sin poder ejecutar el servidor.
+  function logoGenerado(color, anillos) {
+    const N = 256;
+    const cv = document.createElement('canvas');
+    cv.width = N; cv.height = N;
+    const cx = cv.getContext('2d');
+
+    cx.fillStyle = color;
+    cx.fillRect(0, 0, N, N);
+
+    // Anillos concéntricos: distinguen un logo de prueba de otro de un vistazo.
+    for (let i = anillos; i >= 1; i--) {
+      cx.beginPath();
+      cx.arc(N / 2, N / 2, (N * 0.36) * (i / anillos), 0, Math.PI * 2);
+      cx.fillStyle = (i % 2 === 0) ? 'rgba(255,255,255,.35)' : '#ffffff';
+      cx.fill();
+    }
+    return cv.toDataURL('image/png');
+  }
+
+  $('btnCrearPrueba').addEventListener('click', async function () {
+    if (!confirm('Se crearán personas y puestos ficticios en la base de datos real.\n\n' +
+                 'Quedan marcados y podrás borrarlos de una vez. ¿Continuar?')) return;
+    const original = this.textContent;
+    this.disabled = true; this.textContent = 'Generando…';
+    try {
+      const r = await API.pedir('/api/soporte/datos-prueba', {
+        metodo: 'POST', auth: 'staff', cuerpo: { personas: 5 }
+      });
+
+      // Logo para cada puesto de prueba que aún no lo tenga.
+      const colores = ['#E60067', '#00C2FF'];
+      for (let i = 0; i < r.puestos.length; i++) {
+        try {
+          await API.pedir('/api/soporte/empresas/' + encodeURIComponent(r.puestos[i].id) + '/logo', {
+            metodo: 'POST', auth: 'staff',
+            cuerpo: { datos: logoGenerado(colores[i % colores.length], 3 + i) }
+          });
+        } catch (e) { /* el puesto queda sin logo, se ve el emoji */ }
+      }
+
+      aviso('pruebaResult', 'good',
+        '✓ ' + r.personas + ' personas y ' + r.puestos.length + ' puestos con ' +
+        r.insignias + ' insignias. Ya puedes probar el sorteo.');
+      await refrescar();
+    } catch (e) {
+      aviso('pruebaResult', 'bad', e.message);
+    } finally {
+      this.disabled = false; this.textContent = original;
+    }
+  });
+
+  $('btnBorrarPrueba').addEventListener('click', async function () {
+    if (!confirm('Se borrarán TODAS las personas y puestos marcados como prueba,\n' +
+                 'con sus insignias y escaneos.\n\nLos datos reales no se tocan. ¿Continuar?')) return;
+    const original = this.textContent;
+    this.disabled = true; this.textContent = 'Borrando…';
+    try {
+      const r = await API.pedir('/api/soporte/datos-prueba', { metodo: 'DELETE', auth: 'staff' });
+      aviso('pruebaResult', 'good',
+        '✓ Borrados: ' + r.borrado.personas + ' personas y ' + r.borrado.puestos + ' puestos.');
+      await refrescar();
+    } catch (e) {
+      aviso('pruebaResult', 'bad', e.message);
+    } finally {
+      this.disabled = false; this.textContent = original;
+    }
   });
 
   /* --------------------------------------------------------------------- */

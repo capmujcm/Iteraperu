@@ -7,6 +7,7 @@ const registrarInsignias = require('./lib/routes-insignias');
 const registrarEmpresa = require('./lib/routes-empresa');
 const registrarStaff = require('./lib/routes-staff');
 const registrarSorteo = require('./lib/routes-sorteo');
+const registrarPrueba = require('./lib/routes-prueba');
 
 // Logger activado: durante el evento hay que poder reconstruir que paso en la
 // puerta. `disableRequestLogging` evita una linea por peticion de asset, que
@@ -850,6 +851,9 @@ const start = async () => {
         requireAdmin: requireOrganizador   // reponer el acceso de un puesto
       });
       registrarSorteo(fastify, {
+        store, eventoId, rateLimit, requireOrganizador, registrarAccion
+      });
+      registrarPrueba(fastify, {
         store, eventoId, rateLimit, requireOrganizador, registrarAccion
       });
     }

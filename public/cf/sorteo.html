@@ -70,11 +70,20 @@
   @keyframes aparecer{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
   .ganador .eti{font-family:'JetBrains Mono',monospace;font-size:clamp(.9rem,2vw,1.4rem);
     letter-spacing:.3em;text-transform:uppercase;color:var(--yellow);margin-bottom:.6rem;}
+  /* El nombre del ganador NUNCA puede quedar invisible: es el único momento
+     que importa de toda la pantalla. Por defecto va en blanco sólido; el
+     degradado recortado solo se aplica donde el navegador lo soporta de
+     verdad. Con `color:transparent` sin esa salvaguarda, un proyector o un
+     navegador que no aplique background-clip deja el nombre en blanco. */
   .ganador .nom{font-size:clamp(2.5rem,9vw,7rem);font-weight:900;line-height:1;
-    letter-spacing:-.04em;
-    background:linear-gradient(135deg,#fff 20%,var(--yellow) 60%,var(--event) 100%);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-    text-shadow:0 0 80px rgba(255,222,0,.25);}
+    letter-spacing:-.04em;color:#fff;
+    text-shadow:0 0 80px rgba(255,222,0,.35);}
+  @supports ((-webkit-background-clip:text) or (background-clip:text)){
+    .ganador .nom{
+      background:linear-gradient(135deg,#fff 20%,var(--yellow) 60%,#FF7AB8 100%);
+      -webkit-background-clip:text;background-clip:text;
+      -webkit-text-fill-color:transparent;}
+  }
   .ganador .meta{margin-top:1rem;font-size:clamp(1rem,2.2vw,1.6rem);color:var(--muted);}
   .ganador .cod{font-family:'JetBrains Mono',monospace;color:var(--cyan);font-weight:700;}
 
@@ -127,6 +136,29 @@
   .premio-item button{background:none;border:1px solid rgba(255,255,255,.22);color:var(--muted);
     border-radius:9px;padding:.35rem .7rem;cursor:pointer;font-family:inherit;font-size:.8rem;}
 
+  /* ---- patrocinador ---- */
+  /* El logo de quien regala el premio preside la pantalla. Si el premio no
+     tiene patrocinador, se usa el del propio evento. */
+  .patro{display:flex;flex-direction:column;align-items:center;gap:.5rem;margin-bottom:1.2rem;}
+  .patro img{height:clamp(70px,11vh,130px);max-width:min(60vw,420px);object-fit:contain;
+    background:rgba(255,255,255,.96);border-radius:18px;padding:.7rem 1.1rem;
+    box-shadow:0 16px 50px -18px rgba(0,0,0,.8);}
+  .patro-nombre{font-family:'JetBrains Mono',monospace;font-size:clamp(.65rem,1.3vw,.9rem);
+    letter-spacing:.22em;text-transform:uppercase;color:var(--muted);}
+
+  /* ---- tarjetas del selector ---- */
+  .tarjeta{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.16);
+    border-radius:18px;padding:1.2rem 1rem;cursor:pointer;text-align:center;
+    transition:transform .14s,border-color .14s,background .14s;}
+  .tarjeta:hover{transform:translateY(-4px);border-color:var(--event);
+    background:rgba(230,0,103,.14);}
+  .tarjeta img{height:54px;max-width:80%;object-fit:contain;background:#fff;
+    border-radius:10px;padding:.35rem .5rem;margin-bottom:.6rem;}
+  .tarjeta .o{font-family:'JetBrains Mono',monospace;color:var(--yellow);
+    font-weight:800;font-size:.85rem;letter-spacing:.14em;}
+  .tarjeta .nm{font-size:1.15rem;font-weight:800;margin:.25rem 0 .15rem;line-height:1.2;}
+  .tarjeta .de{font-size:.8rem;color:var(--muted);}
+
   canvas#confeti{position:fixed;inset:0;pointer-events:none;z-index:50;}
 
   /* Quien no ha ganado se apaga: es el "efecto de perdedor" mientras la ruleta
@@ -173,6 +205,14 @@
         <input type="text" id="pr-nombre" maxlength="150" required placeholder="Ej. Televisor 55 pulgadas">
       </div>
       <div class="campo">
+        <label for="pr-empresa">¿Quién lo regala?</label>
+        <select id="pr-empresa" style="width:100%;padding:.85rem 1rem;border-radius:12px;
+          border:1.5px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);
+          color:#fff;font-family:inherit;font-size:1rem;">
+          <option value="">Country Fest — se muestra el logo del evento</option>
+        </select>
+      </div>
+      <div class="campo">
         <label for="pr-desc">Detalle (opcional)</label>
         <input type="text" id="pr-desc" maxlength="500" placeholder="Cortesía de…">
       </div>
@@ -194,7 +234,17 @@
   </div>
 
   <div class="escena">
+    <!-- Selector: los premios que quedan, para elegir cuál se juega ahora -->
+    <div id="zonaElegir" class="oculto" style="width:min(92vw,1000px);">
+      <div class="premio-eyebrow" style="text-align:center;margin-bottom:1.2rem;">Elige el premio a sortear</div>
+      <div id="rejillaPremios" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;"></div>
+    </div>
+
     <div id="zonaPremio">
+      <div class="patro" id="patro">
+        <img id="patroLogo" alt="">
+        <div class="patro-nombre" id="patroNombre"></div>
+      </div>
       <div class="premio-eyebrow" id="premioOrden">—</div>
       <div class="premio-nombre" id="premioNombre">—</div>
       <div class="premio-desc" id="premioDesc"></div>
@@ -217,6 +267,7 @@
 
   <div class="barra">
     <button class="btn btn-jugar" id="btnJugar">🎲 Sortear</button>
+    <button class="btn btn-sec" id="btnElegir" hidden>Elegir premio</button>
     <button class="btn btn-sec" id="btnPremios">Premios</button>
     <span class="info" id="infoBombo">—</span>
   </div>
@@ -242,6 +293,29 @@
 
   const $ = id => document.getElementById(id);
   const ver = (id, mostrar) => $(id).classList.toggle('oculto', !mostrar);
+
+  const LOGO_EVENTO = '/assets/country-fest-logo-clean.png';
+
+  // Logo del patrocinador, o el del evento si el premio no tiene ninguno.
+  function logoDe(premio) {
+    return (premio && premio.empresa_id && premio.empresa_tiene_logo)
+      ? '/api/empresas/' + encodeURIComponent(premio.empresa_id) + '/logo'
+      : LOGO_EVENTO;
+  }
+
+  function pintarPatrocinador(premio) {
+    $('patroLogo').src = logoDe(premio);
+    $('patroNombre').textContent = (premio && premio.empresa_nombre)
+      ? 'Cortesía de ' + premio.empresa_nombre
+      : '';
+  }
+
+  function pintarCabecera(premio) {
+    pintarPatrocinador(premio);
+    $('premioOrden').textContent = premio.orden + 'º premio';
+    $('premioNombre').textContent = premio.nombre;
+    $('premioDesc').textContent = premio.descripcion || '';
+  }
 
   function msg(caja, tipo, texto) {
     $(caja).innerHTML = '<div class="msg ' + tipo + '">' + esc(texto) + '</div>';
@@ -283,7 +357,21 @@
   /* --------------------------------------------------------------------- */
   /* premios                                                               */
   /* --------------------------------------------------------------------- */
+  // Puestos disponibles como patrocinadores del premio.
+  async function cargarPuestos() {
+    try {
+      const r = await API.pedir('/api/empresas');
+      const sel = $('pr-empresa');
+      sel.innerHTML = '<option value="">Country Fest — se muestra el logo del evento</option>' +
+        (r.empresas || []).map(function (e) {
+          return '<option value="' + esc(e.id) + '">' + esc(e.nombre) +
+            (e.tiene_logo ? '' : ' (sin logo)') + '</option>';
+        }).join('');
+    } catch (e) { /* el desplegable se queda solo con Country Fest */ }
+  }
+
   async function pintarPremios() {
+    cargarPuestos();
     try {
       const r = await API.pedir('/api/sorteo/premios', { auth: 'staff' });
       const lista = r.premios || [];
@@ -292,7 +380,10 @@
             return '<div class="premio-item">' +
               '<span class="n">' + esc(String(p.orden)) + 'º</span>' +
               '<div class="t"><b>' + esc(p.nombre) + '</b>' +
-                (p.descripcion ? '<br><span style="font-size:.85rem;opacity:.6;">' + esc(p.descripcion) + '</span>' : '') +
+                '<br><span style="font-size:.85rem;opacity:.6;">' +
+                  esc(p.empresa_nombre || 'Country Fest') +
+                  (p.descripcion ? ' · ' + esc(p.descripcion) : '') +
+                '</span>' +
               '</div>' +
               (p.sorteado
                 ? '<span style="color:#0F9B6C;font-size:.85rem;">✓ sorteado</span>'
@@ -322,7 +413,11 @@
     try {
       await API.pedir('/api/sorteo/premios', {
         metodo: 'POST', auth: 'staff',
-        cuerpo: { nombre: nombre, descripcion: $('pr-desc').value.trim() }
+        cuerpo: {
+          nombre: nombre,
+          descripcion: $('pr-desc').value.trim(),
+          empresa_id: $('pr-empresa').value || null
+        }
       });
       $('formPremio').reset();
       $('premioMsg').innerHTML = '';
@@ -345,9 +440,46 @@
   });
 
   /* --------------------------------------------------------------------- */
+  /* elegir qué premio se juega                                            */
+  /* --------------------------------------------------------------------- */
+  $('btnElegir').addEventListener('click', function () {
+    if (!pendientes.length) return;
+
+    $('rejillaPremios').innerHTML = pendientes.map(function (p) {
+      return '<div class="tarjeta" data-premio="' + esc(p.id) + '">' +
+        '<img src="' + esc(logoDe(p)) + '" alt="">' +
+        '<div class="o">' + esc(String(p.orden)) + 'º</div>' +
+        '<div class="nm">' + esc(p.nombre) + '</div>' +
+        '<div class="de">' + esc(p.empresa_nombre || 'Country Fest') + '</div>' +
+      '</div>';
+    }).join('');
+
+    $('rejillaPremios').querySelectorAll('[data-premio]').forEach(function (t) {
+      t.addEventListener('click', function () {
+        elegido = pendientes.find(p => p.id === this.dataset.premio) || elegido;
+        mostrandoGanador = false;
+        ver('zonaElegir', false);
+        ver('zonaPremio', true);
+        ver('zonaGanador', false);
+        pintarCabecera(elegido);
+        $('btnJugar').textContent = '🎲 Sortear el ' + elegido.orden + 'º';
+      });
+    });
+
+    ver('zonaPremio', false);
+    ver('zonaGanador', false);
+    ver('carrete', false);
+    ver('zonaElegir', true);
+  });
+
+  /* --------------------------------------------------------------------- */
   /* estado                                                                */
   /* --------------------------------------------------------------------- */
   let siguiente = null;
+  let pendientes = [];
+  // Premio elegido para la próxima tirada. Por defecto el siguiente por orden,
+  // pero el organizador puede escoger otro de los que quedan.
+  let elegido = null;
   // Mientras se muestra un ganador, la cabecera NO se adelanta al siguiente
   // premio: proyectado, se leería «2º premio — GANADOR Ana Torres» cuando Ana
   // acaba de ganar el 1º. El premio avanza al pulsar Sortear otra vez.
@@ -370,12 +502,17 @@
         return;
       }
 
-      if (siguiente) {
-        $('premioOrden').textContent = siguiente.orden + 'º premio';
-        $('premioNombre').textContent = siguiente.nombre;
-        $('premioDesc').textContent = siguiente.descripcion || '';
+      // Los que quedan por sortear, para el selector.
+      pendientes = (e.premios || []).filter(p => !p.sorteado);
+
+      if (elegido && !pendientes.some(p => p.id === elegido.id)) elegido = null;
+      if (!elegido) elegido = siguiente;
+
+      if (elegido) {
+        pintarCabecera(elegido);
         $('btnJugar').disabled = e.participantes === 0;
       } else {
+        pintarPatrocinador(null);
         $('premioOrden').textContent = 'Sorteo terminado';
         $('premioNombre').textContent = e.premios.length ? '🎉' : 'Sin premios';
         $('premioDesc').textContent = e.premios.length
@@ -383,7 +520,8 @@
           : 'Registra los premios antes de empezar';
         $('btnJugar').disabled = true;
       }
-      $('btnJugar').textContent = siguiente ? '🎲 Sortear el ' + siguiente.orden + 'º' : '🎲 Sortear';
+      $('btnJugar').textContent = elegido ? '🎲 Sortear el ' + elegido.orden + 'º' : '🎲 Sortear';
+      $('btnElegir').hidden = pendientes.length < 2;
     } catch (e) {
       $('estado').textContent = 'Sin conexión';
     }
@@ -455,12 +593,16 @@
     try {
       // El servidor decide y GRABA el ganador aquí. Lo que viene después es
       // la representación de algo ya resuelto.
-      const r = await API.pedir('/api/sorteo/jugar', { metodo: 'POST', auth: 'staff' });
+      const r = await API.pedir('/api/sorteo/jugar', {
+        metodo: 'POST', auth: 'staff',
+        cuerpo: elegido ? { premio_id: elegido.id } : {}
+      });
 
-      $('premioOrden').textContent = r.premio.orden + 'º premio';
-      $('premioNombre').textContent = r.premio.nombre;
-      $('premioDesc').textContent = r.premio.descripcion || '';
+      // El logo de quien regala preside la pantalla durante todo el giro.
+      pintarCabecera(r.premio);
 
+      ver('zonaElegir', false);
+      ver('zonaPremio', true);
       ver('zonaGanador', false);
       ver('carrete', true);
       $('zonaLista').classList.add('apagado');
@@ -484,6 +626,7 @@
       confeti();
       // A partir de aquí la cabecera se queda con el premio recién ganado.
       mostrandoGanador = true;
+      elegido = null;   // el siguiente vuelve a ser el que toca por orden
       await refrescarEstado();
     } catch (e) {
       $('estado').textContent = e.message;

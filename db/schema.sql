@@ -428,3 +428,18 @@ CREATE TABLE IF NOT EXISTS sorteo_resultados (
 -- los ganadores previos, y este indice lo garantiza aunque algo falle arriba.
 CREATE UNIQUE INDEX IF NOT EXISTS idx_sorteo_un_premio_por_persona
   ON sorteo_resultados (evento_id, ticket_id) WHERE ticket_id IS NOT NULL;
+
+-- =============================================================================
+-- 22. Premio patrocinado por un puesto
+-- =============================================================================
+-- Quien regala el premio. Si esta vacio, la pantalla del sorteo muestra el
+-- logotipo del propio evento en lugar del de un patrocinador.
+-- ON DELETE SET NULL: si el puesto se borra, el premio y su resultado siguen
+-- existiendo; solo se queda sin patrocinador.
+ALTER TABLE premios ADD COLUMN IF NOT EXISTS empresa_id UUID
+  REFERENCES empresas(id) ON DELETE SET NULL;
+
+-- Marca de dato de prueba. Permite generar un evento de mentira para ensayar y
+-- despues borrarlo entero sin tocar a nadie real.
+ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS es_prueba BOOLEAN DEFAULT false;
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS es_prueba BOOLEAN DEFAULT false;
