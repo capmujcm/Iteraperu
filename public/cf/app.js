@@ -341,9 +341,16 @@ function esc(v) {
 }
 
 // Nombre completo de una persona, ya escapado.
+//
+// Quien se registro en la puerta puede no tener nombre todavia: ahi solo se
+// pide el documento y la persona completa el resto desde su celular. Devolver
+// vacio dejaba un hueco en las tarjetas que parecia un fallo de carga, asi que
+// se dice lo que pasa.
 function NM(p) {
   if (!p) return '';
-  return esc(((p.nombre || '') + ' ' + (p.apellido || '')).trim());
+  const completo = ((p.nombre || '') + ' ' + (p.apellido || '')).trim();
+  if (!completo) return '<span class="muted">Sin nombre aún</span>';
+  return esc(completo);
 }
 
 const fD = ts => new Date(ts).toLocaleDateString('es-PE');

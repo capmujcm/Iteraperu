@@ -230,7 +230,20 @@
     <!-- ================= perfil ================= -->
     <section class="screen" data-sc="perfil">
       <div class="schead"><h2>Mi perfil</h2></div>
+
+      <div class="note n-warn" id="avisoDatos" hidden style="margin-bottom:.7rem;">
+        <b>Falta tu nombre.</b>
+        <span class="tiny">Te registraron en la puerta solo con tu documento. Escribe tu nombre
+        para que tu entrada sea tuya y podamos anunciarte si ganas el sorteo.</span>
+        <button class="btn btn-event btn-block btn-sm" data-go="mis-datos" style="margin-top:.5rem;">Poner mi nombre</button>
+      </div>
+
       <div class="card" id="perfilBox"></div>
+
+      <div class="card" style="margin-top:.7rem;">
+        <h4 style="font-size:.92rem;margin-bottom:.5rem;">Mis datos</h4>
+        <button class="btn btn-line btn-block btn-sm" data-go="mis-datos">Completar o corregir mis datos</button>
+      </div>
 
       <div class="card" style="margin-top:.7rem;">
         <h4 style="font-size:.92rem;margin-bottom:.5rem;">Seguridad</h4>
@@ -243,13 +256,36 @@
       </div>
 
       <div class="card" style="margin-top:.7rem;">
-        <h4 style="font-size:.92rem;margin-bottom:.5rem;">Mis datos</h4>
+        <h4 style="font-size:.92rem;margin-bottom:.5rem;">Mis derechos sobre mis datos</h4>
         <p class="tiny muted" style="margin-bottom:.6rem;">
           Puedes pedir acceso, corrección o eliminación de tus datos personales.
           Se responde en un máximo de 20 días hábiles, según la Ley 29733.
         </p>
         <a class="btn btn-line btn-block btn-sm" href="mailto:datos@iteraperu.pe?subject=Solicitud%20sobre%20mis%20datos%20-%20Country%20Fest">Escribir a datos@iteraperu.pe</a>
       </div>
+    </section>
+
+    <!-- ================= mis datos ================= -->
+    <!-- Quien se registro en la puerta llega aqui con solo su documento. Este
+         es el sitio donde pone su nombre, y donde cualquiera corrige lo que
+         este mal escrito sin tener que escribir un correo. -->
+    <section class="screen" data-sc="mis-datos">
+      <div class="schead"><button class="back" data-go="perfil" aria-label="Volver">‹</button><h2>Mis datos</h2></div>
+      <p class="tiny muted" style="margin-bottom:.8rem;">
+        Tu nombre es lo que verá el staff en la puerta y lo que se anuncia si ganas el sorteo.
+        El celular y el correo son opcionales: sirven para avisarte si ganas.
+      </p>
+      <form class="card" id="formDatos" novalidate>
+        <div class="field"><label for="md-nom">Nombres</label><input type="text" id="md-nom" autocomplete="given-name" required></div>
+        <div class="field"><label for="md-ape">Apellidos</label><input type="text" id="md-ape" autocomplete="family-name"></div>
+        <div class="field"><label for="md-cel">Celular (opcional)</label><input type="tel" id="md-cel" inputmode="tel" autocomplete="tel"></div>
+        <div class="field"><label for="md-email">Correo (opcional)</label><input type="email" id="md-email" autocomplete="email"></div>
+        <button class="btn btn-event btn-block" type="submit">Guardar</button>
+      </form>
+      <p class="tiny muted" style="margin-top:.6rem;">
+        Deja un campo opcional en blanco y lo borramos de tu registro.
+      </p>
+      <div id="datosResult" style="margin-top:.8rem;"></div>
     </section>
 
     <!-- ================= cambio de contraseña voluntario ================= -->
@@ -510,6 +546,11 @@
 
   function pintarPerfil() {
     if (!persona) return;
+
+    // Registro hecho en la puerta: solo hay documento. Se pide el nombre en
+    // cuanto la persona abre su cuenta, que es cuando puede escribirlo bien.
+    el('avisoDatos').hidden = !!persona.nombre;
+
     el('perfilBox').innerHTML =
       '<div class="between" style="margin-bottom:.6rem;"><b>' + NM(persona) + '</b>' +
         '<span class="pill p-blue">' + esc(String(persona.tipo_ticket || 'general')) + '</span></div>' +
@@ -740,13 +781,59 @@
     });
   }
 
+  // Tras el cambio obligatorio de contraseña: si la ficha no tiene nombre es
+  // que la creo el staff en la puerta, así que lo primero es completarla.
   conectarCambioClave('formClave',
     { actual: 'ck-actual', nueva: 'ck-nueva', nueva2: 'ck-nueva2' },
-    'clvResult', function () { go('ticket'); });
+    'clvResult', function () { go(persona && !persona.nombre ? 'mis-datos' : 'ticket'); });
 
   conectarCambioClave('formClave2',
     { actual: 'cv-actual', nueva: 'cv-nueva', nueva2: 'cv-nueva2' },
     'clv2Result', function () { go('perfil'); });
+
+  /* --------------------------------------------------------------------- */
+  /* mis datos                                                             */
+  /* --------------------------------------------------------------------- */
+  // El formulario se rellena con lo que ya hay para que la persona corrija en
+  // vez de volver a teclear. Se usa value (no innerHTML): nada de lo que se
+  // escriba aquí llega a interpretarse como HTML.
+  function cargarFormDatos() {
+    if (!persona) return;
+    el('md-nom').value = persona.nombre || '';
+    el('md-ape').value = persona.apellido || '';
+    el('md-cel').value = persona.celular || '';
+    el('md-email').value = persona.email || '';
+    limpiar('datosResult');
+  }
+
+  el('formDatos').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    limpiar('datosResult');
+
+    const nombre = el('md-nom').value.trim();
+    if (!nombre) return aviso('datosResult', 'bad', 'Escribe al menos tus nombres.');
+
+    const boton = this.querySelector('button[type="submit"]');
+    await conBoton(boton, 'Guardando…', async function () {
+      try {
+        const datos = await API.pedir('/api/auth/perfil', {
+          metodo: 'PATCH',
+          auth: 'sesion',
+          cuerpo: {
+            nombre: nombre,
+            apellido: el('md-ape').value.trim(),
+            celular: el('md-cel').value.trim(),
+            email: el('md-email').value.trim()
+          }
+        });
+        establecerPersona(datos.attendee);
+        aviso('datosResult', 'good', '✓ Datos guardados');
+        setTimeout(function () { go('ticket'); }, 800);
+      } catch (e) {
+        aviso('datosResult', 'bad', e.message);
+      }
+    });
+  });
 
   /* --------------------------------------------------------------------- */
   /* insignias                                                             */
@@ -929,6 +1016,7 @@
     }
     if (p === 'insignias') cargarInsignias();
     if (p === 'puestos') pintarPuestos();
+    if (p === 'mis-datos') cargarFormDatos();
   });
 
   /* --------------------------------------------------------------------- */

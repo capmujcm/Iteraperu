@@ -452,3 +452,10 @@ ALTER TABLE empresas ADD COLUMN IF NOT EXISTS tiktok VARCHAR(80);
 -- Numero PUBLICO del puesto, para que los asistentes lo contacten. Distinto de
 -- `telefono`, que es el del responsable y solo lo ve la organizacion.
 ALTER TABLE empresas ADD COLUMN IF NOT EXISTS whatsapp VARCHAR(30);
+
+-- En la puerta lo unico que se comprueba es el documento fisico. Pedirle al
+-- staff que ademas teclee nombres y apellidos de cada persona alarga la cola y
+-- llena la base de nombres mal escritos. El alta rapida guarda solo el DNI y la
+-- persona completa sus datos cuando entra a su cuenta desde el celular, que es
+-- donde el dato sale correcto y ademas lo escribe su propio titular.
+ALTER TABLE asistentes_tickets ALTER COLUMN nombre DROP NOT NULL;

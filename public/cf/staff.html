@@ -180,11 +180,12 @@
       <p class="tiny muted" style="margin-bottom:.8rem;">Para quien llegó sin registrarse. Pide el documento físico.</p>
       <form id="formRapido" novalidate>
         <div class="field"><label for="rp-dni">DNI o documento</label><input type="text" id="rp-dni" inputmode="numeric" required autocomplete="off"></div>
-        <div class="g2">
-          <div class="field"><label for="rp-nom">Nombres</label><input type="text" id="rp-nom" required autocomplete="off"></div>
-          <div class="field"><label for="rp-ape">Apellidos</label><input type="text" id="rp-ape" autocomplete="off"></div>
+
+        <div class="note n-info tiny" style="margin-bottom:.8rem;">
+          <b>Solo el documento.</b> Su nombre, celular y correo los completa la propia
+          persona al entrar a su cuenta desde el celular. No los teclees tú: alarga la
+          cola y se escriben mal.
         </div>
-        <div class="field"><label for="rp-cel">Celular (opcional)</label><input type="tel" id="rp-cel" autocomplete="off"></div>
 
         <label class="consent" for="rp-consent">
           <input type="checkbox" id="rp-consent">
@@ -533,10 +534,8 @@
     limpiar('rapResult');
 
     const dni = el('rp-dni').value.trim();
-    const nombre = el('rp-nom').value.trim();
 
     if (!dni) return aviso('rapResult', 'bad', 'Escribe el documento.');
-    if (!nombre) return aviso('rapResult', 'bad', 'Escribe al menos el nombre.');
     if (!el('rp-consent').checked) {
       return aviso('rapResult', 'bad', 'Confirma que verificaste el documento y explicaste el uso de los datos.');
     }
@@ -549,9 +548,6 @@
           auth: 'staff',
           cuerpo: {
             dni: dni,
-            nombre: nombre,
-            apellido: el('rp-ape').value.trim(),
-            celular: el('rp-cel').value.trim(),
             consentimiento_verificado: true,
             validar_ingreso: el('rp-validar').checked,
             puerta: staffPuerta || 'Punto de Ayuda'
@@ -571,8 +567,8 @@
             '<div class="kv"><span>Válida por</span><span>' + esc(String(datos.minutos_validez || 30)) + ' minutos</span></div>' +
           '</div>' +
           '<div class="note n-info tiny" style="margin-top:.6rem;">' +
-            'Dile que entre a <b>iteraperu.pe/e/country-fest</b> con su DNI y esta contraseña ' +
-            'para tener su entrada en el celular. Al entrar elegirá una propia.' +
+            'Dile que entre a <b>iteraperu.pe/e/country-fest</b> con su DNI y esta contraseña. ' +
+            'Ahí elegirá su contraseña, completará su nombre y tendrá su entrada en el celular.' +
           '</div>';
 
         el('formRapido').reset();
