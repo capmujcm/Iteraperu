@@ -443,3 +443,8 @@ ALTER TABLE premios ADD COLUMN IF NOT EXISTS empresa_id UUID
 -- despues borrarlo entero sin tocar a nadie real.
 ALTER TABLE asistentes_tickets ADD COLUMN IF NOT EXISTS es_prueba BOOLEAN DEFAULT false;
 ALTER TABLE empresas ADD COLUMN IF NOT EXISTS es_prueba BOOLEAN DEFAULT false;
+
+-- Redes del puesto. Instagram ya existia; en una feria gastronomica en Peru,
+-- Facebook y TikTok pesan tanto o mas.
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS facebook VARCHAR(80);
+ALTER TABLE empresas ADD COLUMN IF NOT EXISTS tiktok VARCHAR(80);
