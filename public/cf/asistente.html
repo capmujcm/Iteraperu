@@ -452,6 +452,10 @@
   </div>
 </div>
 
+<!-- Lector de QR. Va antes de app.js porque la camara lo usa. Se sirve desde
+     nuestro propio origen: en el recinto no se puede contar con que un CDN
+     responda, y un lector que no carga es una puerta que no valida. -->
+<script src="/cf/jsqr.js"></script>
 <script src="/cf/app.js"></script>
 <script>
 /* =============================================================================
