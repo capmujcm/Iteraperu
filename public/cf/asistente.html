@@ -865,10 +865,19 @@
       ? '<img class="logo-insignia" src="/api/empresas/' + encodeURIComponent(i.empresa_id) + '/logo"' +
         ' alt="" loading="lazy">'
       : '<span class="em">' + esc(i.emoji || '🎪') + '</span>';
-    return '<div class="medal' + (ganada ? '' : ' locked') + '" style="' + fondo + '">' +
+    // Ganada = pulsable: abre la ficha del puesto. Va como botón y no como
+    // div para que se pueda llegar con el teclado y un lector de pantalla
+    // anuncie que hay algo que abrir.
+    if (!ganada) {
+      return '<div class="medal locked">' + cara +
+               '<span class="mn">' + esc(i.nombre || '') + '</span></div>';
+    }
+    return '<button type="button" class="medal abrible" style="' + fondo + '"' +
+             ' data-ficha="' + esc(i.empresa_id) + '"' +
+             ' aria-label="Ver el puesto ' + esc(i.nombre || '') + '">' +
              cara +
              '<span class="mn">' + esc(i.nombre || '') + '</span>' +
-           '</div>';
+           '</button>';
   }
 
   function pintarInsignias() {
@@ -884,9 +893,19 @@
     }
 
     el('insigniasBox').innerHTML =
+      '<p class="tiny muted" style="margin:0 0 .6rem;">Toca una insignia para ver el puesto: lo que ofrece, su descripción y sus redes.</p>' +
       '<div class="bgrid">' + insignias.map(function (i) { return medalla(i, true); }).join('') + '</div>' +
       '<button class="btn btn-line btn-block btn-sm" data-go="puestos" style="margin-top:.8rem;">Ver los puestos que faltan</button>';
   }
+
+  // Un solo manejador en la caja en lugar de uno por insignia: la colección se
+  // vuelve a pintar entera en cada escaneo y así no hay que reenganchar nada.
+  el('insigniasBox').addEventListener('click', function (ev) {
+    const boton = ev.target.closest('[data-ficha]');
+    if (!boton) return;
+    const i = insignias.find(function (x) { return x.empresa_id === boton.dataset.ficha; });
+    if (i) abrirFichaPuesto(i);
+  });
 
   async function pintarPuestos() {
     const caja = el('puestosBox');
@@ -902,10 +921,14 @@
       const mias = {};
       insignias.forEach(function (i) { mias[i.empresa_id] = true; });
 
-      caja.innerHTML = '<div class="list">' + puestos.map(function (p) {
+      // La misma ficha que abre una insignia: aquí sirve para decidir a qué
+      // puesto ir antes de tener su insignia.
+      caja.innerHTML =
+        '<p class="tiny muted" style="margin:0 0 .6rem;">Toca un puesto para ver lo que ofrece y sus redes.</p>' +
+        '<div class="list">' + puestos.map(function (p) {
         const tengo = !!mias[p.id];
-        return '<div class="item">' +
-          '<div class="logo" style="background:' + esc(p.color || '#EEE') + '22;">' + esc(p.emoji || '🎪') + '</div>' +
+        return '<div class="item abrible" role="button" tabindex="0" data-ficha="' + esc(p.id) + '">' +
+          '<div class="logo" style="background:' + colorHex(p.color, '#EEEEEE') + '22;">' + esc(p.emoji || '🎪') + '</div>' +
           '<div class="gr"><b>' + esc(p.nombre) + '</b>' +
             '<span>' + esc(p.stand || '') + (p.condicion ? ' · ' + esc(p.condicion) : '') + '</span></div>' +
           (tengo ? '<span class="pill p-gold">✓</span>' : '<span class="pill p-neutral">—</span>') +
@@ -915,6 +938,25 @@
       caja.innerHTML = '<div class="flash bad">' + esc(e.message) + '</div>';
     }
   }
+
+  function abrirPuestoDeLista(id) {
+    const p = puestos.find(function (x) { return x.id === id; });
+    if (p) abrirFichaPuesto(p);
+  }
+
+  el('puestosBox').addEventListener('click', function (ev) {
+    const fila = ev.target.closest('[data-ficha]');
+    if (fila) abrirPuestoDeLista(fila.dataset.ficha);
+  });
+
+  // Las filas son divs con role="button": el teclado no las activa solo.
+  el('puestosBox').addEventListener('keydown', function (ev) {
+    if (ev.key !== 'Enter' && ev.key !== ' ') return;
+    const fila = ev.target.closest('[data-ficha]');
+    if (!fila) return;
+    ev.preventDefault();
+    abrirPuestoDeLista(fila.dataset.ficha);
+  });
 
   // Mensaje de estado arriba de la cámara: sin ingreso validado no se puede
   // coleccionar, y conviene decirlo antes de que la persona escanee en vano.

@@ -224,8 +224,117 @@ function cerrarCelebracion() {
 
 // Escape cierra, como cualquier dialogo.
 document.addEventListener('keydown', function (ev) {
-  if (ev.key === 'Escape') cerrarCelebracion();
+  if (ev.key === 'Escape') { cerrarCelebracion(); cerrarHoja(); }
 });
+
+/* ===================================================================
+   Ficha de un puesto
+   =================================================================== */
+// Lo que el puesto escribe en "Instagram" es texto libre de hasta 80
+// caracteres: puede poner "@tupuesto", la URL entera o cualquier cosa,
+// incluido un "javascript:". Asi que NUNCA se usa ese valor como href.
+//
+// Se extrae el identificador -solo letras, numeros, punto, guion y guion
+// bajo- y la direccion la componemos nosotros. El esquema y el dominio
+// son constantes del codigo, no dato de nadie.
+function usuarioRed(v) {
+  const limpio = String(v == null ? '' : v)
+    .trim()
+    .replace(/^https?:\/\/(www\.)?[a-z0-9.-]+\//i, '')  // pegaron la URL entera
+    .replace(/^@+/, '')
+    .split(/[/?#]/)[0]
+    .replace(/[^A-Za-z0-9._-]/g, '')
+    .slice(0, 60);
+  return limpio || null;
+}
+
+// El numero se reduce a digitos y se le antepone el 51 de Peru si viene sin
+// prefijo, que es como lo escribe todo el mundo aqui.
+function telefonoWa(v) {
+  let d = String(v == null ? '' : v).replace(/\D/g, '');
+  if (!d) return null;
+  if (d.length === 9) d = '51' + d;
+  if (d.length < 8 || d.length > 15) return null;
+  return d;
+}
+
+const REDES = [
+  { campo: 'instagram', icono: '📸', nombre: 'Instagram', base: 'https://instagram.com/' },
+  { campo: 'facebook', icono: '👍', nombre: 'Facebook', base: 'https://facebook.com/' },
+  { campo: 'tiktok', icono: '🎵', nombre: 'TikTok', base: 'https://tiktok.com/@' }
+];
+
+function cerrarHoja() {
+  const previa = document.querySelector('.hoja');
+  if (previa) previa.remove();
+}
+
+// p es el puesto tal y como lo devuelve el servidor: puede venir de la
+// coleccion de insignias o del catalogo publico, los campos son los mismos.
+function abrirFichaPuesto(p) {
+  if (!p) return;
+  cerrarHoja();
+
+  const cara = p.tiene_logo
+    ? '<img src="/api/empresas/' + encodeURIComponent(p.empresa_id || p.id) + '/logo" alt="">'
+    : esc(p.emoji || '🎪');
+
+  const enlaces = [];
+  REDES.forEach(function (r) {
+    const u = usuarioRed(p[r.campo]);
+    if (!u) return;
+    enlaces.push(
+      '<a class="hoja-red" href="' + r.base + encodeURIComponent(u) + '"' +
+        ' target="_blank" rel="noopener noreferrer">' +
+        '<span class="ic">' + r.icono + '</span>' +
+        '<span class="tx">@' + esc(u) + '</span></a>'
+    );
+  });
+
+  const wa = telefonoWa(p.whatsapp);
+  if (wa) {
+    enlaces.push(
+      '<a class="hoja-red wa" href="https://wa.me/' + encodeURIComponent(wa) + '"' +
+        ' target="_blank" rel="noopener noreferrer">' +
+        '<span class="ic">💬</span><span class="tx">WhatsApp</span></a>'
+    );
+  }
+
+  const sub = [p.rubro, p.stand ? 'Stand ' + p.stand : null]
+    .filter(Boolean).join(' · ');
+
+  const capa = document.createElement('div');
+  capa.className = 'hoja';
+  capa.setAttribute('role', 'dialog');
+  capa.setAttribute('aria-label', 'Ficha del puesto');
+
+  capa.innerHTML =
+    '<div class="hoja-caja">' +
+      '<div class="hoja-asa"><i></i></div>' +
+      '<div class="hoja-cab">' +
+        '<div class="hoja-logo" style="background:' + colorHex(p.color, '#E60067') + '22;">' +
+          cara + '</div>' +
+        '<div><h3>' + esc(p.nombre || '') + '</h3>' +
+          (sub ? '<p>' + esc(sub) + '</p>' : '') + '</div>' +
+      '</div>' +
+      (p.condicion
+        ? '<div class="hoja-promo"><b>Lo que ofrecen</b><span>' + esc(p.condicion) + '</span></div>'
+        : '') +
+      (p.descripcion ? '<p class="hoja-desc">' + esc(p.descripcion) + '</p>' : '') +
+      (enlaces.length
+        ? '<div class="hoja-redes">' + enlaces.join('') + '</div>'
+        : '<p class="hoja-vacio">Este puesto todavía no ha publicado sus redes.</p>') +
+      '<button type="button" class="btn btn-line btn-block btn-sm hoja-pie">Cerrar</button>' +
+    '</div>';
+
+  capa.querySelector('.hoja-pie').addEventListener('click', cerrarHoja);
+  capa.addEventListener('click', function (ev) {
+    if (ev.target === capa) cerrarHoja();
+  });
+
+  document.body.appendChild(capa);
+  try { capa.querySelector('.hoja-pie').focus({ preventScroll: true }); } catch (e) {}
+}
 
 const fD = ts => new Date(ts).toLocaleDateString('es-PE');
 const fT = ts => new Date(ts).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
@@ -272,6 +381,7 @@ function go(nombre) {
   if (!destino) return;
   stopCams();
   cerrarCelebracion();
+  cerrarHoja();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   destino.classList.add('active');
   pantallaActual = nombre;
