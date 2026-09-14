@@ -943,6 +943,16 @@
       const e = datos.empresa;
 
       if (datos.resultado === 'duplicado') {
+        celebrar({
+          tono: 'no',
+          marca: '🔁',
+          titulo: 'Esta ya la tienes',
+          principal: e.nombre,
+          secundario: 'Una insignia por puesto',
+          boton: 'Entendido',
+          pie: 'Busca un puesto que aún no hayas visitado.',
+          auto: 2600
+        });
         el('scResult').innerHTML =
           '<div class="flash warn">Ya tienes la insignia de ' + esc(e.nombre) + '</div>' +
           '<div class="soft tiny muted" style="margin-top:.6rem;">' +
@@ -955,6 +965,23 @@
       // sumar en el cliente, para que lo que se ve sea lo que hay en la base.
       await cargarInsignias();
       pintarPuertaEscaneo();
+
+      // La celebración va primero: es lo que la persona está esperando ver.
+      // La tarjeta de abajo queda para cuando la cierre.
+      celebrar({
+        emoji: e.emoji,
+        color: e.color,
+        titulo: '¡Insignia conseguida!',
+        principal: e.nombre,
+        secundario: (e.rubro || '') + (e.stand ? ' · ' + e.stand : ''),
+        datos: [
+          { valor: '#' + datos.insignia.ticket_sorteo, etiqueta: 'Tu ticket' },
+          { valor: String(insignias.length), etiqueta: insignias.length === 1 ? 'Insignia' : 'Insignias' }
+        ],
+        boton: 'Seguir escaneando',
+        pie: 'Cada insignia es un ticket más para el sorteo.',
+        confeti: true
+      });
 
       el('scResult').innerHTML =
         '<div class="flash good">' + esc(datos.message) + '</div>' +
@@ -975,6 +1002,16 @@
       el('sc-manual').value = '';
     } catch (e) {
       if (e.datos && e.datos.resultado === 'sin_ingreso') {
+        celebrar({
+          tono: 'no',
+          marca: '🚧',
+          titulo: 'Valida tu ingreso primero',
+          principal: 'Aún no has entrado al evento',
+          secundario: 'Muestra tu QR en la puerta',
+          boton: 'Entendido',
+          pie: 'Las insignias se coleccionan dentro del recinto.',
+          auto: 4200
+        });
         el('scResult').innerHTML = '<div class="flash warn">' + esc(e.message) + '</div>';
       } else {
         aviso('scResult', 'bad', e.message);

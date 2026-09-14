@@ -489,6 +489,30 @@
       if (!datos.isDuplicate) validadosEnEsteTurno++;
       pintarBarra();
 
+      // Nombre en texto plano: NM() devuelve marcado y aquí el helper escapa
+      // todo lo que recibe, así que el marcado se vería tal cual.
+      const nombrePlano = ((a.nombre || '') + ' ' + (a.apellido || '')).trim() || 'Sin nombre aún';
+
+      // Confirmación a pantalla completa. En la puerta, con cola y a contraluz,
+      // el color y la marca se leen antes que cualquier texto. No se muestra el
+      // documento: la pantalla la ve todo el que está detrás en la fila.
+      celebrar({
+        tono: datos.isDuplicate ? 'no' : 'ok',
+        marca: datos.isDuplicate ? '⚠' : '✓',
+        titulo: datos.isDuplicate ? 'Ya había ingresado' : 'Adelante',
+        principal: nombrePlano,
+        secundario: String(a.tipo_ticket || 'general').toUpperCase(),
+        datos: [
+          { valor: a.codigo_ticket || '—', etiqueta: 'Entrada' },
+          { valor: fT(Date.now()), etiqueta: 'Hora' }
+        ],
+        boton: 'Siguiente',
+        pie: datos.isDuplicate
+          ? 'Verifica el documento antes de dejar pasar.'
+          : 'Ingreso registrado a tu nombre.',
+        confeti: false
+      });
+
       el('valResult').innerHTML =
         '<div class="flash ' + (datos.isDuplicate ? 'warn' : 'good') + '">' +
           (datos.isDuplicate ? '⚠ Ya había ingresado' : '✓ Acceso concedido') +
@@ -508,6 +532,14 @@
       if (e.status === 401 || e.status === 503) {
         aviso('valResult', 'bad', 'Token de staff no válido. Pide el enlace de acceso al organizador.');
       } else if (e.status === 404) {
+        celebrar({
+          tono: 'no',
+          marca: '✕',
+          titulo: 'Entrada no encontrada',
+          principal: 'Este código no está registrado',
+          boton: 'Cerrar',
+          pie: 'Pide el documento: búscala por DNI o haz un registro rápido.'
+        });
         aviso('valResult', 'bad', 'Entrada no encontrada. Usa "Buscar por DNI" o haz un registro rápido.');
       } else {
         aviso('valResult', 'bad', e.message);

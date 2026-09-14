@@ -331,3 +331,83 @@
   .modal-tab-panel.active{display:block;animation:fadePanel .18s ease forwards;}
   @keyframes fadePanel{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
 
+  /* ============ celebracion y confirmacion a pantalla completa ============ */
+  /* Escanear es el gesto que sostiene el evento: en el asistente porque es como
+     junta insignias, y en la puerta porque es como se valida un ingreso. Antes
+     el resultado era una linea de texto en una tarjeta; quien sostiene el
+     telefono con una cola detras no la lee. Ahora ocupa la pantalla y se va
+     sola, y en la puerta ademas se distingue de un vistazo el verde del rojo. */
+  .celebra{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;
+    padding:1.2rem;background:rgba(10,17,40,.82);backdrop-filter:blur(3px);
+    animation:celebraFondo .25s ease forwards;}
+  .celebra-caja{position:relative;width:100%;max-width:340px;text-align:center;
+    background:linear-gradient(165deg,#0A1128 0%,#200B26 58%,#3A0B22 100%);
+    border:1px solid rgba(255,222,0,.34);border-radius:20px;padding:1.6rem 1.2rem 1.35rem;
+    box-shadow:0 22px 50px -14px rgba(0,0,0,.7);color:#fff;
+    animation:celebraEntra .42s cubic-bezier(.16,1.02,.3,1.24) forwards;}
+
+  /* Variantes de la puerta: el color dice el resultado antes que el texto. */
+  .celebra-caja.ok{background:linear-gradient(165deg,#052E22 0%,#083D2B 100%);
+    border-color:rgba(28,222,150,.45);}
+  .celebra-caja.no{background:linear-gradient(165deg,#3A0E0E 0%,#521616 100%);
+    border-color:rgba(255,138,138,.45);}
+
+  /* El destello sale de detras del icono, no del borde de la tarjeta: el ojo
+     va al objeto que se acaba de ganar. */
+  .celebra-halo{position:absolute;left:50%;top:5.1rem;width:150px;height:150px;margin:-75px 0 0 -75px;
+    border-radius:50%;border:2px solid var(--event-yellow);opacity:0;pointer-events:none;
+    animation:celebraHalo .85s ease-out .1s forwards;}
+  .celebra-caja.ok .celebra-halo{border-color:#1CDE96;}
+  .celebra .medal{width:104px;height:104px;margin:0 auto .75rem;aspect-ratio:auto;position:relative;z-index:1;
+    animation:celebraMedalla .5s cubic-bezier(.2,1.3,.4,1.1) forwards;}
+  .celebra .medal .em{font-size:2.6rem;}
+
+  /* Marca grande de la puerta: un tic o un aspa que se lee a un metro. */
+  .celebra-marca{position:relative;z-index:1;width:104px;height:104px;margin:0 auto .75rem;
+    border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:3.1rem;
+    animation:celebraMedalla .5s cubic-bezier(.2,1.3,.4,1.1) forwards;}
+  /* El color va explicito: el tic y el aspa son glifos de texto, no emoji, y
+     sin esto heredaban el color oscuro del cuerpo sobre un circulo oscuro. */
+  .celebra-caja.ok .celebra-marca{background:rgba(28,222,150,.16);border:2px solid rgba(28,222,150,.5);color:#7BF3C4;}
+  .celebra-caja.no .celebra-marca{background:rgba(255,138,138,.14);border:2px solid rgba(255,138,138,.5);color:#FFB3B3;}
+
+  .celebra h3{margin:0 0 .2rem;font-size:1.28rem;font-weight:900;color:var(--event-yellow);
+    letter-spacing:-.01em;text-wrap:balance;}
+  .celebra-caja.ok h3{color:#7BF3C4;}
+  .celebra-caja.no h3{color:#FFB3B3;}
+  .celebra .cb-puesto{margin:0;font-size:1rem;font-weight:700;color:#fff;word-break:break-word;}
+  .celebra .cb-rubro{margin:.1rem 0 .9rem;font-size:.76rem;color:rgba(255,255,255,.66);}
+  .celebra .cb-tickets{display:flex;gap:.5rem;justify-content:center;margin-bottom:1rem;}
+  .celebra .cb-dato{flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);
+    border-radius:11px;padding:.5rem .3rem;min-width:0;}
+  .celebra .cb-dato b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.12rem;
+    font-weight:800;color:var(--event-yellow);font-variant-numeric:tabular-nums;
+    overflow:hidden;text-overflow:ellipsis;}
+  .celebra-caja.ok .cb-dato b{color:#7BF3C4;}
+  .celebra .cb-dato span{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;
+    color:rgba(255,255,255,.6);}
+  .celebra .cb-cerrar{width:100%;}
+  .celebra .cb-pie{margin:.7rem 0 0;font-size:.68rem;color:rgba(255,255,255,.45);}
+
+  /* Confeti: cada trozo cae con su retardo, su color y su giro propios. Se
+     genera en JS porque son valores numericos, no contenido de nadie. */
+  .celebra-confeti{position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:20px;}
+  .celebra-confeti i{position:absolute;top:-14px;width:8px;height:13px;border-radius:2px;opacity:0;
+    animation:celebraCae 1.5s linear forwards;}
+
+  @keyframes celebraFondo{from{opacity:0;}to{opacity:1;}}
+  @keyframes celebraEntra{from{opacity:0;transform:translateY(22px) scale(.93);}
+    to{opacity:1;transform:translateY(0) scale(1);}}
+  @keyframes celebraMedalla{0%{transform:scale(.3) rotate(-18deg);opacity:0;}
+    60%{transform:scale(1.14) rotate(5deg);opacity:1;}
+    100%{transform:scale(1) rotate(0);opacity:1;}}
+  @keyframes celebraHalo{0%{transform:scale(.45);opacity:.9;}100%{transform:scale(1.85);opacity:0;}}
+  @keyframes celebraCae{0%{opacity:1;transform:translateY(0) rotate(0);}
+    100%{opacity:0;transform:translateY(330px) rotate(var(--giro,540deg));}}
+
+  /* Quien pidio menos movimiento recibe la misma informacion, quieta. */
+  @media (prefers-reduced-motion:reduce){
+    .celebra,.celebra-caja,.celebra .medal,.celebra-marca{animation:none;}
+    .celebra-halo,.celebra-confeti{display:none;}
+  }
+

@@ -123,6 +123,110 @@ function NM(p) {
   return esc(completo);
 }
 
+// Color que viene del servidor y acaba dentro de un atributo style. esc() evita
+// que se escape del atributo, pero no que el valor sea CSS arbitrario: un
+// "red;background-image:url(...)" seguiria colandose. Un puesto solo necesita
+// poder elegir un color, asi que se exige exactamente eso.
+function colorHex(v, porDefecto) {
+  return /^#[0-9a-fA-F]{3,8}$/.test(String(v == null ? '' : v)) ? String(v) : porDefecto;
+}
+
+/* ===================================================================
+   Celebracion / confirmacion a pantalla completa
+   =================================================================== */
+// La usan el asistente al ganar una insignia y la puerta al validar un
+// ingreso. Ocupa la pantalla a proposito: quien sostiene el telefono con una
+// cola detras no lee una linea de texto dentro de una tarjeta.
+//
+// Todo lo que entra aqui viene del servidor, asi que pasa por esc(); el unico
+// valor que acaba en un atributo style es el color, y va por colorHex().
+const PAPELILLOS = ['#FFDE00', '#E60067', '#00C2FF', '#1CDE96', '#FF9E15'];
+let _celebraTimer = null;
+
+function celebrar(o) {
+  const op = o || {};
+  cerrarCelebracion();
+
+  const capa = document.createElement('div');
+  capa.className = 'celebra';
+  capa.setAttribute('role', 'alertdialog');
+  capa.setAttribute('aria-live', 'assertive');
+
+  const tono = op.tono === 'ok' || op.tono === 'no' ? op.tono : '';
+
+  // Icono: o la medalla del puesto, o una marca grande de resultado.
+  const icono = op.emoji !== undefined
+    ? '<div class="medal" style="background:linear-gradient(135deg,' +
+        colorHex(op.color, '#E60067') + ',#111);">' +
+        '<span class="em">' + esc(op.emoji || '🎪') + '</span></div>'
+    : '<div class="celebra-marca">' + esc(op.marca || '✓') + '</div>';
+
+  const datos = (op.datos || []).map(function (d) {
+    return '<div class="cb-dato"><b>' + esc(d.valor) + '</b>' +
+           '<span>' + esc(d.etiqueta) + '</span></div>';
+  }).join('');
+
+  capa.innerHTML =
+    '<div class="celebra-caja' + (tono ? ' ' + tono : '') + '">' +
+      '<div class="celebra-confeti"></div>' +
+      '<div class="celebra-halo"></div>' +
+      icono +
+      '<h3>' + esc(op.titulo || '') + '</h3>' +
+      (op.principal ? '<p class="cb-puesto">' + esc(op.principal) + '</p>' : '') +
+      (op.secundario ? '<p class="cb-rubro">' + esc(op.secundario) + '</p>' : '') +
+      (datos ? '<div class="cb-tickets">' + datos + '</div>' : '') +
+      '<button type="button" class="btn btn-line btn-sm cb-cerrar">' +
+        esc(op.boton || 'Continuar') + '</button>' +
+      (op.pie ? '<p class="cb-pie">' + esc(op.pie) + '</p>' : '') +
+    '</div>';
+
+  if (op.confeti) {
+    const caja = capa.querySelector('.celebra-confeti');
+    for (let i = 0; i < 26; i++) {
+      const p = document.createElement('i');
+      // Valores numericos generados aqui, nunca contenido de nadie.
+      p.style.left = (Math.random() * 100).toFixed(2) + '%';
+      p.style.background = PAPELILLOS[i % PAPELILLOS.length];
+      p.style.animationDelay = (Math.random() * 0.5).toFixed(2) + 's';
+      p.style.animationDuration = (1.1 + Math.random() * 0.8).toFixed(2) + 's';
+      p.style.setProperty('--giro', Math.round(360 + Math.random() * 540) + 'deg');
+      caja.appendChild(p);
+    }
+  }
+
+  // Vibracion corta donde exista. En Android confirma el escaneo sin mirar; en
+  // iPhone no existe y no pasa nada.
+  try {
+    if (navigator.vibrate) navigator.vibrate(op.tono === 'no' ? [90, 60, 90] : 45);
+  } catch (e) {}
+
+  capa.querySelector('.cb-cerrar').addEventListener('click', cerrarCelebracion);
+  capa.addEventListener('click', function (ev) {
+    if (ev.target === capa) cerrarCelebracion();
+  });
+
+  document.body.appendChild(capa);
+  try { capa.querySelector('.cb-cerrar').focus({ preventScroll: true }); } catch (e) {}
+
+  // Se cierra sola: en la puerta nadie va a pulsar un boton entre persona y
+  // persona. Un fallo se queda mas tiempo, que es cuando hay que leerlo.
+  const espera = op.auto === undefined ? (op.tono === 'no' ? 4200 : 2800) : op.auto;
+  if (espera > 0) {
+    _celebraTimer = setTimeout(cerrarCelebracion, espera);
+  }
+}
+
+function cerrarCelebracion() {
+  if (_celebraTimer) { clearTimeout(_celebraTimer); _celebraTimer = null; }
+  const previa = document.querySelector('.celebra');
+  if (previa) previa.remove();
+}
+
+// Escape cierra, como cualquier dialogo.
+document.addEventListener('keydown', function (ev) {
+  if (ev.key === 'Escape') cerrarCelebracion();
+});
+
 const fD = ts => new Date(ts).toLocaleDateString('es-PE');
 const fT = ts => new Date(ts).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
 
@@ -167,6 +271,7 @@ function go(nombre) {
   const destino = document.querySelector('[data-sc="' + nombre + '"]');
   if (!destino) return;
   stopCams();
+  cerrarCelebracion();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   destino.classList.add('active');
   pantallaActual = nombre;
@@ -256,6 +361,10 @@ async function startCam(boxId, onCode) {
 
   const timer = setInterval(async () => {
     if (busy || v.readyState < 2 || !v.videoWidth) return;
+    // Mientras haya una confirmación en pantalla no se lee nada: si no, la
+    // cámara vuelve a enganchar el mismo QR por detrás y el mensaje se
+    // reemplaza solo antes de que nadie lo haya leído.
+    if (document.querySelector('.celebra')) return;
     busy = true;
     try {
       if (det) {
