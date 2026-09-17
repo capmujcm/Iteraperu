@@ -1176,14 +1176,23 @@
             (u.must_change_password ? ' · clave pendiente' : '') + '</span></div>' +
           (u.activo === false
             ? '<span class="pill p-bad">inactivo</span>'
-            : '<span class="pill p-good">activo</span>') +
+            : (u.bloqueado
+                ? '<span class="pill p-warn">bloqueado</span>'
+                : '<span class="pill p-good">activo</span>')) +
         '</div>' +
         '<div class="row" style="margin:-.2rem 0 .5rem;">' +
           '<button class="btn btn-line btn-sm" data-clave="' + esc(u.id) + '" style="flex:1;">Reponer clave</button>' +
           '<button class="btn btn-line btn-sm" data-activo="' + esc(u.id) + '" data-valor="' +
             (u.activo === false ? 'true' : 'false') + '" style="flex:1;">' +
             (u.activo === false ? 'Reactivar' : 'Desactivar') + '</button>' +
-        '</div>';
+        '</div>' +
+        // Solo aparece cuando hace falta: en la puerta, 15 minutos de bloqueo
+        // con cola delante son inasumibles.
+        (u.bloqueado
+          ? '<div class="row" style="margin:-.2rem 0 .5rem;">' +
+              '<button class="btn btn-line btn-sm" data-desbloquear="' + esc(u.id) + '" style="flex:1;">' +
+              '🔓 Quitar el bloqueo por intentos fallidos</button></div>'
+          : '');
       }).join('') + '</div>';
 
       caja.querySelectorAll('[data-clave]').forEach(function (b) {
@@ -1192,6 +1201,16 @@
           try {
             const r2 = await API.staffReponerClave(this.dataset.clave);
             mostrarCredencial(r2.usuario, r2.password_temporal, r2.dias_validez);
+            await pintarUsuarios();
+          } catch (e) { aviso('usuariosResult', 'bad', e.message); }
+        });
+      });
+
+      caja.querySelectorAll('[data-desbloquear]').forEach(function (b) {
+        b.addEventListener('click', async function () {
+          try {
+            await API.staffDesbloquear(this.dataset.desbloquear);
+            aviso('usuariosResult', 'good', '✓ Ya puede volver a intentar entrar.');
             await pintarUsuarios();
           } catch (e) { aviso('usuariosResult', 'bad', e.message); }
         });
