@@ -171,6 +171,27 @@
       </div>
 
       <div class="card" style="margin-top:.7rem;">
+        <h4 style="font-size:.95rem;margin-bottom:.5rem;">Importar el padrón de puestos</h4>
+        <p class="tiny muted" style="margin-bottom:.6rem;">
+          Da de alta los puestos reales del Country Fest desde el archivo del proyecto
+          (numeración de stands + formulario de inscripción). Se puede repetir: crea los
+          que faltan y corrige los que ya están. <b>No borra nada</b> y nunca cambia el QR
+          ni el código impreso de un puesto que ya existe.
+        </p>
+        <p class="tiny muted" style="margin-bottom:.6rem;">
+          Los nombres y teléfonos de los responsables <b>no están en el repositorio</b>.
+          Si los quieres cargar, adjunta aquí el archivo
+          <code>contactos-countryfest-2026.json</code> que tienes en tu máquina.
+        </p>
+        <div class="row wrap" style="align-items:center;gap:.5rem;">
+          <input type="file" id="fileContactos" accept="application/json,.json" class="tiny">
+          <button class="btn btn-line btn-sm" id="btnImportarPuestos">Importar puestos</button>
+          <button class="btn btn-line btn-sm" id="btnDescargarClaves" style="display:none;">Descargar claves (CSV)</button>
+        </div>
+        <div id="importResult" style="margin-top:.6rem;"></div>
+      </div>
+
+      <div class="card" style="margin-top:.7rem;">
         <h4 style="font-size:.95rem;margin-bottom:.5rem;">Datos de prueba</h4>
         <p class="tiny muted" style="margin-bottom:.6rem;">
           Crea personas y puestos ficticios con insignias repartidas, para ensayar
@@ -198,9 +219,11 @@
 /* =============================================================================
    Country Fest - consola del organizador
    =============================================================================
-   Solo lectura y descargas. Las acciones que tocan personas (validar ingreso,
-   restablecer contrasenas, crear puestos) viven en el Punto de Ayuda, donde
-   queda registrado quien las hizo.
+   Lectura, descargas y las operaciones de padron que son del organizador y no
+   de la puerta: datos de prueba y la importacion del padron de puestos. Las
+   acciones que tocan a una persona concreta (validar ingreso, restablecer
+   contrasenas, alta suelta de un puesto) viven en el Punto de Ayuda. Todas
+   quedan en la bitacora con el nombre de quien las hizo.
    ============================================================================= */
 (function () {
   'use strict';
@@ -433,6 +456,100 @@
     }
     return cv.toDataURL('image/png');
   }
+
+  /* --------------------------------------------------------------------- */
+  /* importacion del padron real de puestos                                */
+  /* --------------------------------------------------------------------- */
+  // Las claves temporales se muestran una sola vez: el servidor guarda el hash,
+  // no la clave. Se dejan en memoria hasta que se recargue la pagina para poder
+  // descargarlas en CSV, y nunca se escriben en localStorage.
+  let clavesRecienCreadas = [];
+
+  // El archivo de contactos trae datos personales de los responsables. Se lee
+  // en el navegador del organizador y se manda al servidor; no se guarda aqui.
+  function leerContactos(input) {
+    return new Promise(function (resolve, reject) {
+      const f = input && input.files && input.files[0];
+      if (!f) return resolve(null);
+      if (f.size > 512 * 1024) return reject(new Error('El archivo de contactos es demasiado grande.'));
+      const fr = new FileReader();
+      fr.onerror = function () { reject(new Error('No se pudo leer el archivo de contactos.')); };
+      fr.onload = function () {
+        let datos;
+        try { datos = JSON.parse(fr.result); }
+        catch (e) { return reject(new Error('El archivo de contactos no es un JSON válido.')); }
+        const lista = Array.isArray(datos) ? datos : (Array.isArray(datos.contactos) ? datos.contactos : null);
+        if (!lista) return reject(new Error('El archivo de contactos debe ser una lista.'));
+        resolve(lista);
+      };
+      fr.readAsText(f);
+    });
+  }
+
+  el('btnImportarPuestos').addEventListener('click', async function () {
+    let contactos = null;
+    try {
+      contactos = await leerContactos(el('fileContactos'));
+    } catch (e) {
+      return aviso('importResult', 'bad', e.message);
+    }
+
+    let previo;
+    try {
+      previo = await API.pedir('/api/soporte/empresas/importar', { auth: 'staff' });
+    } catch (e) {
+      return aviso('importResult', 'bad', e.message);
+    }
+
+    if (!confirm('El archivo tiene ' + previo.total + ' puestos: ' + previo.por_crear +
+                 ' por crear y ' + previo.ya_creados + ' que ya existen y se van a actualizar.\n\n' +
+                 (contactos ? 'Se aplicarán ' + contactos.length + ' contactos.\n\n' : 'Sin archivo de contactos.\n\n') +
+                 'No se borra ningún puesto. ¿Continuar?')) return;
+
+    const original = this.textContent;
+    this.disabled = true; this.textContent = 'Importando…';
+    try {
+      const cuerpo = { confirmar: 'IMPORTAR' };
+      if (contactos) cuerpo.contactos = contactos;
+      const r = await API.pedir('/api/soporte/empresas/importar', {
+        metodo: 'POST', auth: 'staff', cuerpo: cuerpo
+      });
+
+      clavesRecienCreadas = r.creados || [];
+      const fallidos = r.fallidos || [];
+      el('btnDescargarClaves').style.display = clavesRecienCreadas.length ? '' : 'none';
+
+      aviso('importResult', fallidos.length ? 'warn' : 'good',
+        '✓ ' + clavesRecienCreadas.length + ' puestos creados y ' + (r.actualizados || 0) + ' actualizados' +
+        (fallidos.length ? '. Fallaron: ' + fallidos.join(', ') : '') +
+        '. ' + (r.aviso || ''));
+      await refrescar();
+    } catch (e) {
+      aviso('importResult', 'bad', e.message);
+    } finally {
+      this.disabled = false; this.textContent = original;
+    }
+  });
+
+  el('btnDescargarClaves').addEventListener('click', function () {
+    if (!clavesRecienCreadas.length) return;
+    // CSV sin datos personales: usuario de acceso, nombre del puesto, stand,
+    // codigo impreso y clave temporal. Lo que hace falta para repartirlas.
+    const comilla = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+    const filas = [['usuario', 'puesto', 'stand', 'codigo_impreso', 'clave_temporal']];
+    clavesRecienCreadas.forEach(p => {
+      filas.push([p.usuario, p.nombre, p.stand, p.codigo_corto, p.password_temporal]);
+    });
+    // BOM al principio para que Excel en Windows abra el CSV como UTF-8 y no
+    // parta las tildes de los nombres de los puestos.
+    const csv = '﻿' + filas.map(f => f.map(comilla).join(',')).join('\r\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'claves-puestos-countryfest.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
 
   el('btnCrearPrueba').addEventListener('click', async function () {
     if (!confirm('Se crearán personas y puestos ficticios en la base de datos real.\n\n' +

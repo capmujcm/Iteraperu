@@ -237,14 +237,67 @@ Al crearlo se devuelve **una sola vez** la clave temporal de acceso del puesto.
 Anótala: no se guarda en claro. Si se pierde, hay un botón en la ficha para
 generar otra.
 
+### Importar el padrón completo de una vez
+
+Dar de alta 72 puestos a mano son 72 formularios y 72 ocasiones de escribir mal
+un nombre. El padrón del Country Fest 2026 vive en
+[`db/puestos-countryfest-2026.json`](db/puestos-countryfest-2026.json) y se
+carga desde **Consola del organizador → Importar el padrón de puestos**.
+
+| Endpoint | Acceso | Qué hace |
+|---|---|---|
+| `GET /api/soporte/empresas/importar` | organizador | Cuántos puestos trae el archivo y cuántos ya existen |
+| `POST /api/soporte/empresas/importar` | organizador | Crea los que faltan, corrige los que están |
+
+Es idempotente y se puede repetir. **No borra nada**, y a un puesto que ya
+existe nunca le cambia el QR, el código impreso ni el usuario: los carteles
+pueden estar ya colgados. Los puestos que sobren se desactivan a mano; un
+import que borra es un import que un día se ejecuta dos veces y se lleva por
+delante las insignias de la gente.
+
+Las claves temporales de los puestos creados se muestran una sola vez y se
+bajan en CSV desde el mismo botón.
+
+#### Los datos personales no están en el repositorio
+
+El repositorio es público, y un nombre con su celular dentro del historial de
+git ya no se puede retirar. Por eso el archivo versionado **solo lleva el
+catálogo**: marca, stand, zona, emoji, color y descripción del negocio.
+
+Los nombres y teléfonos de los responsables van en
+`datos-privados/contactos-countryfest-2026.json`, que está en `.gitignore`, se
+queda en la máquina de la organización y se adjunta en el momento de importar:
+
+```json
+{
+  "contactos": [
+    { "usuario": "micaobakery", "responsable": "…", "telefono": "9…", "whatsapp": "9…" }
+  ]
+}
+```
+
+Se cruzan por `usuario`. Si no se adjunta el archivo, los puestos se crean
+igual y se quedan sin datos de contacto.
+
+#### Regenerar el catálogo
+
+Sale de dos archivos de la organización: la numeración de stands (hoja 1) y las
+respuestas del formulario de inscripción, cruzados por nombre de marca. Cuando
+una marca ocupa dos espacios (`A24/A25`) es **un solo puesto** con una sola
+insignia: dos QR para la misma marca darían dos boletos de sorteo por la misma
+visita.
+
 ## El puesto como usuario: `/negocios/country-fest`
 
-El responsable del puesto entra con su código (`P-4K7Q`) y la clave que le dio
-la organización. Caduca a los 7 días y le obliga a definir la suya al entrar.
+El responsable del puesto entra con su **usuario** (`micaobakery`) y la clave que
+le dio la organización. No con el código impreso bajo su QR (`P-4K7Q`): ese está
+a la vista de todo el recinto y usarlo como identificador de acceso regalaba la
+lista de usuarios válidos. La clave temporal caduca a los 7 días y le obliga a
+definir la suya al entrar.
 
 | Endpoint | Acceso |
 |---|---|
-| `POST /api/negocio/login` | Público (15/min) |
+| `POST /api/negocio/login` | Público (60/min por IP; 8 fallos bloquean la cuenta) |
 | `GET /api/negocio/me` | Sesión del puesto |
 | `POST /api/negocio/change-password` | Sesión del puesto |
 | `PATCH /api/negocio/perfil` | Sesión del puesto |

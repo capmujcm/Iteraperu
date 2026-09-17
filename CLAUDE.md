@@ -9,9 +9,18 @@ que pedirlo: es el comportamiento por defecto.
 Esto aplica a cualquier cambio, por pequeño que parezca: una función nueva, un
 endpoint, un formulario, un texto que se pinta en pantalla o una dependencia.
 
+### Dos niveles, porque no todo pesa igual
+
+- **BLOQUEANTE** — si esto falla, el cambio no se da por terminado bajo ninguna
+  circunstancia. Puntos 1 a 4 y 8.
+- **REVISABLE** — hay que verificarlo y decir el resultado. Si algo queda
+  pendiente, se dice explícitamente. Puntos 5 a 7 y 9 a 11.
+
+Un sistema que trata todo como crítico termina con nadie revisando nada.
+
 ### Checklist obligatorio antes de dar por hecho un cambio
 
-1. **XSS / inyección en el navegador**
+1. **XSS / inyección en el navegador** — BLOQUEANTE
    - Nunca insertar datos de usuario en `innerHTML`, `outerHTML`, `insertAdjacentHTML`
      ni en atributos (`value="..."`, `href`, `style`) sin pasarlos por `esc()`.
    - Para nombres de personas usar `NM(obj)`; ambos helpers ya existen en
@@ -44,15 +53,57 @@ endpoint, un formulario, un texto que se pinta en pantalla o una dependencia.
    - Validar tipo y longitud de lo que llega en `req.body` antes de usarlo.
    - No confiar en la validación del frontend.
 
-7. **Dependencias**
+7. **Dependencias** — REVISABLE
    - Antes de añadir una dependencia nueva, justificar por qué es necesaria y
      preferir la solución sin dependencia si es razonable.
+   - Correr `npm audit` antes de dar por terminado un cambio que toca
+     dependencias. Las versiones se fijan; nada de rangos abiertos.
+
+8. **Autorización sobre el objeto, no solo sobre la ruta** — BLOQUEANTE
+   - Que un endpoint lleve `requireAdmin` no basta. Si la ruta recibe un id
+     (`/asistentes/:id`, `/empresas/:id`, `/insignias/:id`), hay que verificar
+     que ese recurso pertenece a quien lo pide o al evento sobre el que tiene
+     permiso. Cambiar un número en la URL para ver el registro de otro es el
+     fallo más explotado que existe y no lo cubre ningún token global.
+   - El control vive en el servidor. Ocultar un botón en el frontend es
+     cosmética, no seguridad.
+   - Responder "no encontrado" y no "prohibido" cuando el recurso existe pero no
+     es del solicitante: "prohibido" confirma que el registro existe.
+
+9. **Sesiones y enumeración** — REVISABLE
+   - Los mensajes de error de acceso no distinguen entre "no existe" y
+     "contraseña incorrecta". Tampoco en recuperación de contraseña.
+   - Al elevar privilegios o cambiar de identidad, emitir sesión nueva. No
+     reutilizar la anterior.
+
+10. **Archivos y peticiones salientes** — REVISABLE
+    - Archivo subido: validar el tipo real por contenido, no por extensión ni
+      por lo que declara el cliente. Límite de tamaño. Guardar fuera de la raíz
+      pública y servirlo por una ruta que verifica permisos. Nunca ejecutarlo.
+    - Si el servidor consulta una URL que vino de fuera, validar el destino
+      contra lista permitida y no seguir redirecciones a direcciones internas.
+    - Un parámetro de retorno solo puede apuntar a rutas propias, verificadas
+      contra lista, no comparando el inicio del texto.
+
+11. **Rastro de lo sensible** — REVISABLE
+    - Las tablas de registro (`acciones_staff`, `checkins_log`, `scans_log`) son
+      append-only: no se editan ni se borran filas. Si hace falta corregir, se
+      agrega un registro nuevo.
 
 ### Al terminar cualquier tarea
 
-Informar explícitamente qué punto del checklist se revisó y si algo quedó
-pendiente. Si un cambio introduce un riesgo que no se puede eliminar, decirlo
+Informar explícitamente **qué punto concreto se revisó y cómo se comprobó** — no
+"revisé seguridad", sino qué puntos y con qué resultado. Si un punto no aplica al
+cambio, decirlo y seguir: enumerar puntos irrelevantes para parecer exhaustivo le
+quita valor a la revisión.
+
+Si algo quedó pendiente o hay un riesgo que no se pudo eliminar, decirlo
 claramente en vez de darlo por bueno en silencio.
+
+### Si un secreto se expuso
+
+No basta con borrar el commit: **se rota la credencial**. Un token que estuvo en
+el historial de git se considera comprometido para siempre.
 
 ## Contexto técnico
 

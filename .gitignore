@@ -25,3 +25,8 @@ build/
 .env
 .env.*
 !.env.example
+
+# Datos personales de los participantes (Ley 29733). El repositorio es publico:
+# nombres, celulares y cualquier padron con PII se quedan en la maquina de la
+# organizacion y se cargan desde la consola, nunca por git.
+datos-privados/
