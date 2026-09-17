@@ -262,6 +262,10 @@
         Entrada <span class="cod" id="gCodigo">—</span>
         · <span id="gBoletos">—</span>
       </div>
+      <!-- Se muestra solo con un ganador en pantalla. Si no aparece, el premio
+           vuelve al bombo sin borrar lo que ya pasó. -->
+      <button class="btn btn-sec" id="btnNoReclamado" hidden
+              style="margin-top:.9rem;font-size:.85rem;opacity:.75;">No se presentó</button>
     </div>
   </div>
 
@@ -269,6 +273,10 @@
     <button class="btn btn-jugar" id="btnJugar">🎲 Sortear</button>
     <button class="btn btn-sec" id="btnElegir" hidden>Elegir premio</button>
     <button class="btn btn-sec" id="btnPremios">Premios</button>
+    <label class="info" style="display:flex;align-items:center;gap:.4rem;cursor:pointer;">
+      <input type="checkbox" id="soloPresentes" checked>
+      Solo quien está en el evento
+    </label>
     <span class="info" id="infoBombo">—</span>
   </div>
 
@@ -485,13 +493,25 @@
   // acaba de ganar el 1º. El premio avanza al pulsar Sortear otra vez.
   let mostrandoGanador = false;
 
+  // Quien no validó su ingreso no está en el recinto: sacar su nombre deja el
+  // premio colgado. Se puede desmarcar, y entonces participa todo el mundo.
+  const soloPresentes = () => $('soloPresentes').checked;
+
+  // Al cambiarla se recalcula el bombo en pantalla, para que el organizador vea
+  // cuánta gente entra y cuánta queda fuera ANTES de girar.
+  $('soloPresentes').addEventListener('change', function () { refrescarEstado(); });
+
   async function refrescarEstado() {
     try {
-      const e = await API.pedir('/api/sorteo/estado', { auth: 'staff' });
+      const e = await API.pedir(
+        '/api/sorteo/estado?solo_presentes=' + (soloPresentes() ? 'true' : 'false'),
+        { auth: 'staff' }
+      );
       siguiente = e.siguiente;
 
       $('infoBombo').textContent =
-        e.participantes + ' participantes · ' + e.total_boletos + ' boletos en el bombo';
+        e.participantes + ' participantes · ' + e.total_boletos + ' boletos en el bombo' +
+        (soloPresentes() ? ' (presentes)' : ' (todos)');
       $('estado').textContent = e.pendientes + ' premio(s) por sortear';
       pintarGanadores(e.ganadores || []);
 
@@ -528,12 +548,17 @@
   }
 
   function pintarGanadores(lista) {
+    // Los desiertos NO desaparecen de la lista: se muestran tachados. Lo que
+    // pasó en el escenario queda a la vista, no se borra.
     $('listaGanadores').innerHTML = lista.length
       ? lista.map(function (g) {
-          return '<div class="fila-g">' +
+          const desierto = !!g.no_reclamado_at;
+          return '<div class="fila-g"' + (desierto ? ' style="opacity:.45;"' : '') + '>' +
             '<span class="pos">' + esc(String(g.orden)) + 'º</span>' +
-            '<div class="pr"><b>' + NM(g) + '</b>' +
-              '<span>' + esc(g.premio || '') + '</span></div>' +
+            '<div class="pr"><b' + (desierto ? ' style="text-decoration:line-through;"' : '') + '>' +
+              NM(g) + '</b>' +
+              '<span>' + esc(g.premio || '') +
+                (desierto ? ' · no se presentó' : '') + '</span></div>' +
             '<span class="tk">' + esc(g.codigo_ticket || '') + '</span>' +
           '</div>';
         }).join('')
@@ -582,21 +607,27 @@
   /* jugar                                                                 */
   /* --------------------------------------------------------------------- */
   let jugando = false;
+  // Resultado que se está mostrando, por si hay que declararlo desierto.
+  let resultadoEnPantalla = null;
 
   $('btnJugar').addEventListener('click', async function () {
     if (jugando) return;
     jugando = true;
     mostrandoGanador = false;
+    resultadoEnPantalla = null;
+    $('btnNoReclamado').hidden = true;
     $('btnJugar').disabled = true;
     $('btnPremios').disabled = true;
 
     try {
       // El servidor decide y GRABA el ganador aquí. Lo que viene después es
       // la representación de algo ya resuelto.
+      const cuerpo = { solo_presentes: soloPresentes() };
+      if (elegido) cuerpo.premio_id = elegido.id;
       const r = await API.pedir('/api/sorteo/jugar', {
-        metodo: 'POST', auth: 'staff',
-        cuerpo: elegido ? { premio_id: elegido.id } : {}
+        metodo: 'POST', auth: 'staff', cuerpo: cuerpo
       });
+      resultadoEnPantalla = { id: r.resultado_id, premio: r.premio, ganador: r.ganador };
 
       // El logo de quien regala preside la pantalla durante todo el giro.
       pintarCabecera(r.premio);
@@ -621,6 +652,7 @@
       $('gBoletos').textContent = r.ganador.boletos === 1
         ? '1 insignia' : r.ganador.boletos + ' insignias';
       ver('zonaGanador', true);
+      $('btnNoReclamado').hidden = !resultadoEnPantalla || !resultadoEnPantalla.id;
       $('zonaLista').classList.remove('apagado');
 
       confeti();
@@ -636,6 +668,38 @@
       jugando = false;
       $('btnPremios').disabled = false;
       // refrescarEstado ya decide si queda algo por sortear.
+    }
+  });
+
+  /* --------------------------------------------------------------------- */
+  /* el ganador no se presentó                                             */
+  /* --------------------------------------------------------------------- */
+  // El premio vuelve a estar pendiente y se puede sortear otra vez. El
+  // resultado anterior no se borra: queda en la lista, tachado. Quien salió
+  // pierde el turno y no vuelve al bombo.
+  $('btnNoReclamado').addEventListener('click', async function () {
+    if (!resultadoEnPantalla || !resultadoEnPantalla.id) return;
+
+    const g = resultadoEnPantalla.ganador || {};
+    const nombre = ((g.nombre || '') + ' ' + (g.apellido || '')).trim() || 'el ganador';
+    const premio = (resultadoEnPantalla.premio || {}).nombre || 'este premio';
+    if (!confirm('¿Declarar desierto «' + premio + '»?\n\n' + nombre +
+                 ' pierde el turno y el premio se vuelve a sortear.')) return;
+
+    this.disabled = true;
+    try {
+      await API.pedir('/api/sorteo/resultados/' + encodeURIComponent(resultadoEnPantalla.id) + '/no-reclamado', {
+        metodo: 'POST', auth: 'staff'
+      });
+      resultadoEnPantalla = null;
+      this.hidden = true;
+      mostrandoGanador = false;
+      ver('zonaGanador', false);
+      await refrescarEstado();
+    } catch (e) {
+      $('estado').textContent = e.message;
+    } finally {
+      this.disabled = false;
     }
   });
 

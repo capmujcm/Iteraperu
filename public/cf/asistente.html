@@ -372,7 +372,7 @@
           <b>2. Aforo y derecho de admisión:</b> El ingreso al recinto está supeditado a la capacidad máxima autorizada por las autoridades y al cumplimiento riguroso de las normas de convivencia, seguridad ciudadana y orden público del evento.
         </p>
         <p style="margin-bottom:.55rem;">
-          <b>3. Dinámica oficial de insignias y sorteo:</b> Cada puesto o stand oficial que visites otorga 1 insignia digital escaneando su QR único. Cada insignia acumulada acredita 1 opción o ticket para los sorteos oficiales de premios del festival.
+          <b>3. Dinámica oficial de insignias y sorteo:</b> Cada puesto o stand oficial que visites otorga 1 insignia digital escaneando su QR único. Cada insignia acumulada acredita 1 opción o ticket para los sorteos oficiales de premios del festival. <b>Para participar en un sorteo hay que estar en el recinto en el momento en que se realiza</b> y haber validado el ingreso ese día; el premio se entrega en el acto y, si la persona anunciada no se presenta, el premio se vuelve a sortear entre los demás asistentes presentes.
         </p>
         <p style="margin-bottom:.55rem;">
           <b>4. Cuidado de pertenencias y conducta:</b> La organización no asume responsabilidad por pérdidas o extravíos de objetos personales en las instalaciones. Toda falta de respeto o alteración del orden motivará el retiro inmediato del recinto.
@@ -921,6 +921,13 @@
         '<button class="btn btn-event btn-block btn-sm" data-go="mis-datos" style="margin-top:.5rem;">Poner mi nombre</button></div>'
       : '';
 
+    // La regla se dice ANTES del sorteo, no cuando alguien reclama: para entrar
+    // al bombo hay que estar en el recinto con el ingreso validado de ese día.
+    const avisoPresencia = (!sinNombre && insignias.length)
+      ? '<div class="note tiny" style="margin:0 0 .7rem;">Para participar en el sorteo tienes que ' +
+        '<b>estar en el evento</b> cuando se realice, con tu ingreso validado ese día.</div>'
+      : '';
+
     if (!insignias.length) {
       el('insigniasBox').innerHTML = avisoNombre +
         '<div class="soft center tiny muted" style="padding:1.4rem 1rem;">' +
@@ -930,7 +937,7 @@
       return;
     }
 
-    el('insigniasBox').innerHTML = avisoNombre +
+    el('insigniasBox').innerHTML = avisoNombre + avisoPresencia +
       '<p class="tiny muted" style="margin:0 0 .6rem;">Toca una insignia para ver el puesto: lo que ofrece, su descripción y sus redes.</p>' +
       '<div class="bgrid">' + insignias.map(function (i) { return medalla(i, true); }).join('') + '</div>' +
       '<button class="btn btn-line btn-block btn-sm" data-go="puestos" style="margin-top:.8rem;">Ver los puestos que faltan</button>';

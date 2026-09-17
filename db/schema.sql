@@ -459,3 +459,38 @@ ALTER TABLE empresas ADD COLUMN IF NOT EXISTS whatsapp VARCHAR(30);
 -- persona completa sus datos cuando entra a su cuenta desde el celular, que es
 -- donde el dato sale correcto y ademas lo escribe su propio titular.
 ALTER TABLE asistentes_tickets ALTER COLUMN nombre DROP NOT NULL;
+
+-- =============================================================================
+-- 24. Premio no reclamado
+-- =============================================================================
+-- Si el ganador no aparece -se fue temprano, no oye su nombre, esta en la
+-- cola de un puesto- el premio se queda colgado: no se podia declarar desierto
+-- ni volver a sortear, porque `premio_id` era UNIQUE y borrar el resultado
+-- habria sido borrar el rastro de lo que paso en el escenario.
+--
+-- El resultado NO se borra: se marca. Queda quien salio, cuando y quien lo
+-- declaro desierto, y el premio vuelve a estar pendiente (punto 11: las tablas
+-- de registro no se editan para tapar, se anotan).
+ALTER TABLE sorteo_resultados ADD COLUMN IF NOT EXISTS no_reclamado_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE sorteo_resultados ADD COLUMN IF NOT EXISTS no_reclamado_por VARCHAR(120);
+
+-- La unicidad pasa a ser "un resultado VIGENTE por premio". Sigue impidiendo
+-- que dos pulsaciones del boton sorteen el mismo premio dos veces, pero deja
+-- registrar el segundo sorteo cuando el primero quedo desierto.
+ALTER TABLE sorteo_resultados DROP CONSTRAINT IF EXISTS sorteo_resultados_premio_id_key;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sorteo_premio_vigente
+  ON sorteo_resultados (premio_id) WHERE no_reclamado_at IS NULL;
+
+-- El indice de "un premio por persona" se limita tambien a los resultados
+-- vigentes: un resultado desierto no deberia consumir el cupo de esa persona
+-- a nivel de base de datos.
+--
+-- Quien salio y no reclamo NO vuelve al bombo igualmente: esa regla vive en
+-- `participantesSorteo`, que excluye a quien tenga CUALQUIER resultado, sea
+-- vigente o desierto. Pierde el turno. Se decide ahi y no aqui porque es una
+-- regla del evento, y si la organizacion cambia de criterio se cambia una
+-- consulta, no un indice de una tabla con datos dentro.
+DROP INDEX IF EXISTS idx_sorteo_un_premio_por_persona;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sorteo_un_premio_por_persona
+  ON sorteo_resultados (evento_id, ticket_id)
+  WHERE ticket_id IS NOT NULL AND no_reclamado_at IS NULL;
