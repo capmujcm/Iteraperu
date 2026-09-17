@@ -77,8 +77,13 @@ if (connectionString) {
     pool = new Pool({
       connectionString,
       ssl: isInternal ? false : { rejectUnauthorized },
-      max: 3,
-      idleTimeoutMillis: 10000,
+      // Tres conexiones eran pocas para el dia del evento: cada peticion hace
+      // entre dos y cuatro consultas (sesion, persona, operacion), asi que con
+      // tres puertas validando ingresos y gente escaneando puestos dentro, la
+      // cuarta peticion simultanea se quedaba esperando turno. Se ve desde
+      // fuera como "la app se queda cargando". Railway admite bastante mas.
+      max: Number(process.env.DB_POOL_MAX) || 12,
+      idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 4000
     });
     pool.on('error', (err) => console.warn('[PostgreSQL Pool Warning]:', err.message));
