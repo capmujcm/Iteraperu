@@ -117,12 +117,13 @@ sistema no permite desactivar al último organizador activo.
 
 | Endpoint | Acceso |
 |---|---|
-| `POST /api/staff/login` | Público (15/min) |
+| `POST /api/staff/login` | Público (60/min por IP; 8 fallos bloquean la cuenta) |
 | `GET /api/staff/me` · `POST /api/staff/logout` | Sesión de staff |
 | `POST /api/staff/change-password` | Sesión de staff |
 | `GET`/`POST /api/staff/usuarios` | Organizador |
 | `POST /api/staff/usuarios/:id/clave` | Organizador — repone la clave |
 | `POST /api/staff/usuarios/:id/activo` | Organizador — activa o desactiva |
+| `POST /api/staff/usuarios/:id/desbloquear` | Organizador — quita el bloqueo por intentos fallidos |
 | `GET /api/staff/acciones` | Organizador — bitácora |
 
 ## Acceso de los asistentes
@@ -155,13 +156,13 @@ repetir el trámite en el Punto de Ayuda.
 
 | Endpoint | Acceso |
 |---|---|
-| `POST /api/auth/register` | Público (10/min) — exige `acepta_privacidad` |
-| `POST /api/auth/login` | Público (15/min) |
+| `POST /api/auth/register` | Público (90/min por IP) — exige `acepta_privacidad` |
+| `POST /api/auth/login` | Público (150/min por IP; 8 fallos bloquean el DNI) |
 | `POST /api/auth/change-password` | Sesión de la persona |
 | `GET /api/auth/me` | Sesión de la persona |
 | `POST /api/auth/logout` | Sesión de la persona |
-| `POST /api/soporte/reset-password` | Token de staff |
-| `POST /api/soporte/buscar` | Token de staff — búsqueda por DNI |
+| `POST /api/soporte/reset-password` | Sesión de staff (30/min por persona) |
+| `POST /api/soporte/buscar` | Sesión de staff (60/min por persona) — búsqueda por DNI |
 
 No hay ningún endpoint público que devuelva datos de una persona. El antiguo
 `POST /api/tickets/verify` se retiró: permitía recorrer los códigos correlativos
@@ -169,12 +170,44 @@ No hay ningún endpoint público que devuelva datos de una persona. El antiguo
 
 ### Límites de peticiones
 
-El limitador cuenta por IP, pero en el recinto cientos de celulares comparten la
-misma dirección (NAT de los operadores y wifi del local). Por eso los topes por
-IP de los endpoints públicos son altos (90 registros y 150 ingresos por minuto)
-y la fuerza bruta la frena el bloqueo por cuenta: 8 intentos fallidos sobre un
-mismo DNI o usuario lo bloquean 15 minutos. Lo que se limita por persona, como
-los escaneos de puestos (20 por minuto), usa la sesión como clave, no la IP.
+En el recinto cientos de celulares comparten la misma dirección (NAT de los
+operadores y wifi del local), así que la IP identifica al local, no a quien
+llama. De ahí el criterio:
+
+- **Endpoints públicos** (registro web y los tres logins): topes por IP altos
+  —90 registros, 150 ingresos por minuto— porque ahí todavía no hay sesión que
+  identifique a nadie. La fuerza bruta la frena el bloqueo por cuenta: 8
+  intentos fallidos sobre un mismo DNI o usuario lo bloquean 15 minutos.
+- **Todo lo que ya pasó por una guardia** se cuenta **por persona**, no por IP:
+  escaneos de puestos (20/min por asistente), registro rápido (60/min por
+  miembro del staff), reseteo de contraseña (30/min), búsqueda por DNI y alta
+  de puestos (60/min). Un tope por IP aquí era un tope para el equipo entero:
+  cuando una puerta lo agotaba, las demás recibían 429 sin haber hecho nada.
+
+El bloqueo por usuario tiene un filo: como es por cuenta y no por quien lo
+intenta, alguien puede dejar fuera a un miembro del staff con ocho peticiones.
+Por eso el organizador puede levantarlo desde **Usuarios de staff**
+(`POST /api/staff/usuarios/:id/desbloquear`) sin tocarle la contraseña.
+
+### Contraseñas
+
+Se guardan con `scrypt` (hash + sal), nunca en claro. El hashing es
+**asíncrono** (`crypto.scrypt`, no `scryptSync`): la versión síncrona bloquea el
+hilo de Node ~100 ms por contraseña, y durante ese tiempo el servidor no atiende
+nada más —ni un escaneo, ni un check-in—. En la hora punta de la puerta eso
+dejaba el proceso bloqueado casi todo el rato.
+
+Consecuencia para quien toque este código: `auth.hashPassword` y
+`auth.verifyPassword` devuelven promesas. **Toda llamada lleva `await`.** Sin él,
+`verifyPassword(...)` devuelve un objeto Promise, que es *truthy*, y un
+`if (!auth.verifyPassword(...))` dejaría entrar cualquier contraseña. Se
+comprueba con:
+
+```bash
+grep -rn "auth.hashPassword(\|auth.verifyPassword(" lib/ server.js | grep -v "^lib/auth.js" | grep -v "await "
+```
+
+que debe devolver cero líneas.
 
 ### Dos días de evento
 
@@ -184,6 +217,13 @@ vuelta en «pendiente de ingreso». Se pulsa desde la consola antes de abrir
 puertas el segundo día. No toca `checkins_log`, ni las cuentas, ni las insignias.
 Las curvas por hora de la consola y del panel del puesto muestran solo el día en
 curso, en hora de Lima (`EVENT_TZ`).
+
+Es la operación más destructiva de la consola: deja el aforo a cero y nadie
+puede escanear puestos hasta volver a pasar por la puerta. Por eso pide escribir
+`REINICIAR` a mano, y por eso existe la vuelta atrás:
+`POST /api/soporte/deshacer-reinicio` (cuerpo `{ "confirmar": "DESHACER" }`)
+devuelve a «dentro» a quien tenga un ingreso **exitoso de hoy** en
+`checkins_log`. No adivina: quien no pasó por la puerta hoy, no vuelve.
 
 ## Dinámica de insignias y sorteo
 
@@ -198,22 +238,60 @@ Cada puesto participante tiene un QR impreso. El asistente lo escanea y gana
 | `POST /api/soporte/empresas` | Organizador — alta de puesto |
 | `PATCH /api/soporte/empresas/:id` | Organizador — corregir datos o dar de baja / reactivar |
 | `GET /api/soporte/empresas` | Organizador — puestos con su QR para imprimir |
+| `GET /api/sorteo/estado` | Organizador — admite `?solo_presentes=false` |
+| `POST /api/sorteo/jugar` | Organizador — cuerpo `{ solo_presentes }` opcional |
+| `POST /api/sorteo/resultados/:id/no-reclamado` | Organizador — declara el premio desierto |
 
-### Cómo está protegido el sorteo
+### Quién participa
 
+- **Hay que estar en el recinto.** Solo entra al bombo quien tiene el ingreso
+  validado en ese momento. El evento dura dos días: sin esta regla, el domingo
+  —después de reiniciar ingresos— quien vino solo el sábado seguía participando
+  con todas sus insignias y podía salir premiado desde su casa. La pantalla del
+  sorteo lleva una casilla para ver el recuento con y sin el filtro antes de
+  girar, y el criterio de cada sorteo queda en `acciones_staff`.
+  La condición se avisa **antes**: está en las bases y en «Mis insignias».
 - **Sin nombre no se participa.** Quien fue registrado en puerta solo con su
   documento y no completó su nombre queda fuera del bombo hasta que lo ponga:
   no se puede anunciar a alguien sin nombre en la pantalla. La app se lo avisa
   en «Mis insignias».
-- **Ensayar no quema los premios.** Al borrar los datos de prueba se borran
-  también los resultados de sorteo de personas de prueba, así que los premios
-  vuelven a quedar libres.
+- **Nadie gana dos veces**, ni aunque su premio quedara desierto: quien sale
+  pierde el turno.
+
+### Si el ganador no se presenta
+
+Pasa: la persona se fue temprano, no oye su nombre, está en la cola de un
+puesto. `POST /api/sorteo/resultados/:id/no-reclamado` (organizador) declara el
+premio desierto desde la propia pantalla del sorteo.
+
+El resultado **no se borra: se marca**. El premio vuelve a estar pendiente y se
+puede sortear otra vez; la lista de ganadores sigue mostrando al primero,
+tachado. Borrar el resultado sería borrar lo que pasó en el escenario delante de
+4000 personas.
+
+La unicidad es «un resultado **vigente** por premio» (índice parcial
+`idx_sorteo_premio_vigente`), así que dos pulsaciones del botón siguen sin poder
+sortear dos veces lo mismo.
+
+### Cómo está protegido el sorteo
+
 - **Una insignia por persona y puesto** es un índice único en PostgreSQL
   (`insignia_unica_por_puesto`). El duplicado lo decide la base de datos, no el
   navegador. Antes esto se comprobaba en `localStorage`, así que cualquiera con
   la consola se daba tickets.
-- **El número de ticket lo asigna el servidor** dentro del mismo `INSERT`. En
-  dos pasos daría números repetidos cuando dos personas escanean a la vez.
+- **El número de boleto sale de una secuencia** de PostgreSQL
+  (`insignias_ticket_seq`). Antes salía de `COUNT(*) + 1` dentro del `INSERT`:
+  dos personas escaneando a la vez se llevaban el mismo número.
+- **El ganador lo decide el servidor** y queda grabado antes de que la ruleta
+  empiece a girar. La animación es puro teatro.
+- **El resultado se puede recalcular.** El número ganador se deriva de la
+  semilla: `sha256(semilla|premio_id|total_boletos) mod total_boletos`. Con los
+  tres valores, que quedan guardados, cualquiera reproduce el resultado. Antes
+  la semilla y el número eran dos aleatorios independientes, así que guardar la
+  semilla no demostraba nada.
+- **Ensayar no quema los premios.** Al borrar los datos de prueba se borran
+  también los resultados de sorteo de personas de prueba, así que los premios
+  vuelven a quedar libres.
 - **Hay que haber validado el ingreso** para poder escanear
   (`EXIGIR_INGRESO_PARA_ESCANEAR`, activo por defecto).
 - **Todo intento queda en `scans_log`** con su dispositivo y resultado.
