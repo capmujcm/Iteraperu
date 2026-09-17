@@ -327,6 +327,22 @@
     return m >= 120 ? Math.round(m / 60) + ' horas' : m + ' minutos';
   }
 
+  // Aforo en la ficha de cada validación. Quien está en la puerta no ve la
+  // consola del organizador, y es quien tiene que decidir si para la cola.
+  // A partir del 95 % se marca en ámbar; no se bloquea nada automáticamente.
+  function lineaAforo(aforo) {
+    if (!aforo || !aforo.max) return '';
+    const dentro = Number(aforo.dentro) || 0;
+    const max = Number(aforo.max) || 0;
+    const pct = max ? Math.round((dentro / max) * 100) : 0;
+    const alto = pct >= 95;
+    return '<div class="kv"><span>Aforo</span>' +
+      '<span class="mono"' + (alto ? ' style="color:#E60067;font-weight:700;"' : '') + '>' +
+        esc(dentro + ' / ' + max) + ' · ' + esc(pct + '%') +
+      '</span></div>' +
+      (alto ? '<div class="soft tiny" style="margin-top:.4rem;color:#E60067;">Aforo casi lleno. Avisa a la organización.</div>' : '');
+  }
+
   function pintarBarra() {
     el('staffNombreBar').textContent = staffNombre
       ? (staffNombre + (staffPuerta ? ' · ' + staffPuerta : ''))
@@ -532,6 +548,7 @@
             '<span class="pill p-blue">' + esc(String(a.tipo_ticket || 'general').toUpperCase()) + '</span></div>' +
           '<div class="kv"><span>Entrada</span><span class="mono">' + esc(a.codigo_ticket || '') + '</span></div>' +
           '<div class="kv"><span>Hora</span><span class="mono">' + esc(fT(Date.now())) + '</span></div>' +
+          lineaAforo(datos.aforo) +
         '</div>' +
         (datos.isDuplicate
           ? '<div class="soft tiny muted" style="margin-top:.6rem;">Esta entrada ya se había usado. Verifica el documento antes de dejar pasar.</div>'
