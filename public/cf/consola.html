@@ -164,8 +164,14 @@
           <b>No borra nada:</b> los ingresos del día anterior, las cuentas y las
           insignias se conservan.
         </p>
+        <p class="tiny muted" style="margin-bottom:.6rem;">
+          Si lo pulsas por error, <b>«Deshacer»</b> devuelve a «dentro» a quien tenga un
+          ingreso registrado hoy. No inventa a nadie: quien no pasó por la puerta hoy
+          no vuelve.
+        </p>
         <div class="row wrap">
           <button class="btn btn-dark btn-sm" id="btnReiniciarIngresos">🌅 Reiniciar ingresos para hoy</button>
+          <button class="btn btn-line btn-sm" id="btnDeshacerReinicio">↩ Deshacer el reinicio de hoy</button>
         </div>
         <div id="reinicioResult" style="margin-top:.6rem;"></div>
       </div>
@@ -423,6 +429,27 @@
       aviso('reinicioResult', 'good',
         '✓ Listo. ' + n(r.reiniciados) + ' persona(s) vuelven a "pendiente de ingreso". ' +
         'La puerta ya puede validar el día de hoy.');
+      await refrescar();
+    } catch (e) {
+      aviso('reinicioResult', 'bad', e.message);
+    } finally {
+      this.disabled = false; this.textContent = original;
+    }
+  });
+
+  // Vuelta atrás de un reinicio pulsado a destiempo. Reconstruye el estado con
+  // lo que ya está registrado: quien tenga un ingreso exitoso de hoy vuelve a
+  // figurar dentro. No hace falta confirmación escrita porque no destruye nada.
+  el('btnDeshacerReinicio').addEventListener('click', async function () {
+    if (!confirm('Volverán a figurar como "dentro del evento" todas las personas ' +
+                 'que hoy pasaron por la puerta.\n\n' +
+                 'Úsalo si reiniciaste los ingresos por error. ¿Continuar?')) return;
+    const original = this.textContent;
+    this.disabled = true; this.textContent = 'Deshaciendo…';
+    try {
+      const r = await API.deshacerReinicio();
+      aviso('reinicioResult', 'good',
+        '✓ Listo. ' + n(r.recuperados) + ' persona(s) vuelven a figurar dentro del evento.');
       await refrescar();
     } catch (e) {
       aviso('reinicioResult', 'bad', e.message);

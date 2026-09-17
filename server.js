@@ -735,6 +735,32 @@ fastify.post('/api/soporte/reiniciar-ingresos', {
   return { success: true, reiniciados };
 });
 
+// -----------------------------------------------------------------------------
+// Deshacer el reinicio de ingresos
+// -----------------------------------------------------------------------------
+// El reinicio es la operacion mas destructiva que tiene la consola: un clic a
+// destiempo deja a miles de personas como "pendientes de ingreso", con el aforo
+// a cero y sin poder escanear puestos, y la unica salida era que todas
+// volvieran a pasar por la puerta.
+//
+// Esto lo revierte con lo que ya esta registrado: vuelve a "dentro" quien tenga
+// un ingreso exitoso de HOY en checkins_log. No inventa a nadie, y checkins_log
+// no se toca (punto 11: solo se lee).
+fastify.post('/api/soporte/deshacer-reinicio', {
+  preHandler: [requireOrganizador, rateLimit(5, 60000)]
+}, async (req, reply) => {
+  const b = req.body || {};
+  if (b.confirmar !== 'DESHACER') {
+    return reply.code(400).send({
+      error: 'Falta la confirmación. Envía { "confirmar": "DESHACER" }.'
+    });
+  }
+  const recuperados = await store.deshacerReinicio(eventoId, ZONA_HORARIA);
+  await registrarAccion(req, 'deshacer_reinicio', `${recuperados} persona(s) vuelven a "dentro"`);
+  req.log.warn({ recuperados }, 'reinicio de ingresos deshecho');
+  return { success: true, recuperados };
+});
+
 
 // Texto exacto de la casilla de consentimiento de la landing. Se guarda junto
 // al lead: si mañana cambia la redaccion, hay que poder demostrar cual acepto

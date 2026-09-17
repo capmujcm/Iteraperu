@@ -668,6 +668,7 @@ const API = (function () {
     editarPuesto: (id, datos) => pedir('/api/soporte/empresas/' + encodeURIComponent(id), { metodo: 'PATCH', cuerpo: datos, auth: 'staff' }),
     // Segundo dia del evento: todos vuelven a "pendiente de ingreso".
     reiniciarIngresos: () => pedir('/api/soporte/reiniciar-ingresos', { metodo: 'POST', cuerpo: { confirmar: 'REINICIAR' }, auth: 'staff' }),
+    deshacerReinicio: () => pedir('/api/soporte/deshacer-reinicio', { metodo: 'POST', cuerpo: { confirmar: 'DESHACER' }, auth: 'staff' }),
 
     // --- cuentas de staff ---
     staffLogin: datos => pedir('/api/staff/login', { metodo: 'POST', cuerpo: datos }),
@@ -677,7 +678,8 @@ const API = (function () {
     staffUsuarios: () => pedir('/api/staff/usuarios', { auth: 'staff' }),
     staffCrearUsuario: datos => pedir('/api/staff/usuarios', { metodo: 'POST', cuerpo: datos, auth: 'staff' }),
     staffReponerClave: id => pedir('/api/staff/usuarios/' + encodeURIComponent(id) + '/clave', { metodo: 'POST', auth: 'staff' }),
-    staffActivo: (id, activo) => pedir('/api/staff/usuarios/' + encodeURIComponent(id) + '/activo', { metodo: 'POST', cuerpo: { activo }, auth: 'staff' })
+    staffActivo: (id, activo) => pedir('/api/staff/usuarios/' + encodeURIComponent(id) + '/activo', { metodo: 'POST', cuerpo: { activo }, auth: 'staff' }),
+    staffDesbloquear: id => pedir('/api/staff/usuarios/' + encodeURIComponent(id) + '/desbloquear', { metodo: 'POST', auth: 'staff' })
   };
 })();
 
