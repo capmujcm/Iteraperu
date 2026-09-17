@@ -655,7 +655,8 @@ const API = (function () {
     misInsignias: () => pedir('/api/insignias/mias', { auth: 'sesion' }),
 
     // --- staff ---
-    verificarTicket: datos => pedir('/api/tickets/verify', { metodo: 'POST', cuerpo: datos }),
+    // (verificarTicket se retiro junto con /api/tickets/verify: era publico,
+    // nadie lo usaba y permitia enumerar nombres por codigo de entrada.)
     checkin: datos => pedir('/api/tickets/checkin', { metodo: 'POST', cuerpo: datos, auth: 'staff' }),
     buscarPorDni: dni => pedir('/api/soporte/buscar', { metodo: 'POST', cuerpo: { dni: dni }, auth: 'staff' }),
     resetClave: datos => pedir('/api/soporte/reset-password', { metodo: 'POST', cuerpo: datos, auth: 'staff' }),
@@ -664,6 +665,9 @@ const API = (function () {
     // --- organizador: puestos y sus QR ---
     puestosConQr: () => pedir('/api/soporte/empresas', { auth: 'staff' }),
     crearPuesto: datos => pedir('/api/soporte/empresas', { metodo: 'POST', cuerpo: datos, auth: 'staff' }),
+    editarPuesto: (id, datos) => pedir('/api/soporte/empresas/' + encodeURIComponent(id), { metodo: 'PATCH', cuerpo: datos, auth: 'staff' }),
+    // Segundo dia del evento: todos vuelven a "pendiente de ingreso".
+    reiniciarIngresos: () => pedir('/api/soporte/reiniciar-ingresos', { metodo: 'POST', cuerpo: { confirmar: 'REINICIAR' }, auth: 'staff' }),
 
     // --- cuentas de staff ---
     staffLogin: datos => pedir('/api/staff/login', { metodo: 'POST', cuerpo: datos }),

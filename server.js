@@ -25,9 +25,16 @@ const EVENTO = {
   slug: process.env.EVENT_SLUG || 'country-fest',
   nombre: process.env.EVENT_NAME || 'Country Fest 2026',
   descripcion: process.env.EVENT_DESC || 'Feria gastronomica con dinamica de insignias.',
-  lugar: process.env.EVENT_PLACE || 'Por confirmar',
-  aforo_max: Number(process.env.EVENT_AFORO) || 500
+  lugar: process.env.EVENT_PLACE || 'La Villa Country Club, Ilo',
+  // Aforo confirmado por la organizacion: 4000 personas. Se puede ajustar con
+  // EVENT_AFORO; el valor se vuelve a aplicar en cada arranque (ver store.init).
+  aforo_max: Number(process.env.EVENT_AFORO) || 4000
 };
+
+// Zona horaria del evento. Railway y PostgreSQL corren en UTC; sin esto la
+// curva de ingresos por hora mostraba las 5 de la tarde como las 22:00 y las
+// perdia fuera del rango.
+const ZONA_HORARIA = process.env.EVENT_TZ || 'America/Lima';
 
 // Datos ficticios de demostracion. Apagados por defecto: en una prueba real
 // contaminan el aforo, la analitica y la lista de asistentes.
@@ -291,8 +298,16 @@ async function requireAdmin(req, reply) {
   }
 }
 
-// Limitador de tasa en memoria (ventana deslizante por IP) — frena fuerza bruta
-// y enumeración de DNIs/códigos sin añadir dependencias.
+// Limitador de tasa en memoria (ventana fija) — frena fuerza bruta y
+// enumeración de DNIs/códigos sin añadir dependencias.
+//
+// OJO con la clave: por defecto es la IP, pero en el recinto cientos de
+// celulares llegan con la MISMA direccion (los operadores peruanos usan NAT
+// masivo, y el wifi del local tambien). Un tope bajo por IP bloquearia a gente
+// legitima en masa el dia del evento. Por eso:
+//   * los limites por IP de los endpoints publicos son generosos, y la fuerza
+//     bruta sobre una cuenta la frena el bloqueo por DNI/usuario (8 intentos);
+//   * lo que se limita por persona (escaneos) usa una clave propia via `keyFn`.
 const rateBuckets = new Map();
 
 // Detrás del proxy de Railway, req.ip es la IP del proxy y no distingue
@@ -308,12 +323,13 @@ function clientIp(req) {
   return req.ip || 'unknown';
 }
 
-function rateLimit(max, windowMs) {
+function rateLimit(max, windowMs, keyFn) {
   return async (req, reply) => {
-    const ip = clientIp(req);
+    const clave = keyFn ? keyFn(req) : ('ip:' + clientIp(req));
+    if (!clave) return;
     const now = Date.now();
-    let b = rateBuckets.get(ip);
-    if (!b || now > b.reset) { b = { count: 0, reset: now + windowMs }; rateBuckets.set(ip, b); }
+    let b = rateBuckets.get(clave);
+    if (!b || now > b.reset) { b = { count: 0, reset: now + windowMs }; rateBuckets.set(clave, b); }
     b.count++;
     if (b.count > max) {
       reply.code(429).send({ error: 'Demasiadas solicitudes. Espera un momento e intenta de nuevo.' });
@@ -337,7 +353,7 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
   .split(',').map(s => s.trim()).filter(Boolean);
 fastify.register(require('@fastify/cors'), {
   origin: allowedOrigins.length ? allowedOrigins : false,
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   maxAge: 86400
 });
 fastify.register(require('@fastify/static'), {
@@ -468,23 +484,33 @@ fastify.get('/api/events/current', async () => {
 fastify.get('/api/events/analytics', { preHandler: requireOrganizador }, async () => {
   const conteo = await store.countAttendees(eventoId);
   const porTipoFilas = await store.countByTipo(eventoId);
-  const timeline = await store.checkinTimeline(eventoId);
+  // Solo el dia de hoy (hora de Lima): el evento dura dos dias y mezclar las
+  // horas de ambos en una sola curva no dice nada.
+  const timeline = await store.checkinTimeline(eventoId, ZONA_HORARIA);
   const insignias = await store.contarInsignias(eventoId);
 
-  const aforoMax = evento.aforo_max || 500;
+  const aforoMax = evento.aforo_max || 4000;
   const porTipo = porTipoFilas.reduce((acc, f) => {
     acc[f.tipo_ticket || 'general'] = f.n;
     return acc;
   }, {});
 
-  // Acumulado sobre la franja horaria del evento.
-  const horas = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+  // Acumulado por hora. El rango sale de los datos -desde la primera hora con
+  // ingresos hasta la ultima- en vez de una franja fija de 8 a 18 que dejaba
+  // fuera la tarde y la noche, que es cuando mas gente entra a una feria.
   const mapa = timeline.reduce((acc, f) => { acc[f.hora] = f.ingresos; return acc; }, {});
-  let acumulado = 0;
-  const timelineHoras = horas.map(hora => {
-    acumulado += mapa[hora] || 0;
-    return { hora, ingresos: acumulado };
-  });
+  const conDatos = Object.keys(mapa).map(h => parseInt(h, 10)).filter(n => !isNaN(n));
+  const timelineHoras = [];
+  if (conDatos.length) {
+    const desde = Math.min(...conDatos);
+    const hasta = Math.max(...conDatos);
+    let acumulado = 0;
+    for (let h = desde; h <= hasta; h++) {
+      const hora = String(h).padStart(2, '0') + ':00';
+      acumulado += mapa[hora] || 0;
+      timelineHoras.push({ hora, ingresos: acumulado });
+    }
+  }
 
   return {
     success: true,
@@ -600,20 +626,11 @@ async function buscarPorTicket({ token, code }) {
   return null;
 }
 
-// Verificacion publica: responde lo justo para saber a quien se deja pasar.
-// Nunca devuelve DNI, correo ni celular.
-fastify.post('/api/tickets/verify', { preHandler: rateLimit(20, 60000) }, async (req, reply) => {
-  const { token, code } = req.body || {};
-  const persona = await buscarPorTicket({ token, code });
-  if (!persona) {
-    return reply.status(404).send({ valid: false, message: 'Ticket no encontrado' });
-  }
-  return {
-    valid: true,
-    attendee: publicAttendee(persona),
-    alreadyCheckedIn: persona.estado === 'checkin'
-  };
-});
+// Nota: aqui existia POST /api/tickets/verify, publico y sin uso en ninguna
+// pantalla. Devolvia nombre y apellido a partir del codigo de entrada, y los
+// codigos son correlativos (CF-1000, CF-1001...), asi que permitia recorrerlos
+// y sacar la lista de asistentes. Se retiro (checklist puntos 2 y 9). La
+// puerta usa /api/tickets/checkin, que exige sesion de staff.
 
 // Check-in: escribe en la base y deja rastro en checkins_log.
 fastify.post('/api/tickets/checkin', { preHandler: requireStaff }, async (req, reply) => {
@@ -666,6 +683,36 @@ fastify.post('/api/soporte/buscar', {
     return reply.status(404).send({ error: 'No hay ningún registro con ese documento.' });
   }
   return { success: true, attendee: safeAttendee(persona) };
+});
+
+// -----------------------------------------------------------------------------
+// Segundo dia: reiniciar los ingresos
+// -----------------------------------------------------------------------------
+// El evento dura dos dias (26 y 27). Cada dia hay que volver a validar en
+// puerta: si no, quien entro el sabado aparece como "dentro" el domingo sin
+// haber venido, el aforo miente y ademas podria escanear puestos desde su casa
+// (la insignia exige ingreso validado).
+//
+// Que hace: pone a todos los que estaban en 'checkin' de vuelta en 'valido'.
+// Que NO hace: no toca checkins_log (append-only, los ingresos del dia 1 se
+// conservan), ni las insignias, ni las cuentas. Es reversible en la practica:
+// la gente vuelve a pasar por la puerta.
+//
+// Solo organizador, con confirmacion explicita en el cuerpo para que un clic
+// accidental no vacie el recinto en plena tarde.
+fastify.post('/api/soporte/reiniciar-ingresos', {
+  preHandler: [requireOrganizador, rateLimit(5, 60000)]
+}, async (req, reply) => {
+  const b = req.body || {};
+  if (b.confirmar !== 'REINICIAR') {
+    return reply.code(400).send({
+      error: 'Falta la confirmación. Envía { "confirmar": "REINICIAR" }.'
+    });
+  }
+  const reiniciados = await store.reiniciarIngresos(eventoId);
+  await registrarAccion(req, 'reiniciar_ingresos', `${reiniciados} persona(s) vuelven a "pendiente de ingreso"`);
+  req.log.warn({ reiniciados }, 'ingresos reiniciados para un nuevo dia');
+  return { success: true, reiniciados };
 });
 
 
@@ -779,17 +826,21 @@ fastify.get('/sorteo/:slug', appDeEvento('sorteo.html'));     // pantalla de pro
 fastify.get('/e', async (req, reply) => reply.redirect(302, '/e/' + evento.slug));
 fastify.get('/entrada', async (req, reply) => reply.redirect(302, '/e/' + evento.slug));
 
-// Demo comercial: datos ficticios, autonoma, sin tocar la base real.
+// Demo comercial: datos ficticios, autonoma, sin tocar la base real. Solo se
+// llega a ella por /evento, a proposito.
 fastify.get('/evento', async (req, reply) => reply.sendFile('evento/prototipo.html'));
 
-// URLs dedicadas por rol
-fastify.get('/asistente', async (req, reply) => reply.sendFile('evento/prototipo.html'));
-fastify.get('/persona', async (req, reply) => reply.sendFile('evento/prototipo.html'));
-fastify.get('/empresa', async (req, reply) => reply.sendFile('evento/prototipo.html'));
-fastify.get('/organizador', async (req, reply) => reply.sendFile('evento/prototipo.html'));
-fastify.get('/proveedor', async (req, reply) => reply.sendFile('evento/prototipo.html'));
-fastify.get('/staff', async (req, reply) => reply.sendFile('evento/prototipo.html'));
-fastify.get('/ayuda', async (req, reply) => reply.sendFile('evento/prototipo.html'));
+// Atajos por rol. Antes servian el prototipo de venta: quien tecleaba
+// iteraperu.pe/staff el dia del evento caia en la demo con datos ficticios.
+// Ahora llevan a la app real del rol que corresponde.
+const irA = (ruta) => async (req, reply) => reply.redirect(302, ruta + '/' + evento.slug);
+fastify.get('/asistente', irA('/e'));
+fastify.get('/persona', irA('/e'));
+fastify.get('/empresa', irA('/negocios'));
+fastify.get('/proveedor', irA('/negocios'));
+fastify.get('/organizador', irA('/consola'));
+fastify.get('/staff', irA('/staff'));
+fastify.get('/ayuda', irA('/staff'));
 
 // Sunrise Hotel Ilo — Plataforma Web, Presentación y Centro de Mando
 fastify.get('/sunrise', async (req, reply) => reply.redirect(302, '/sunrise/'));
@@ -842,13 +893,15 @@ const start = async () => {
       });
       registrarInsignias(fastify, {
         store, eventoId, rateLimit,
-        requireAdmin: requireOrganizador,  // alta de puestos y sus QR
+        requireAdmin: requireOrganizador,  // alta y edicion de puestos y sus QR
         requireSession,
-        exigirIngreso: EXIGIR_INGRESO_PARA_ESCANEAR
+        exigirIngreso: EXIGIR_INGRESO_PARA_ESCANEAR,
+        registrarAccion
       });
       registrarEmpresa(fastify, {
         store, eventoId, rateLimit,
-        requireAdmin: requireOrganizador   // reponer el acceso de un puesto
+        requireAdmin: requireOrganizador,  // reponer el acceso de un puesto
+        zonaHoraria: ZONA_HORARIA
       });
       registrarSorteo(fastify, {
         store, eventoId, rateLimit, requireOrganizador, registrarAccion

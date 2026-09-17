@@ -320,6 +320,13 @@
     try { return await fn(); } finally { btn.disabled = false; btn.textContent = original; }
   }
 
+  // "30 minutos" o "14 horas", según lo que mande el servidor.
+  function validezLegible(datos) {
+    if (datos.horas_validez) return datos.horas_validez + ' horas';
+    const m = Number(datos.minutos_validez || 30);
+    return m >= 120 ? Math.round(m / 60) + ' horas' : m + ' minutos';
+  }
+
   function pintarBarra() {
     el('staffNombreBar').textContent = staffNombre
       ? (staffNombre + (staffPuerta ? ' · ' + staffPuerta : ''))
@@ -472,13 +479,16 @@
 
       if (bruto.indexOf('CF|') === 0) {
         peticion.token = bruto.slice(3);
-      } else if (/^\d{8}$/.test(bruto)) {
-        // Es un DNI: se traduce a su código mediante el buscador de soporte,
-        // porque el endpoint de check-in no acepta documentos.
+      } else if (/^[A-Z]+-\d+$/i.test(bruto)) {
+        // Código de entrada (CF-1042, DEMO-1003, TEST-1000).
+        peticion.code = bruto;
+      } else if (/^[A-Z0-9.\s-]{6,15}$/i.test(bruto)) {
+        // Es un documento: DNI de 8 dígitos, o carné de extranjería / pasaporte
+        // alfanumérico. Se traduce a su código mediante el buscador de soporte,
+        // porque el endpoint de check-in no acepta documentos. El token del QR
+        // mide 32 caracteres, así que no se confunde con esto.
         const r = await API.buscarPorDni(bruto);
         peticion.code = r.attendee.codigo_ticket;
-      } else if (/^CF-\d+$/i.test(bruto) || /^DEMO-\d+$/i.test(bruto)) {
-        peticion.code = bruto;
       } else {
         peticion.token = bruto;
       }
@@ -600,11 +610,12 @@
               '<span class="pill p-good">' + esc(a.codigo_ticket || '') + '</span></div>' +
             '<div class="kv"><span>Contraseña temporal</span>' +
               '<span class="mono" style="font-size:1.1rem;font-weight:700;">' + esc(datos.password_temporal || '') + '</span></div>' +
-            '<div class="kv"><span>Válida por</span><span>' + esc(String(datos.minutos_validez || 30)) + ' minutos</span></div>' +
+            '<div class="kv"><span>Válida por</span><span>' + esc(validezLegible(datos)) + '</span></div>' +
           '</div>' +
           '<div class="note n-info tiny" style="margin-top:.6rem;">' +
             'Dile que entre a <b>iteraperu.pe/e/country-fest</b> con su DNI y esta contraseña. ' +
-            'Ahí elegirá su contraseña, completará su nombre y tendrá su entrada en el celular.' +
+            'Ahí elegirá su contraseña, completará su nombre y tendrá su entrada en el celular. ' +
+            '<b>Sin nombre no entra al sorteo</b>, así que conviene que lo haga hoy.' +
           '</div>';
 
         el('formRapido').reset();
@@ -792,17 +803,103 @@
         (p.rubro ? '<div class="kv"><span>Rubro</span><span>' + esc(p.rubro) + '</span></div>' : '') +
         (p.condicion ? '<div class="kv"><span>Condición</span><span>' + esc(p.condicion) + '</span></div>' : '') +
         '<div class="kv"><span>Logo</span><span>' + (p.tiene_logo ? '✓ subido' : '— todavía no') + '</span></div>' +
-        '<div class="kv"><span>Estado</span><span>' + (p.activo ? 'Activo' : 'Inactivo') + '</span></div>' +
+        '<div class="kv"><span>Estado</span><span>' + (p.activo ? 'Activo' : '<span class="pill p-bad">Inactivo</span>') + '</span></div>' +
       '</div>' +
       '<button class="btn btn-line btn-block btn-sm" id="pdAcceso" style="margin-top:.8rem;">' +
         (p.tiene_acceso ? 'Reponer su clave de acceso' : 'Generar su clave de acceso') +
       '</button>' +
+      '<div class="row" style="margin-top:.5rem;">' +
+        '<button class="btn btn-line btn-sm" id="pdEditar" style="flex:1;">✏️ Corregir datos</button>' +
+        '<button class="btn btn-line btn-sm" id="pdActivo" style="flex:1;">' +
+          (p.activo ? '⛔ Dar de baja' : '✅ Reactivar') + '</button>' +
+      '</div>' +
+      // Formulario de corrección. Se rellena con value, nunca con innerHTML:
+      // nada de lo que escribió el puesto llega a interpretarse como HTML.
+      '<form class="card" id="pdForm" hidden style="margin-top:.8rem;">' +
+        '<div class="field"><label for="pe-nombre">Nombre del puesto</label><input type="text" id="pe-nombre" maxlength="150" required autocomplete="off"></div>' +
+        '<div class="g2">' +
+          '<div class="field"><label for="pe-rubro">Rubro</label><input type="text" id="pe-rubro" maxlength="60" autocomplete="off"></div>' +
+          '<div class="field"><label for="pe-stand">Stand</label><input type="text" id="pe-stand" maxlength="30" autocomplete="off"></div>' +
+        '</div>' +
+        '<div class="g2">' +
+          '<div class="field"><label for="pe-emoji">Emoji</label><input type="text" id="pe-emoji" maxlength="4" autocomplete="off"></div>' +
+          '<div class="field"><label for="pe-color">Color</label><input type="color" id="pe-color" style="height:42px;padding:.2rem;"></div>' +
+        '</div>' +
+        '<div class="field"><label for="pe-condicion">Condición para la insignia</label><input type="text" id="pe-condicion" maxlength="500" autocomplete="off"></div>' +
+        '<div class="field"><label for="pe-telefono">Celular del responsable</label><input type="tel" id="pe-telefono" maxlength="30" autocomplete="off"></div>' +
+        '<div class="row">' +
+          '<button class="btn btn-accent" type="submit" style="flex:1;">Guardar</button>' +
+          '<button class="btn btn-line" type="button" id="pdCancelar">Cancelar</button>' +
+        '</div>' +
+      '</form>' +
       '<div id="pdResult" style="margin-top:.8rem;"></div>';
 
     // El contenido es "CFP|<token>", exactamente lo que espera el escaneo.
     drawQR(p.qr_contenido, el('pdQr'), 5);
 
     el('pdAcceso').addEventListener('click', function () { reponerAcceso(p.id, 'pdResult'); });
+
+    // --- corregir datos ---
+    el('pdEditar').addEventListener('click', function () {
+      el('pe-nombre').value = p.nombre || '';
+      el('pe-rubro').value = p.rubro || '';
+      el('pe-stand').value = p.stand || '';
+      el('pe-emoji').value = p.emoji || '';
+      el('pe-color').value = colorHex(p.color, '#E60067').slice(0, 7);
+      el('pe-condicion').value = p.condicion || '';
+      el('pe-telefono').value = p.telefono || '';
+      el('pdForm').hidden = false;
+      el('pe-nombre').focus();
+    });
+    el('pdCancelar').addEventListener('click', function () { el('pdForm').hidden = true; });
+
+    el('pdForm').addEventListener('submit', async function (ev) {
+      ev.preventDefault();
+      limpiar('pdResult');
+      const nombre = el('pe-nombre').value.trim();
+      if (!nombre) return aviso('pdResult', 'bad', 'El nombre no puede quedar vacío.');
+      const boton = this.querySelector('button[type="submit"]');
+      await conBoton(boton, 'Guardando…', async function () {
+        try {
+          await API.editarPuesto(p.id, {
+            nombre: nombre,
+            rubro: el('pe-rubro').value,
+            stand: el('pe-stand').value,
+            emoji: el('pe-emoji').value,
+            color: el('pe-color').value,
+            condicion: el('pe-condicion').value,
+            telefono: el('pe-telefono').value
+          });
+          await pintarPuestos();          // refresca la caché
+          abrirPuesto(p.id);              // repinta la ficha con lo nuevo
+          aviso('pdResult', 'good', '✓ Datos corregidos');
+        } catch (e) {
+          aviso('pdResult', 'bad', e.message);
+        }
+      });
+    });
+
+    // --- dar de baja / reactivar ---
+    // Un puesto inactivo desaparece del catálogo y su QR deja de dar insignias.
+    // Las insignias ya ganadas se conservan.
+    el('pdActivo').addEventListener('click', async function () {
+      const activar = !p.activo;
+      const texto = activar
+        ? '¿Reactivar este puesto? Vuelve al catálogo y su QR vuelve a dar insignias.'
+        : '¿Dar de baja este puesto?\n\nDesaparece del catálogo y su QR deja de dar insignias. ' +
+          'Las insignias que la gente ya ganó se conservan. Se puede reactivar después.';
+      if (!confirm(texto)) return;
+      limpiar('pdResult');
+      try {
+        await API.editarPuesto(p.id, { activo: activar });
+        await pintarPuestos();
+        abrirPuesto(p.id);
+        aviso('pdResult', 'good', activar ? '✓ Puesto reactivado' : '✓ Puesto dado de baja');
+      } catch (e) {
+        aviso('pdResult', 'bad', e.message);
+      }
+    });
+
     go('puesto-detalle');
   }
 

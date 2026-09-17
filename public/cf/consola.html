@@ -155,6 +155,21 @@
         <div id="exportResult" style="margin-top:.6rem;"></div>
       </div>
 
+      <div class="card" style="margin-top:.7rem;border-color:var(--event);">
+        <h4 style="font-size:.95rem;margin-bottom:.5rem;">Segundo día · reiniciar ingresos</h4>
+        <p class="tiny muted" style="margin-bottom:.6rem;">
+          El evento dura dos días. Antes de abrir puertas el segundo día, pulsa aquí:
+          todos vuelven a <b>«pendiente de ingreso»</b> y deben validar otra vez en la
+          puerta. Así el aforo del día es real y nadie escanea puestos sin haber entrado.
+          <b>No borra nada:</b> los ingresos del día anterior, las cuentas y las
+          insignias se conservan.
+        </p>
+        <div class="row wrap">
+          <button class="btn btn-dark btn-sm" id="btnReiniciarIngresos">🌅 Reiniciar ingresos para hoy</button>
+        </div>
+        <div id="reinicioResult" style="margin-top:.6rem;"></div>
+      </div>
+
       <div class="card" style="margin-top:.7rem;">
         <h4 style="font-size:.95rem;margin-bottom:.5rem;">Datos de prueba</h4>
         <p class="tiny muted" style="margin-bottom:.6rem;">
@@ -365,6 +380,35 @@
   });
 
   /* --------------------------------------------------------------------- */
+  /* segundo día: reiniciar ingresos                                       */
+  /* --------------------------------------------------------------------- */
+  // Doble confirmación: la segunda exige teclear la palabra. Es un botón que
+  // vacía el recinto en la pantalla, y en la mesa de producción hay prisa.
+  el('btnReiniciarIngresos').addEventListener('click', async function () {
+    if (!confirm('Todos los que hoy figuran como "dentro del evento" pasarán a ' +
+                 '"pendiente de ingreso" y tendrán que validar otra vez en la puerta.\n\n' +
+                 'Hazlo solo al empezar un nuevo día. ¿Continuar?')) return;
+    const palabra = prompt('Para confirmar, escribe REINICIAR en mayúsculas:');
+    if (palabra !== 'REINICIAR') {
+      aviso('reinicioResult', 'warn', 'Cancelado. No se cambió nada.');
+      return;
+    }
+    const original = this.textContent;
+    this.disabled = true; this.textContent = 'Reiniciando…';
+    try {
+      const r = await API.reiniciarIngresos();
+      aviso('reinicioResult', 'good',
+        '✓ Listo. ' + n(r.reiniciados) + ' persona(s) vuelven a "pendiente de ingreso". ' +
+        'La puerta ya puede validar el día de hoy.');
+      await refrescar();
+    } catch (e) {
+      aviso('reinicioResult', 'bad', e.message);
+    } finally {
+      this.disabled = false; this.textContent = original;
+    }
+  });
+
+  /* --------------------------------------------------------------------- */
   /* datos de prueba                                                       */
   /* --------------------------------------------------------------------- */
   // Los logos de los puestos de prueba se dibujan aquí, en un canvas, y se
@@ -430,7 +474,8 @@
     try {
       const r = await API.pedir('/api/soporte/datos-prueba', { metodo: 'DELETE', auth: 'staff' });
       aviso('pruebaResult', 'good',
-        '✓ Borrados: ' + r.borrado.personas + ' personas y ' + r.borrado.puestos + ' puestos.');
+        '✓ Borrados: ' + r.borrado.personas + ' personas y ' + r.borrado.puestos + ' puestos' +
+        (r.borrado.sorteos ? ', y ' + r.borrado.sorteos + ' resultado(s) de sorteo de prueba. Los premios quedan libres para sortearse de verdad.' : '.'));
       await refrescar();
     } catch (e) {
       aviso('pruebaResult', 'bad', e.message);
@@ -453,10 +498,11 @@
   // Con la pestaña oculta no se consulta: durante el evento esta pantalla queda
   // abierta horas y no tiene sentido machacar la base cada 20 segundos.
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) detener();
-    else if (!el('[data-sc="panel"]') || document.querySelector('.screen.active').dataset.sc === 'panel') {
-      arrancarRefresco();
-    }
+    if (document.hidden) { detener(); return; }
+    // Solo se reanuda si el panel esta a la vista: antes se reanudaba tambien
+    // en la pantalla de acceso y disparaba un "token no valido" sin motivo.
+    const activa = document.querySelector('.screen.active');
+    if (activa && activa.dataset.sc === 'panel') arrancarRefresco();
   });
 
   /* --------------------------------------------------------------------- */

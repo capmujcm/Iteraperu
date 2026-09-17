@@ -191,6 +191,10 @@
         Guarda esta pantalla o toma una captura. En la puerta el staff escanea tu QR.
         Si el celular se queda sin batería, con tu DNI te ubican en el Punto de Ayuda.
       </div>
+      <div class="note n-warn tiny" style="margin-top:.6rem;">
+        <b>Son dos días.</b> Tu entrada vale el 26 y el 27, pero cada día se valida
+        en la puerta al entrar. Las insignias que ganes se conservan.
+      </div>
     </section>
 
     <!-- ================= escanear puesto ================= -->
@@ -518,6 +522,30 @@
     persona = null;
     API.borrarSesion();
     mostrarNav(false);
+  }
+
+  // Vuelve a pedir la ficha al servidor y repinta. Se llama al entrar a "Mi
+  // entrada" y a "Escanear": si el staff valido el ingreso mientras la app
+  // estaba abierta, sin esto seguia diciendo "Pendiente de ingreso" hasta
+  // recargar, y el aviso de la camara decia que no se podia escanear.
+  let refrescando = false;
+  async function refrescarPersona() {
+    if (!persona || refrescando || !API.tieneSesion()) return;
+    refrescando = true;
+    try {
+      const datos = await API.yo();
+      if (datos && datos.attendee) {
+        persona = datos.attendee;
+        pintarTicket();
+        pintarPerfil();
+        pintarPuertaEscaneo();
+      }
+    } catch (e) {
+      // Sin red o sesion caducada: se queda lo que habia. El arranque ya
+      // gestiona los casos graves.
+    } finally {
+      refrescando = false;
+    }
   }
 
   function pintarTicket() {
@@ -883,8 +911,18 @@
   function pintarInsignias() {
     el('ticketsSorteo').textContent = insignias.length;
 
+    // Sin nombre no se entra al bombo: el servidor excluye del sorteo a quien
+    // no puede ser anunciado en pantalla. Se avisa aqui, que es donde la
+    // persona mira sus tickets.
+    const sinNombre = persona && !persona.nombre;
+    const avisoNombre = sinNombre
+      ? '<div class="note n-warn tiny" style="margin:0 0 .7rem;"><b>Tus tickets no entran al sorteo todavía.</b> ' +
+        'Falta tu nombre: sin él no podemos anunciarte si ganas. ' +
+        '<button class="btn btn-event btn-block btn-sm" data-go="mis-datos" style="margin-top:.5rem;">Poner mi nombre</button></div>'
+      : '';
+
     if (!insignias.length) {
-      el('insigniasBox').innerHTML =
+      el('insigniasBox').innerHTML = avisoNombre +
         '<div class="soft center tiny muted" style="padding:1.4rem 1rem;">' +
           'Todavía no tienes insignias.<br>Visita un puesto y escanea su QR.' +
         '</div>' +
@@ -892,7 +930,7 @@
       return;
     }
 
-    el('insigniasBox').innerHTML =
+    el('insigniasBox').innerHTML = avisoNombre +
       '<p class="tiny muted" style="margin:0 0 .6rem;">Toca una insignia para ver el puesto: lo que ofrece, su descripción y sus redes.</p>' +
       '<div class="bgrid">' + insignias.map(function (i) { return medalla(i, true); }).join('') + '</div>' +
       '<button class="btn btn-line btn-block btn-sm" data-go="puestos" style="margin-top:.8rem;">Ver los puestos que faltan</button>';
@@ -1096,7 +1134,9 @@
       pintarPuertaEscaneo();
       limpiar('scResult');
       startCam('camEscanear', escanear);
+      refrescarPersona();
     }
+    if (p === 'ticket') refrescarPersona();
     if (p === 'insignias') cargarInsignias();
     if (p === 'puestos') pintarPuestos();
     if (p === 'mis-datos') cargarFormDatos();

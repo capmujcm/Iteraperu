@@ -163,9 +163,27 @@ repetir el trámite en el Punto de Ayuda.
 | `POST /api/soporte/reset-password` | Token de staff |
 | `POST /api/soporte/buscar` | Token de staff — búsqueda por DNI |
 
-`POST /api/tickets/verify` es público pero **solo resuelve por token de QR o
-código de ticket**, y devuelve nombre, código, tipo y estado. Nunca DNI, correo
-ni celular.
+No hay ningún endpoint público que devuelva datos de una persona. El antiguo
+`POST /api/tickets/verify` se retiró: permitía recorrer los códigos correlativos
+(CF-1000, CF-1001…) y sacar la lista de nombres.
+
+### Límites de peticiones
+
+El limitador cuenta por IP, pero en el recinto cientos de celulares comparten la
+misma dirección (NAT de los operadores y wifi del local). Por eso los topes por
+IP de los endpoints públicos son altos (90 registros y 150 ingresos por minuto)
+y la fuerza bruta la frena el bloqueo por cuenta: 8 intentos fallidos sobre un
+mismo DNI o usuario lo bloquean 15 minutos. Lo que se limita por persona, como
+los escaneos de puestos (20 por minuto), usa la sesión como clave, no la IP.
+
+### Dos días de evento
+
+`POST /api/soporte/reiniciar-ingresos` (organizador, cuerpo
+`{ "confirmar": "REINICIAR" }`) pone a todos los que figuran como «dentro» de
+vuelta en «pendiente de ingreso». Se pulsa desde la consola antes de abrir
+puertas el segundo día. No toca `checkins_log`, ni las cuentas, ni las insignias.
+Las curvas por hora de la consola y del panel del puesto muestran solo el día en
+curso, en hora de Lima (`EVENT_TZ`).
 
 ## Dinámica de insignias y sorteo
 
@@ -177,11 +195,19 @@ Cada puesto participante tiene un QR impreso. El asistente lo escanea y gana
 | `GET /api/empresas` | Público — catálogo **sin** los tokens de QR |
 | `POST /api/insignias/scan` | Sesión de la persona |
 | `GET /api/insignias/mias` | Sesión de la persona |
-| `POST /api/soporte/empresas` | Token de staff — alta de puesto |
-| `GET /api/soporte/empresas` | Token de staff — puestos con su QR para imprimir |
+| `POST /api/soporte/empresas` | Organizador — alta de puesto |
+| `PATCH /api/soporte/empresas/:id` | Organizador — corregir datos o dar de baja / reactivar |
+| `GET /api/soporte/empresas` | Organizador — puestos con su QR para imprimir |
 
 ### Cómo está protegido el sorteo
 
+- **Sin nombre no se participa.** Quien fue registrado en puerta solo con su
+  documento y no completó su nombre queda fuera del bombo hasta que lo ponga:
+  no se puede anunciar a alguien sin nombre en la pantalla. La app se lo avisa
+  en «Mis insignias».
+- **Ensayar no quema los premios.** Al borrar los datos de prueba se borran
+  también los resultados de sorteo de personas de prueba, así que los premios
+  vuelven a quedar libres.
 - **Una insignia por persona y puesto** es un índice único en PostgreSQL
   (`insignia_unica_por_puesto`). El duplicado lo decide la base de datos, no el
   navegador. Antes esto se comprobaba en `localStorage`, así que cualquiera con
@@ -282,6 +308,8 @@ Ver [`.env.example`](.env.example). Las que importan para operar:
 | `ADMIN_TOKEN` | Sin él, el Punto de Ayuda y el check-in quedan cerrados (503) |
 | `ALLOWED_ORIGINS` | Lista blanca CORS. Vacío = solo mismo origen |
 | `EVENT_SLUG` / `EVENT_NAME` | Identidad del evento activo |
+| `EVENT_PLACE` / `EVENT_AFORO` | Lugar y aforo (4000). Se reaplican en cada arranque |
+| `EVENT_TZ` | Zona horaria de las curvas por hora. Por defecto `America/Lima` |
 | `SEED_DEMO` | `true` siembra asistentes ficticios. Apagar en pruebas reales |
 
 ---
