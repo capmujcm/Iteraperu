@@ -158,7 +158,7 @@ async function asegurarOrganizador() {
     );
   }
 
-  const { hash, salt, algo } = auth.hashPassword(ADMIN_PASSWORD);
+  const { hash, salt, algo } = await auth.hashPassword(ADMIN_PASSWORD);
   await store.createUsuarioStaff({
     evento_id: eventoId,
     usuario,
@@ -196,7 +196,7 @@ async function sembrarDemo() {
   // Todas las personas de demo comparten la contrasena temporal, con cambio
   // obligatorio: asi ni siquiera los datos de prueba dejan cuentas con clave
   // fija utilizable.
-  const { hash, salt, algo } = auth.hashPassword(auth.TEMP_PASSWORD);
+  const { hash, salt, algo } = await auth.hashPassword(auth.TEMP_PASSWORD);
 
   for (let i = 0; i < SEED_N; i++) {
     await store.createAttendee({
