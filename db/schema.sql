@@ -494,3 +494,31 @@ DROP INDEX IF EXISTS idx_sorteo_un_premio_por_persona;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_sorteo_un_premio_por_persona
   ON sorteo_resultados (evento_id, ticket_id)
   WHERE ticket_id IS NOT NULL AND no_reclamado_at IS NULL;
+
+-- =============================================================================
+-- 25. Numero de boleto sin repetir
+-- =============================================================================
+-- El numero salia de (SELECT COUNT(*) + 1 FROM insignias) dentro del propio
+-- INSERT. Con dos personas escaneando a la vez, las dos transacciones veian el
+-- mismo recuento y se llevaban el mismo numero. No afecta a quien gana -el
+-- sorteo cuenta insignias, no numeros- pero la app le enseña ese numero a la
+-- persona como "tu boleto", y dos boletos iguales en dos celulares distintos es
+-- un reclamo en la cola del Punto de Ayuda.
+--
+-- Una secuencia lo resuelve: PostgreSQL garantiza que nextval no repite nunca,
+-- ni con mil escaneos simultaneos. Un escaneo duplicado consume un numero y
+-- deja un hueco en la serie; es irrelevante, porque el numero identifica al
+-- boleto, no cuenta cuantos hay.
+CREATE SEQUENCE IF NOT EXISTS insignias_ticket_seq;
+
+-- Se coloca por encima de lo ya repartido para no chocar con los numeros que
+-- la gente ya tiene en pantalla. Idempotente: en cada arranque la deja como
+-- mucho donde estaba, nunca por debajo.
+SELECT setval(
+  'insignias_ticket_seq',
+  GREATEST(
+    (SELECT COALESCE(MAX(ticket_sorteo), 0) FROM insignias),
+    (SELECT last_value FROM insignias_ticket_seq)
+  ),
+  true
+);
