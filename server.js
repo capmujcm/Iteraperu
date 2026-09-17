@@ -329,6 +329,14 @@ function clientIp(req) {
   return req.ip || 'unknown';
 }
 
+// Clave de limitacion para los endpoints que YA pasaron por una guardia de
+// staff. Contar por IP ahi no sirve: todo el equipo trabaja desde el mismo
+// wifi del local, asi que un tope "por IP" es en realidad un tope para el
+// equipo entero, y cuando una puerta lo agota las demas reciben 429 sin haber
+// hecho nada. `req.actor` lo deja la guardia, asi que no lo controla el
+// cliente. El token de emergencia cuenta como un actor mas.
+const porActor = req => 'staff:' + ((req.actor && req.actor.id) || 'token');
+
 function rateLimit(max, windowMs, keyFn) {
   return async (req, reply) => {
     const clave = keyFn ? keyFn(req) : ('ip:' + clientIp(req));
@@ -667,19 +675,25 @@ fastify.post('/api/tickets/checkin', { preHandler: requireStaff }, async (req, r
     yaHabiaIngresado ? 'duplicado' : 'exitoso'
   );
 
+  // El aforo viaja con cada validacion. La consola ya lo muestra, pero quien
+  // decide si se para la cola esta en la puerta, no mirando una laptop. No se
+  // bloquea el ingreso al llegar al tope: eso lo decide una persona, no un if.
+  const conteo = await store.countAttendees(eventoId);
+
   return {
     success: true,
     isDuplicate: yaHabiaIngresado,
     message: yaHabiaIngresado ? '⚠ Advertencia: Ingreso previo registrado.' : '✓ Acceso concedido.',
     attendee: publicAttendee(actualizada),
-    checkin: registro
+    checkin: registro,
+    aforo: { dentro: conteo.ingresados, max: evento.aforo_max || 4000 }
   };
 });
 
 // Punto de Ayuda: ubicar a una persona por su documento. Exige token de staff
 // y devuelve la ficha sin hash de contrasena.
 fastify.post('/api/soporte/buscar', {
-  preHandler: [requireStaff, rateLimit(60, 60000)]
+  preHandler: [requireStaff, rateLimit(60, 60000, porActor)]
 }, async (req, reply) => {
   const dni = auth.normalizeDni((req.body || {}).dni);
   if (!dni) return reply.status(400).send({ error: 'Documento inválido.' });
@@ -893,30 +907,30 @@ const start = async () => {
       //   requireStaff        -> acciones de puerta
       //   requireOrganizador  -> puestos, exportaciones y datos del evento
       const { requireSession } = registrarAuth(fastify, {
-        store, eventoId, rateLimit,
+        store, eventoId, rateLimit, porActor,
         requireAdmin: requireStaff,        // reset y registro rápido: puerta
         registrarAccion
       });
       registrarInsignias(fastify, {
-        store, eventoId, rateLimit,
+        store, eventoId, rateLimit, porActor,
         requireAdmin: requireOrganizador,  // alta y edicion de puestos y sus QR
         requireSession,
         exigirIngreso: EXIGIR_INGRESO_PARA_ESCANEAR,
         registrarAccion
       });
       registrarEmpresa(fastify, {
-        store, eventoId, rateLimit,
+        store, eventoId, rateLimit, porActor,
         requireAdmin: requireOrganizador,  // reponer el acceso de un puesto
         zonaHoraria: ZONA_HORARIA
       });
       registrarSorteo(fastify, {
-        store, eventoId, rateLimit, requireOrganizador, registrarAccion
+        store, eventoId, rateLimit, porActor, requireOrganizador, registrarAccion
       });
       registrarPrueba(fastify, {
-        store, eventoId, rateLimit, requireOrganizador, registrarAccion
+        store, eventoId, rateLimit, porActor, requireOrganizador, registrarAccion
       });
       registrarImportacion(fastify, {
-        store, eventoId, rateLimit, requireOrganizador, registrarAccion
+        store, eventoId, rateLimit, porActor, requireOrganizador, registrarAccion
       });
     }
 
