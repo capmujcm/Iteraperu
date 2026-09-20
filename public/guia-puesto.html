@@ -82,7 +82,10 @@
     color:var(--muted);margin:1.8rem 0 .2rem;font-weight:800;
   }
   .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-weight:700;}
-  .faq b{display:block;font-size:.9rem;margin-top:.8rem;}
+  /* Solo los <b> que son hijos directos son preguntas. Sin el ">", un <b>
+     dentro de una respuesta se convertía en titular y partía el párrafo. */
+  .faq > b{display:block;font-size:.9rem;margin-top:.8rem;}
+  .faq > b:first-child{margin-top:0;}
   .faq p{margin:.2rem 0 0;font-size:.87rem;color:#414859;}
   footer{text-align:center;color:var(--muted);font-size:.78rem;margin-top:2rem;}
   footer a{color:var(--rosa);}
