@@ -846,6 +846,13 @@ fastify.post('/api/leads', { preHandler: rateLimit(15, 60000) }, async (request,
 // -----------------------------------------------------------------------------
 fastify.get('/brand', async (req, reply) => reply.sendFile('brand-deck.html'));
 
+// Guia del puesto participante. Publica y sin sesion a proposito: es el enlace
+// que llega por WhatsApp junto con las credenciales, y pedir login para leer
+// como se hace login no tendria sentido. No contiene datos de ningun puesto.
+// La ruta es corta porque se manda por chat y se dicta por telefono.
+fastify.get('/guia', async (req, reply) => reply.sendFile('guia-puesto.html'));
+fastify.get('/guia-puesto', async (req, reply) => reply.redirect(302, '/guia'));
+
 // -----------------------------------------------------------------------------
 // App real de Country Fest
 // -----------------------------------------------------------------------------

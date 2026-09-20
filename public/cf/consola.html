@@ -192,9 +192,12 @@
         <div class="row wrap" style="align-items:center;gap:.5rem;">
           <input type="file" id="fileContactos" accept="application/json,.json" class="tiny">
           <button class="btn btn-line btn-sm" id="btnImportarPuestos">Importar puestos</button>
-          <button class="btn btn-line btn-sm" id="btnDescargarClaves" style="display:none;">Descargar claves (CSV)</button>
+          <button class="btn btn-line btn-sm" id="btnDescargarClaves" style="display:none;">⬇ Descargar hoja de reparto (CSV)</button>
         </div>
         <div id="importResult" style="margin-top:.6rem;"></div>
+        <!-- Tabla de entrega: un puesto por fila con su acceso y el botón que
+             abre WhatsApp con el mensaje escrito. Se llena tras importar. -->
+        <div id="entregaBox"></div>
       </div>
 
       <div class="card" style="margin-top:.7rem;">
@@ -492,6 +495,101 @@
   // descargarlas en CSV, y nunca se escriben en localStorage.
   let clavesRecienCreadas = [];
 
+  // Contactos del archivo que adjuntó el organizador, indexados por usuario.
+  // Se quedan en memoria para poder cruzarlos con las claves que devuelve el
+  // servidor: el servidor responde con el acceso pero NO con el teléfono del
+  // responsable, y sin teléfono no se le puede mandar nada.
+  let contactosPorUsuario = new Map();
+
+  // Celular peruano a formato internacional, para el enlace de WhatsApp.
+  function normalizaCelular(v) {
+    const d = String(v || '').replace(/\D/g, '');
+    if (!d) return '';
+    if (d.indexOf('51') === 0 && d.length >= 11) return d;
+    if (d.length === 9) return '51' + d;
+    return d;
+  }
+
+  // El mensaje que recibe el responsable del puesto. Lleva el enlace a la guía
+  // para que no haya que explicarle nada por chat.
+  function mensajePuesto(p) {
+    const c = contactosPorUsuario.get(p.usuario) || {};
+    const base = 'https://' + location.host;
+    return 'Hola' + (c.responsable ? ' ' + String(c.responsable).split(' ')[0] : '') + ' 👋\n\n' +
+      'Ya tienes tu acceso al panel de *' + p.nombre + '* para el Country Fest 2026.\n\n' +
+      '🔗 Entra aquí: ' + base + '/negocios/country-fest\n' +
+      '👤 Usuario: ' + p.usuario + '\n' +
+      '🔑 Contraseña: ' + p.password_temporal + '\n\n' +
+      'La contraseña es temporal y al entrar te pedirá elegir una propia.\n\n' +
+      '📍 Tu stand: ' + (p.stand || 'por confirmar') + '\n' +
+      '🏷️ Código de tu QR: ' + p.codigo_corto + '\n\n' +
+      '📖 Guía rápida de 2 minutos: ' + base + '/guia\n\n' +
+      'Lo más importante: sube el logo de tu marca. Es la insignia que se queda ' +
+      'en el celular de cada persona que visita tu puesto.';
+  }
+
+  function enlaceWa(p) {
+    const c = contactosPorUsuario.get(p.usuario) || {};
+    const tel = normalizaCelular(c.whatsapp || c.telefono);
+    if (!tel) return null;
+    return 'https://wa.me/' + tel + '?text=' + encodeURIComponent(mensajePuesto(p));
+  }
+
+  // Tabla de entrega: un puesto por fila, con su acceso y el botón que abre el
+  // WhatsApp del responsable con el mensaje ya escrito. Es la diferencia entre
+  // repartir 72 credenciales en veinte minutos o en una tarde transcribiendo
+  // "K7M2PQR4" a mano, que es justo donde se cuelan los errores.
+  function pintarEntrega() {
+    const caja = el('entregaBox');
+    if (!clavesRecienCreadas.length) { caja.innerHTML = ''; return; }
+
+    const sinTelefono = clavesRecienCreadas.filter(p => !enlaceWa(p)).length;
+
+    caja.innerHTML =
+      '<div class="note n-warn tiny" style="margin:.8rem 0 .6rem;">' +
+        '<b>Estas claves no se vuelven a mostrar.</b> Descarga el CSV antes de cerrar o recargar. ' +
+        'Si pierdes una, se repone desde la ficha del puesto.' +
+      '</div>' +
+      (sinTelefono
+        ? '<div class="note tiny" style="margin-bottom:.6rem;">' + sinTelefono +
+          ' puesto(s) sin teléfono en el archivo de contactos: a esos hay que ' +
+          'entregarles el acceso a mano, con el botón de copiar.</div>'
+        : '') +
+      '<div class="list">' + clavesRecienCreadas.map(function (p, i) {
+        const c = contactosPorUsuario.get(p.usuario) || {};
+        const wa = enlaceWa(p);
+        return '<div class="item" style="flex-wrap:wrap;gap:.4rem;">' +
+          '<div class="gr" style="flex:1;min-width:190px;">' +
+            '<b>' + esc(p.nombre) + '</b>' +
+            '<span class="mono">' + esc(p.usuario) + ' · ' + esc(p.password_temporal) + '</span>' +
+            '<span class="tiny muted">' + esc(p.stand || 's/ stand') + ' · ' + esc(p.codigo_corto) +
+              (c.responsable ? ' · ' + esc(c.responsable) : '') + '</span>' +
+          '</div>' +
+          '<div class="row" style="gap:.35rem;">' +
+            '<button class="btn btn-line btn-sm" data-copia="' + i + '">📋</button>' +
+            (wa
+              ? '<a class="btn btn-accent btn-sm" target="_blank" rel="noopener" href="' + esc(wa) + '">💬 Enviar</a>'
+              : '<span class="pill p-warn">sin teléfono</span>') +
+          '</div>' +
+        '</div>';
+      }).join('') + '</div>';
+
+    // Copiar el mensaje de una fila, para los que no tienen WhatsApp.
+    caja.querySelectorAll('[data-copia]').forEach(function (b) {
+      b.addEventListener('click', async function () {
+        const p = clavesRecienCreadas[Number(this.dataset.copia)];
+        if (!p) return;
+        try {
+          await navigator.clipboard.writeText(mensajePuesto(p));
+          this.textContent = '✓';
+          setTimeout(() => { this.textContent = '📋'; }, 1500);
+        } catch (e) {
+          aviso('importResult', 'warn', 'El navegador no dejó copiar. Usa el CSV.');
+        }
+      });
+    });
+  }
+
   // El archivo de contactos trae datos personales de los responsables. Se lee
   // en el navegador del organizador y se manda al servidor; no se guarda aqui.
   function leerContactos(input) {
@@ -550,10 +648,20 @@
       const fallidos = r.fallidos || [];
       el('btnDescargarClaves').style.display = clavesRecienCreadas.length ? '' : 'none';
 
+      // El índice de contactos se arma aquí y no antes: el servidor devuelve el
+      // acceso de cada puesto pero no el teléfono de su responsable, así que el
+      // cruce lo hace el navegador con el archivo que se acaba de adjuntar.
+      contactosPorUsuario = new Map();
+      (contactos || []).forEach(function (c) {
+        const u = String((c && c.usuario) || '').trim().toLowerCase();
+        if (u) contactosPorUsuario.set(u, c);
+      });
+
       aviso('importResult', fallidos.length ? 'warn' : 'good',
         '✓ ' + clavesRecienCreadas.length + ' puestos creados y ' + (r.actualizados || 0) + ' actualizados' +
         (fallidos.length ? '. Fallaron: ' + fallidos.join(', ') : '') +
         '. ' + (r.aviso || ''));
+      pintarEntrega();
       await refrescar();
     } catch (e) {
       aviso('importResult', 'bad', e.message);
@@ -564,20 +672,46 @@
 
   el('btnDescargarClaves').addEventListener('click', function () {
     if (!clavesRecienCreadas.length) return;
-    // CSV sin datos personales: usuario de acceso, nombre del puesto, stand,
-    // codigo impreso y clave temporal. Lo que hace falta para repartirlas.
-    const comilla = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
-    const filas = [['usuario', 'puesto', 'stand', 'codigo_impreso', 'clave_temporal']];
+
+    // Hoja de reparto: todo lo que hace falta para entregar los 72 accesos, en
+    // una sola tabla. Lleva el acceso del puesto Y los datos del responsable,
+    // cruzados por usuario, porque repartir credenciales mirando dos archivos a
+    // la vez es como se termina mandando la clave de un puesto a otro.
+    //
+    // ESTE ARCHIVO LLEVA CONTRASEÑAS Y TELÉFONOS. No va al repositorio, no se
+    // manda por chat y se borra cuando el reparto esté hecho: a partir de ese
+    // momento las claves ya no sirven de nada, porque cada puesto define la
+    // suya al entrar, pero los teléfonos siguen siendo datos personales.
+    const comilla = v => {
+      let s = String(v == null ? '' : v);
+      // Una celda que empieza por = + - @ la ejecuta Excel como fórmula.
+      if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+      return '"' + s.replace(/"/g, '""') + '"';
+    };
+
+    const filas = [[
+      'puesto', 'stand', 'zona', 'usuario', 'clave_temporal', 'codigo_impreso',
+      'responsable', 'telefono', 'whatsapp', 'entregado', 'enlace_whatsapp'
+    ]];
+
     clavesRecienCreadas.forEach(p => {
-      filas.push([p.usuario, p.nombre, p.stand, p.codigo_corto, p.password_temporal]);
+      const c = contactosPorUsuario.get(p.usuario) || {};
+      filas.push([
+        p.nombre, p.stand, p.rubro || c.zona || '',
+        p.usuario, p.password_temporal, p.codigo_corto,
+        c.responsable || '', c.telefono || '', c.whatsapp || '',
+        '',                       // columna para marcar a mano quién ya recibió
+        enlaceWa(p) || ''
+      ]);
     });
+
     // BOM al principio para que Excel en Windows abra el CSV como UTF-8 y no
     // parta las tildes de los nombres de los puestos.
     const csv = '﻿' + filas.map(f => f.map(comilla).join(',')).join('\r\n');
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'claves-puestos-countryfest.csv';
+    a.download = 'accesos-puestos-countryfest-2026.csv';
     a.click();
     URL.revokeObjectURL(url);
   });

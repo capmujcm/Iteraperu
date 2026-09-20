@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E60067">
+<title>Country Fest 2026 · Guía para tu puesto</title>
+<link rel="icon" href="/assets/itera-mark.svg">
+<link rel="preconnect" href="https://api.fontshare.com">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap">
+<!--
+  Guía del puesto participante. Pública y sin sesión a propósito: es el enlace
+  que llega por WhatsApp junto con las credenciales, y pedir login para leer
+  cómo se hace login no tendría sentido.
+
+  No contiene ningún dato de ningún puesto: son instrucciones iguales para los
+  72. Las credenciales viajan en el mensaje, nunca en esta página ni en su URL.
+-->
+<style>
+  :root{
+    --rosa:#E60067; --rosa-suave:#FFF0F6; --amarillo:#FFDE00;
+    --cyan:#00C2FF; --navy:#0A1128; --verde:#0F9B6C;
+    --texto:#1A1F2E; --muted:#6B7280; --linea:#E8EAF0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;background:#F7F8FC;color:var(--texto);
+    font-family:'Satoshi',system-ui,-apple-system,'Segoe UI',sans-serif;
+    line-height:1.55;-webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:620px;margin:0 auto;padding:0 16px 48px;}
+
+  header{
+    background:linear-gradient(165deg,#0A1128 0%,#200B26 55%,#3A0B22 100%);
+    padding:1.8rem 16px 1.6rem;text-align:center;
+  }
+  header img{width:230px;max-width:80%;height:auto;display:block;margin:0 auto .7rem;}
+  header .tag{
+    display:inline-block;color:var(--amarillo);border:1px solid rgba(255,222,0,.4);
+    background:rgba(255,222,0,.12);border-radius:999px;
+    font-size:.64rem;letter-spacing:.09em;padding:.3rem .8rem;font-weight:700;
+  }
+  header h1{color:#fff;font-size:1.28rem;margin:.8rem 0 .2rem;font-weight:900;}
+  header p{color:rgba(255,255,255,.82);font-size:.86rem;margin:0;}
+
+  .card{
+    background:#fff;border:1px solid var(--linea);border-radius:14px;
+    padding:1.1rem;margin-top:.9rem;
+  }
+  .paso{display:flex;gap:.85rem;align-items:flex-start;}
+  .num{
+    flex:none;width:32px;height:32px;border-radius:50%;
+    background:var(--rosa);color:#fff;font-weight:900;font-size:.95rem;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .paso h2{font-size:1rem;margin:.25rem 0 .4rem;font-weight:800;}
+  .paso p{margin:0 0 .5rem;font-size:.9rem;}
+  .paso ul{margin:.3rem 0 .5rem;padding-left:1.1rem;font-size:.88rem;}
+  .paso li{margin-bottom:.3rem;}
+
+  .dato{
+    background:var(--rosa-suave);border:1px solid #FFD1E3;border-radius:10px;
+    padding:.6rem .75rem;margin:.5rem 0;font-size:.85rem;
+  }
+  .dato b{color:var(--rosa);}
+
+  .nota{
+    background:#FFFCE6;border:1px solid #FFEFA3;border-radius:10px;
+    padding:.65rem .8rem;font-size:.84rem;margin:.5rem 0;
+  }
+  .ok{background:#E9F9F2;border-color:#B6E8D2;}
+
+  .btn{
+    display:block;text-align:center;text-decoration:none;
+    background:var(--rosa);color:#fff;font-weight:800;font-size:.95rem;
+    padding:.9rem 1rem;border-radius:12px;margin:.9rem 0 .2rem;
+  }
+  .btn.sec{background:#fff;color:var(--rosa);border:1.5px solid var(--rosa);}
+
+  h3.sec{
+    font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);margin:1.8rem 0 .2rem;font-weight:800;
+  }
+  .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-weight:700;}
+  .faq b{display:block;font-size:.9rem;margin-top:.8rem;}
+  .faq p{margin:.2rem 0 0;font-size:.87rem;color:#414859;}
+  footer{text-align:center;color:var(--muted);font-size:.78rem;margin-top:2rem;}
+  footer a{color:var(--rosa);}
+</style>
+</head>
+<body>
+
+<header>
+  <img src="/assets/country-fest-logo-clean.png" alt="Country Fest 2026">
+  <span class="tag">26 Y 27 DE SEPTIEMBRE · LA VILLA COUNTRY CLUB · ILO</span>
+  <h1>Guía para tu puesto</h1>
+  <p>Todo lo que tienes que hacer, en 2 minutos de lectura.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="nota" style="margin-top:1.1rem;">
+    <b>Antes de empezar:</b> necesitas el <b>usuario</b> y la <b>contraseña temporal</b>
+    que te enviamos por WhatsApp. Si no los tienes, escríbenos y te los reenviamos.
+  </div>
+
+  <h3 class="sec">Lo que hay que hacer</h3>
+
+  <div class="card">
+    <div class="paso">
+      <div class="num">1</div>
+      <div>
+        <h2>Entra a tu panel</h2>
+        <p>Desde el celular o la computadora, con el usuario y la contraseña del mensaje.</p>
+        <a class="btn" href="/negocios/country-fest">Abrir mi panel</a>
+        <div class="dato">
+          La contraseña que te dimos es <b>temporal</b>. Al entrar por primera vez el
+          sistema te va a pedir que elijas una tuya. Elige una que recuerdes: si la
+          pierdes hay que pedirle otra a la organización.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="paso">
+      <div class="num">2</div>
+      <div>
+        <h2>Sube el logo de tu marca</h2>
+        <p>
+          Esto es lo más importante y lo que más se te va a olvidar, así que va primero.
+        </p>
+        <div class="dato">
+          Tu logo <b>es la insignia</b> que se queda guardada en el celular de cada
+          persona que visita tu puesto. Si no lo subes, en vez de tu marca aparece un
+          dibujito genérico.
+        </div>
+        <ul>
+          <li>Formatos: PNG, JPG o WebP. No se aceptan SVG.</li>
+          <li>Peso máximo: 400 KB.</li>
+          <li>Cuadrado se ve mejor que alargado.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="paso">
+      <div class="num">3</div>
+      <div>
+        <h2>Completa tu ficha</h2>
+        <p>
+          Es lo que ve la gente cuando toca tu insignia en su celular: qué vendes,
+          en qué stand estás y tus redes.
+        </p>
+        <ul>
+          <li><b>Descripción:</b> una o dos líneas de qué ofreces.</li>
+          <li><b>Redes:</b> Instagram, Facebook, TikTok y un WhatsApp de contacto.</li>
+          <li><b>Promoción:</b> si das algo a quien escanea, ponlo aquí.</li>
+        </ul>
+        <div class="nota ok">
+          El WhatsApp que pongas aquí es <b>público</b>: lo ve cualquier asistente.
+          Si no quieres que se vea, déjalo vacío. El número que nos diste para
+          mandarte las credenciales no se publica nunca.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="paso">
+      <div class="num">4</div>
+      <div>
+        <h2>Imprime tu QR y tenlo a la vista</h2>
+        <p>
+          En tu panel está el QR de tu puesto. La organización te lo entrega impreso,
+          pero conviene que también sepas dónde encontrarlo.
+        </p>
+        <ul>
+          <li>Ponlo donde se vea y se alcance con el brazo estirado.</li>
+          <li><b>Evita el sol directo</b> y los plásticos que brillan: la cámara no lee
+            con reflejo.</li>
+          <li>Debajo del QR hay un código corto tipo <span class="mono">P-4K7Q</span>.
+            Si a alguien no le lee la cámara, que lo escriba a mano.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sec">Cómo funciona la dinámica</h3>
+
+  <div class="card">
+    <p style="margin:0;font-size:.9rem;">
+      La persona llega a tu puesto, escanea tu QR con su celular y gana
+      <b>tu insignia</b>, que vale un boleto para el sorteo. Cuantos más puestos
+      visite, más boletos tiene.
+    </p>
+    <div class="nota">
+      <b>Una insignia por persona y por puesto.</b> Que alguien escanee tu QR diez
+      veces no le da diez boletos, y no hace falta que se lo expliques: la app se lo
+      dice sola.
+    </div>
+    <p style="margin:.6rem 0 0;font-size:.9rem;">
+      En tu panel ves cuántas insignias entregaste y a qué hora fueron. <b>No verás
+      quiénes son</b>: los datos personales de los asistentes no se comparten con los
+      puestos, porque nadie dio permiso para eso.
+    </p>
+  </div>
+
+  <h3 class="sec">Dudas frecuentes</h3>
+
+  <div class="card faq">
+    <b>Perdí la contraseña.</b>
+    <p>Pídele a la organización que te genere otra. No la podemos recuperar: en
+      nuestro sistema no está guardada en texto, solo cifrada.</p>
+
+    <b>No me llegó nada / el enlace no abre.</b>
+    <p>Entra directo a <span class="mono">iteraperu.pe/negocios/country-fest</span>
+      y escribe tu usuario y contraseña a mano.</p>
+
+    <b>¿Puedo entrar desde varios celulares?</b>
+    <p>Sí. La sesión queda abierta en cada uno.</p>
+
+    <b>Se me cayó la señal en el evento.</b>
+    <p>El panel necesita internet. Si el wifi del local va mal, prueba con tus datos
+      móviles. Tu QR impreso <b>sigue funcionando igual</b>: quien lo escanea lo hace
+      desde su propio celular, no desde el tuyo.</p>
+
+    <b>¿Qué pasa si no subo el logo?</b>
+    <p>Todo funciona igual, pero tu insignia aparece con un emoji genérico en vez de
+      tu marca. Es una oportunidad desperdiciada: esa imagen se queda en el celular
+      de cada persona que te visitó.</p>
+  </div>
+
+  <a class="btn" href="/negocios/country-fest">Entrar a mi panel</a>
+  <!-- Contacto: el correo es el único canal publicado del proyecto. Si la
+       organización quiere poner aquí un WhatsApp de soporte, se cambia por
+       un enlace wa.me con el número real. No se inventa uno. -->
+  <a class="btn sec" href="mailto:hola@iteraperu.pe?subject=Consulta%20sobre%20mi%20puesto%20en%20el%20Country%20Fest">
+    Escribir a la organización</a>
+
+  <footer>
+    Country Fest 2026 · La Villa Country Club, Ilo<br>
+    Plataforma por <a href="https://iteraperu.pe">ITERA</a>
+  </footer>
+</div>
+
+</body>
+</html>
