@@ -194,6 +194,17 @@
           <button class="btn btn-line btn-sm" id="btnImportarPuestos">Importar puestos</button>
           <button class="btn btn-line btn-sm" id="btnDescargarClaves" style="display:none;">⬇ Descargar hoja de reparto (CSV)</button>
         </div>
+        <hr style="border:none;border-top:1px solid var(--line);margin:.9rem 0;">
+        <p class="tiny muted" style="margin-bottom:.6rem;">
+          <b>¿Ya importaste y perdiste las claves?</b> Se muestran una sola vez, así que
+          si cerraste la pestaña antes de descargarlas no hay forma de recuperarlas.
+          Este botón le genera una nueva a cada puesto y te deja la hoja lista para repartir.
+          Solo toca a los que <b>nunca han entrado</b>: a quien ya definió su propia
+          contraseña no se le cambia nada.
+        </p>
+        <div class="row wrap">
+          <button class="btn btn-dark btn-sm" id="btnReponerClaves">🔑 Reponer claves de todos los puestos</button>
+        </div>
         <div id="importResult" style="margin-top:.6rem;"></div>
         <!-- Tabla de entrega: un puesto por fila con su acceso y el botón que
              abre WhatsApp con el mensaje escrito. Se llena tras importar. -->
@@ -663,6 +674,57 @@
         '. ' + (r.aviso || ''));
       pintarEntrega();
       await refrescar();
+    } catch (e) {
+      aviso('importResult', 'bad', e.message);
+    } finally {
+      this.disabled = false; this.textContent = original;
+    }
+  });
+
+  // Reponer las claves de todos los puestos de una vez.
+  //
+  // Hace falta porque las claves se muestran una sola vez: si la pestaña se
+  // cerró antes de descargarlas, no hay forma de recuperarlas. La alternativa
+  // era entrar a la ficha de cada puesto y reponerla a mano, 72 veces.
+  //
+  // El servidor solo toca a los que nunca han entrado. A quien ya definió su
+  // propia contraseña no se le cambia nada, porque reponérsela lo echaría del
+  // panel sin que él lo haya pedido.
+  el('btnReponerClaves').addEventListener('click', async function () {
+    if (!confirm('Se generará una contraseña temporal nueva para cada puesto que ' +
+                 'todavía no haya entrado al panel.\n\n' +
+                 'A los que ya definieron su propia contraseña no se les toca.\n\n' +
+                 '¿Continuar?')) return;
+
+    const original = this.textContent;
+    this.disabled = true; this.textContent = 'Generando…';
+    try {
+      const r = await API.pedir('/api/soporte/empresas/claves', {
+        metodo: 'POST', auth: 'staff', cuerpo: { confirmar: 'REPONER' },
+        tiempo: API.TIEMPO_LARGO_MS
+      });
+
+      clavesRecienCreadas = r.accesos || [];
+
+      // Aquí los datos de contacto vienen del propio servidor, ya guardados en
+      // la ficha de cada puesto, así que no hace falta el archivo adjunto.
+      contactosPorUsuario = new Map();
+      clavesRecienCreadas.forEach(function (p) {
+        contactosPorUsuario.set(p.usuario, {
+          responsable: p.responsable, telefono: p.telefono, whatsapp: p.whatsapp
+        });
+      });
+
+      el('btnDescargarClaves').style.display = clavesRecienCreadas.length ? '' : 'none';
+
+      const fallidos = r.fallidos || [];
+      aviso('importResult', fallidos.length ? 'warn' : 'good',
+        '✓ ' + clavesRecienCreadas.length + ' clave(s) nuevas, válidas ' + r.dias_validez + ' días' +
+        (r.omitidos_por_estar_en_uso
+          ? '. ' + r.omitidos_por_estar_en_uso + ' puesto(s) omitidos porque ya usan su propia contraseña'
+          : '') +
+        (fallidos.length ? '. Fallaron: ' + fallidos.join(', ') : '') + '.');
+      pintarEntrega();
     } catch (e) {
       aviso('importResult', 'bad', e.message);
     } finally {
