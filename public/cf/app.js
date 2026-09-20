@@ -364,15 +364,52 @@ function deviceId() {
 // que asusta a la gente.
 const streams = {};
 
+// Generacion de camara. Cada peticion de camara se lleva un numero; si cuando
+// el permiso se resuelve ya hay otra peticion mas nueva -o se cambio de
+// pantalla- la que llega tarde se apaga sola en vez de quedarse encendida sin
+// que nadie la controle. Sin esto, dos toques seguidos en "Escanear" dejaban
+// una camara huerfana: el led encendido y la bateria bajando el resto del dia,
+// porque stopCams solo puede apagar las que alcanzo a registrar.
+let _camGen = 0;
+
 function stopCams() {
+  _camGen++;
   Object.keys(streams).forEach(k => {
     try {
       streams[k].stream.getTracks().forEach(t => t.stop());
       clearInterval(streams[k].timer);
+      const caja = el(k);
+      const v = caja && caja.querySelector('video');
+      if (v) v.srcObject = null;
     } catch (e) {}
     delete streams[k];
   });
 }
+
+// Volver de segundo plano. iOS suelta la pista de video cuando el telefono se
+// bloquea o se cambia de app: al volver, el temporizador sigue corriendo sobre
+// un cuadro muerto y la camara no lee nunca mas. Desde fuera no se nota -la
+// reticula sigue ahi- y en la puerta eso es el staff apuntando a un QR tras
+// otro sin entender por que no pasa nada.
+// Se rearma entera en vez de intentar adivinar si sigue sirviendo. Mirar si la
+// pista esta "viva" no basta: iOS a veces la reporta activa y el cuadro esta
+// congelado igual, y entonces no hay forma de distinguir una camara que lee de
+// una que no sin ponerse a comparar pixeles. Volver a abrirla cuesta unas
+// decimas y un parpadeo; equivocarse cuesta una puerta parada.
+document.addEventListener('visibilitychange', function () {
+  if (document.hidden) return;
+  Object.keys(streams).forEach(function (boxId) {
+    const s = streams[boxId];
+    if (!s) return;
+    const cb = s.onCode;
+    try {
+      s.stream.getTracks().forEach(t => t.stop());
+      clearInterval(s.timer);
+    } catch (e) {}
+    delete streams[boxId];
+    startCam(boxId, cb);
+  });
+});
 
 let pantallaActual = null;
 
@@ -424,6 +461,11 @@ async function startCam(boxId, onCode) {
     box.innerHTML = '<div class="off">Este navegador no da acceso a la cámara.<br>Usa el código manual.</div>';
     return;
   }
+
+  // Numero de esta peticion. Si cuando la camara se abra ya hay otra mas nueva,
+  // esta sobra y se apaga: ver el comentario de _camGen.
+  const gen = ++_camGen;
+
   box.innerHTML = '<div class="off">Abriendo cámara…</div>';
 
   let stream;
@@ -439,6 +481,13 @@ async function startCam(boxId, onCode) {
         ? 'La cámara solo funciona sobre HTTPS.'
         : 'No se pudo abrir la cámara.<br>' + (e && e.message ? esc(e.message) : '');
     box.innerHTML = '<div class="off">' + msg + '</div>';
+    return;
+  }
+
+  // El permiso puede tardar segundos. Si mientras tanto se cambio de pantalla o
+  // se volvio a pedir la camara, esta llega tarde: se apaga y se va.
+  if (gen !== _camGen) {
+    stream.getTracks().forEach(t => t.stop());
     return;
   }
 
@@ -500,13 +549,37 @@ async function startCam(boxId, onCode) {
     busy = false;
   }, 140);
 
-  streams[boxId] = { stream, timer };
+  // Ultima comprobacion: entre que se pinto el video y se armo el temporizador
+  // pudo cambiarse de pantalla. Sin esto quedaria un timer leyendo sobre una
+  // camara que ya nadie mira.
+  if (gen !== _camGen) {
+    clearInterval(timer);
+    stream.getTracks().forEach(t => t.stop());
+    return;
+  }
+
+  // `onCode` se guarda para poder rearmar la camara al volver de segundo plano.
+  streams[boxId] = { stream, timer, onCode };
 }
 
 /* ===================================================================
    Cliente de la API
    =================================================================== */
 const API = (function () {
+  // Tiempo máximo de espera de una petición. Generoso -el 4G de un recinto
+  // lleno va lento- pero finito: lo que no puede pasar es que una petición
+  // colgada deje el lector de QR bloqueado el resto del turno.
+  const TIEMPO_MAXIMO_MS = 15000;
+
+  // Hay operaciones que legítimamente tardan más y cortarlas sería peor que
+  // esperar. Se pasan con `tiempo` en las opciones de pedir():
+  //
+  //   * Subir un logo: hasta 400 KB por la red de subida de un celular.
+  //   * Importar el padrón: 72 puestos, cada uno con su hash de contraseña.
+  //     Si esta se corta, los puestos quedan creados pero se pierden las claves
+  //     temporales, que solo se muestran una vez.
+  const TIEMPO_LARGO_MS = 120000;
+
   const CLAVE_SESION = 'cf_sesion';
   const CLAVE_STAFF = 'cf_staff_token';
   // Clave distinta de la del asistente: en el mismo navegador puede haber una
@@ -597,16 +670,36 @@ const API = (function () {
       }
     }
 
+    // Corte por tiempo. Sin esto, una peticion que se queda colgada -wifi
+    // saturado con 4000 personas dentro- no termina nunca, y como el lector de
+    // QR solo se vuelve a armar en el `finally` de quien la llamo, la camara
+    // quedaba MUERTA EN SILENCIO: se apunta a un codigo tras otro y no pasa
+    // nada, sin error ni aviso. Mejor fallar en 15 segundos y poder reintentar.
+    const espera = Number(o.tiempo) > 0 ? Number(o.tiempo) : TIEMPO_MAXIMO_MS;
+    const ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
+    let corte = null;
+    if (ctrl) {
+      opciones.signal = ctrl.signal;
+      corte = setTimeout(function () { try { ctrl.abort(); } catch (e) {} }, espera);
+    }
+
     let res;
     try {
       res = await fetch(url, opciones);
     } catch (e) {
       avisarSinRed(true);
       // Se distingue "no hay red" de "el servidor dijo que no": en puerta son
-      // dos problemas distintos y se resuelven de forma distinta.
-      const err = new Error('Sin conexión con el servidor.');
+      // dos problemas distintos y se resuelven de forma distinta. El corte por
+      // tiempo se dice aparte, porque ahi la peticion PUDO haber llegado.
+      const expiro = e && (e.name === 'AbortError');
+      const err = new Error(expiro
+        ? 'El servidor tardó demasiado. Vuelve a intentarlo.'
+        : 'Sin conexión con el servidor.');
       err.sinRed = true;
+      err.expiro = expiro;
       throw err;
+    } finally {
+      if (corte) clearTimeout(corte);
     }
     avisarSinRed(false);
 
@@ -638,6 +731,8 @@ const API = (function () {
     borrarSesionEmpresa: () => guardar(CLAVE_EMPRESA, ''),
     guardarTokenStaff: t => guardar(CLAVE_STAFF, t),
     pedir: pedir,
+    // Plazo largo para las operaciones que legitimamente tardan (ver arriba).
+    TIEMPO_LARGO_MS: TIEMPO_LARGO_MS,
 
     // --- asistente ---
     evento: () => pedir('/api/events/current'),

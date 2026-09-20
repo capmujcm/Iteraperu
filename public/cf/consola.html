@@ -538,8 +538,12 @@
     try {
       const cuerpo = { confirmar: 'IMPORTAR' };
       if (contactos) cuerpo.contactos = contactos;
+      // Plazo largo: son 72 puestos, cada uno con su hash de contraseña. Si
+      // esta petición se cortara, los puestos quedarían creados en la base pero
+      // se perderían sus claves temporales, que solo se muestran una vez.
       const r = await API.pedir('/api/soporte/empresas/importar', {
-        metodo: 'POST', auth: 'staff', cuerpo: cuerpo
+        metodo: 'POST', auth: 'staff', cuerpo: cuerpo,
+        tiempo: API.TIEMPO_LARGO_MS
       });
 
       clavesRecienCreadas = r.creados || [];

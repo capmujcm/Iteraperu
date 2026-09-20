@@ -532,8 +532,12 @@
         r.readAsDataURL(archivo);
       });
 
+      // Plazo largo: son hasta 400 KB por la red de subida de un celular, que
+      // es la mitad lenta de una conexión móvil. Cortarla a los 15 segundos
+      // habría hecho fallar subidas que iban bien.
       const datos = await API.pedir('/api/negocio/logo', {
-        metodo: 'POST', auth: 'empresa', cuerpo: { datos: base64 }
+        metodo: 'POST', auth: 'empresa', cuerpo: { datos: base64 },
+        tiempo: API.TIEMPO_LARGO_MS
       });
       empresa = datos.empresa;
       pintarLogo();
