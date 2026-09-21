@@ -137,7 +137,9 @@
       <div id="logoResult" style="margin-top:.8rem;"></div>
 
       <div class="soft tiny muted" style="margin-top:.8rem;">
-        <b>Formatos:</b> PNG, JPG o WebP, hasta 400 KB. Cuadrada se ve mejor.<br>
+        <b>Formatos:</b> PNG, JPG o WebP, hasta 12 MB. Cuadrada se ve mejor.<br>
+        La imagen se reduce en tu celular antes de subirla, así que puedes usar
+        la foto tal como sale de la cámara.<br>
         Los SVG no se aceptan por seguridad.
       </div>
     </section>
@@ -502,7 +504,121 @@
   /* --------------------------------------------------------------------- */
   /* logo                                                                  */
   /* --------------------------------------------------------------------- */
-  const LOGO_MAX = 400 * 1024;
+  // El servidor acepta hasta 4 MB, pero aquí casi nunca se llega: antes de
+  // subir, la imagen se reescala en el propio celular. Sin esto, la foto de
+  // 4 MB que sale de la cámara se guardaba tal cual en la base y se volvía a
+  // descargar entera en el celular de cada asistente que viera la insignia.
+  const LOGO_MAX = 4 * 1024 * 1024;
+
+  // Tope de lo que se acepta ABRIR. Es más alto que el del servidor porque el
+  // reescalado va a dejar el archivo muy por debajo; lo que evita este número
+  // es intentar meter en un canvas una imagen tan grande que tumbe la pestaña.
+  const LOGO_ENTRADA_MAX = 12 * 1024 * 1024;
+
+  // La insignia se pinta pequeña, nunca más de ~120 px de lado. 512 deja
+  // margen para pantallas de mucha densidad sin pagar por píxeles que no se
+  // llegan a ver.
+  const LOGO_LADO = 512;
+
+  // Peso al que se intenta llegar bajando la calidad. No es un límite duro: si
+  // no se alcanza, se sube lo que haya salido -que ya es mucho menos que el
+  // original- y el servidor sigue teniendo la última palabra.
+  const LOGO_OBJETIVO = 180 * 1024;
+
+  // Decodifica el archivo a algo que se pueda dibujar. createImageBitmap es lo
+  // rápido y lo que no depende del DOM; el <img> es la reserva para los Safari
+  // que no lo traen.
+  async function decodificarImagen(archivo) {
+    if (typeof createImageBitmap === 'function') {
+      try { return await createImageBitmap(archivo); } catch (e) { /* se prueba con <img> */ }
+    }
+    const url = URL.createObjectURL(archivo);
+    try {
+      return await new Promise(function (resolve, reject) {
+        const img = new Image();
+        img.onload = function () { resolve(img); };
+        img.onerror = function () { reject(new Error('No se pudo leer la imagen.')); };
+        img.src = url;
+      });
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  // Formatos de salida por orden de preferencia. WebP pesa bastante menos y
+  // conserva la transparencia, pero no todos los navegadores lo saben ESCRIBIR
+  // aunque sepan leerlo, así que se comprueba lo que devuelve el canvas y se
+  // cae al formato de siempre: PNG para lo que puede tener fondo transparente,
+  // JPG para una foto.
+  function formatosPara(tipo) {
+    return tipo === 'image/jpeg'
+      ? ['image/webp', 'image/jpeg']
+      : ['image/webp', 'image/png'];
+  }
+
+  // Devuelve un data URL, o null si el navegador no sabe escribir ese formato.
+  function exportar(canvas, tipo, calidad) {
+    let url;
+    try { url = canvas.toDataURL(tipo, calidad); } catch (e) { return null; }
+    // Un navegador que no conoce el tipo no falla: devuelve un PNG sin avisar.
+    if (url.indexOf('data:' + tipo) !== 0) return null;
+    return url;
+  }
+
+  const pesoDe = (dataUrl) => Math.ceil((dataUrl.length - dataUrl.indexOf(',') - 1) * 0.75);
+
+  // Reduce la imagen y devuelve { dataUrl, bytes }. Si algo no sale -navegador
+  // sin canvas útil, imagen que no decodifica, o una imagen que ya está bien-
+  // devuelve null y quien llama sube el archivo tal como vino: el reescalado es
+  // una mejora, no un requisito para poder subir un logo.
+  async function reducirLogo(archivo) {
+    let fuente;
+    try { fuente = await decodificarImagen(archivo); } catch (e) { return null; }
+
+    const ancho = fuente.width;
+    const alto = fuente.height;
+    if (!ancho || !alto) return null;
+
+    // Ya es pequeña y ya pesa poco: no se toca. Recomprimir una imagen que
+    // está bien solo la empeora.
+    if (ancho <= LOGO_LADO && alto <= LOGO_LADO && archivo.size <= LOGO_OBJETIVO) {
+      if (fuente.close) fuente.close();
+      return null;
+    }
+
+    const escala = Math.min(1, LOGO_LADO / Math.max(ancho, alto));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(ancho * escala));
+    canvas.height = Math.max(1, Math.round(alto * escala));
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) { if (fuente.close) fuente.close(); return null; }
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    try {
+      ctx.drawImage(fuente, 0, 0, canvas.width, canvas.height);
+    } catch (e) {
+      return null;
+    } finally {
+      if (fuente.close) fuente.close();
+    }
+
+    // Se baja la calidad por pasos y se para en cuanto cabe. Se guarda siempre
+    // el mejor resultado visto, para no acabar subiendo el más pesado si
+    // ninguno llega al objetivo.
+    let mejor = null;
+    for (const tipo of formatosPara(archivo.type)) {
+      for (const calidad of [0.86, 0.72, 0.6]) {
+        const url = exportar(canvas, tipo, calidad);
+        if (!url) break;                   // este formato no se puede escribir
+        const bytes = pesoDe(url);
+        if (!mejor || bytes < mejor.bytes) mejor = { dataUrl: url, bytes: bytes };
+        if (mejor.bytes <= LOGO_OBJETIVO) return mejor;
+        if (tipo === 'image/png') break;   // PNG ignora la calidad: repetir da lo mismo
+      }
+    }
+    return mejor;
+  }
 
   el('btnSubirLogo').addEventListener('click', function () { el('logoInput').click(); });
 
@@ -512,29 +628,45 @@
     if (!archivo) return;
     limpiar('logoResult');
 
-    // Se comprueba aquí para dar una respuesta inmediata, pero el servidor
-    // vuelve a validar tipo y tamaño: esta comprobación es una cortesía, no
-    // una defensa.
-    if (archivo.size > LOGO_MAX) {
+    // Lo que se comprueba aquí se vuelve a comprobar en el servidor: esto es
+    // una cortesía para no hacer subir 10 MB antes de decir que no, no una
+    // defensa. La defensa es la del servidor, que además mira los bytes reales.
+    if (archivo.size > LOGO_ENTRADA_MAX) {
       return aviso('logoResult', 'bad',
-        'La imagen pesa ' + Math.round(archivo.size / 1024) + ' KB. El máximo son 400 KB.');
+        'La imagen pesa ' + (archivo.size / (1024 * 1024)).toFixed(1) + ' MB y es demasiado ' +
+        'grande para abrirla aquí. El máximo son ' + (LOGO_ENTRADA_MAX / (1024 * 1024)) + ' MB.');
     }
     if (['image/png', 'image/jpeg', 'image/webp'].indexOf(archivo.type) < 0) {
       return aviso('logoResult', 'bad', 'Sube un PNG, JPG o WebP.');
     }
 
-    aviso('logoResult', 'warn', 'Subiendo…');
+    aviso('logoResult', 'warn', 'Preparando la imagen…');
     try {
-      const base64 = await new Promise(function (resolve, reject) {
-        const r = new FileReader();
-        r.onload = function () { resolve(String(r.result)); };
-        r.onerror = function () { reject(new Error('No se pudo leer el archivo.')); };
-        r.readAsDataURL(archivo);
-      });
+      const reducida = await reducirLogo(archivo);
 
-      // Plazo largo: son hasta 400 KB por la red de subida de un celular, que
-      // es la mitad lenta de una conexión móvil. Cortarla a los 15 segundos
-      // habría hecho fallar subidas que iban bien.
+      let base64;
+      if (reducida) {
+        base64 = reducida.dataUrl;
+      } else {
+        // No se redujo -no hacía falta, o este navegador no pudo-. Se sube el
+        // original, y entonces sí tiene que caber en lo que acepta el servidor.
+        if (archivo.size > LOGO_MAX) {
+          return aviso('logoResult', 'bad',
+            'La imagen pesa ' + (archivo.size / (1024 * 1024)).toFixed(1) + ' MB y no se pudo ' +
+            'reducir en este navegador. El máximo son 4 MB: prueba con una más pequeña.');
+        }
+        base64 = await new Promise(function (resolve, reject) {
+          const r = new FileReader();
+          r.onload = function () { resolve(String(r.result)); };
+          r.onerror = function () { reject(new Error('No se pudo leer el archivo.')); };
+          r.readAsDataURL(archivo);
+        });
+      }
+
+      aviso('logoResult', 'warn', 'Subiendo…');
+
+      // Plazo largo: la red de subida es la mitad lenta de una conexión móvil.
+      // Cortarla a los 15 segundos habría hecho fallar subidas que iban bien.
       const datos = await API.pedir('/api/negocio/logo', {
         metodo: 'POST', auth: 'empresa', cuerpo: { datos: base64 },
         tiempo: API.TIEMPO_LARGO_MS

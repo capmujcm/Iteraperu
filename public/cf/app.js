@@ -574,7 +574,7 @@ const API = (function () {
   // Hay operaciones que legítimamente tardan más y cortarlas sería peor que
   // esperar. Se pasan con `tiempo` en las opciones de pedir():
   //
-  //   * Subir un logo: hasta 400 KB por la red de subida de un celular.
+  //   * Subir un logo: hasta 4 MB por la red de subida de un celular.
   //   * Importar el padrón: 72 puestos, cada uno con su hash de contraseña.
   //     Si esta se corta, los puestos quedan creados pero se pierden las claves
   //     temporales, que solo se muestran una vez.

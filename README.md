@@ -404,7 +404,13 @@ devuelven solo `tiene_logo`; los bytes se piden por `/api/empresas/:id/logo`.
 - Solo PNG, JPG y WebP. **SVG rechazado**: puede contener `<script>` y se
   ejecutaría en el navegador de cada asistente que viera la insignia — un XSS
   almacenado con alcance a todo el evento.
-- Máximo 400 KB, con `bodyLimit` propio en la ruta.
+- Máximo 4 MB, con `bodyLimit` propio en la ruta (se calcula desde ese tope).
+- **El navegador reescala antes de subir** (`reducirLogo()` en `negocio.html`):
+  512 px de lado máximo, objetivo ~180 KB, a WebP si el navegador sabe
+  escribirlo y si no a PNG/JPG. Por eso el puesto puede elegir un archivo de
+  hasta 12 MB aunque el servidor solo acepte 4: lo que viaja son ~150 KB. Si el
+  reescalado no se puede hacer, se sube el original y manda el tope de 4 MB.
+  Es una mejora de peso, no un control de seguridad: el servidor revalida todo.
 - Al servirla: `X-Content-Type-Options: nosniff` y `Content-Type` explícito.
 
 ### Qué NO ve el puesto
