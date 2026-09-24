@@ -75,6 +75,16 @@
     {"usuario": "ahvhacompany", "nombre": "AHVHA COMPANY", "stand": "C20", "zona": "EMPRENDEDORES", "emoji": "🎪", "color": "#315CFF", "descripcion": "Soy distribuidor Autorizado de la marca Royal Prestige, promociono sorteos gratuitos de talleres de cocina saludable para las familias dando a conocer los utensilios de la marca."},
     {"usuario": "kidstentaciones", "nombre": "KIDS TENTACIONES", "stand": "C21", "zona": "EMPRENDEDORES", "emoji": "🎁", "color": "#315CFF", "descripcion": "LIBROS, CUENTOS, DIDACTICOS PARA NIÑOS Y ACCESORIOS"},
     {"usuario": "glowess", "nombre": "Glowess", "stand": "C22", "zona": "EMPRENDEDORES", "emoji": "🧴", "color": "#315CFF", "descripcion": "Skincare, productos y accesorios importados, ropa nacional"},
-    {"usuario": "orquideaboutique", "nombre": "ORQUIDEA BOUTIQUE", "stand": "C23", "zona": "EMPRENDEDORES", "emoji": "👗", "color": "#315CFF", "descripcion": "Venta de prendas"}
+    {"usuario": "orquideaboutique", "nombre": "ORQUIDEA BOUTIQUE", "stand": "C23", "zona": "EMPRENDEDORES", "emoji": "👗", "color": "#315CFF", "descripcion": "Venta de prendas"},
+    {"usuario": "otioriginal", "nombre": "OTI ORIGINAL", "stand": "", "zona": "EMPRENDEDORES", "emoji": "🎪", "color": "#315CFF", "descripcion": "Venta de Productos Originales en Marcas exclusivas."},
+    {"usuario": "gardenfestcoffee", "nombre": "Garden Fest Coffee", "stand": "", "zona": "MINI EMPRENDEDORES", "emoji": "🤝", "color": "#0F9B6C", "descripcion": "☕🍫 Se ofrece delicioso café y chocolate, acompañado de una hermosa exposición de plantas ornamentales de la selva. 🌿🌺"},
+    {"usuario": "papertoys", "nombre": "Papertoys", "stand": "", "zona": "MINI EMPRENDEDORES", "emoji": "🎁", "color": "#0F9B6C", "descripcion": "Muñecos articulados de papel y Cartulina de personajes de Marvell y personalizados elaborados por el menor"},
+    {"usuario": "floreriaelparaiso", "nombre": "Floreria El Paraiso Eventos", "stand": "", "zona": "EMPRENDEDORES", "emoji": "🎪", "color": "#315CFF", "descripcion": "ofrecemos servicio de decoraciones para toda ocasion, catering, arreglos florales, ramos, detalles"},
+    {"usuario": "dulcefiesta", "nombre": "DulceFiesta", "stand": "", "zona": "MINI EMPRENDEDORES", "emoji": "🍰", "color": "#0F9B6C", "descripcion": "Dulces para cumpleaños y decoración"},
+    {"usuario": "lunanystore", "nombre": "Lunany Store", "stand": "", "zona": "EMPRENDEDORES", "emoji": "🎁", "color": "#315CFF", "descripcion": "Venta de llaveros acrílicos , peluches ,pines relacionados al anime y snack coreanos"},
+    {"usuario": "esencia", "nombre": "Esencia", "stand": "", "zona": "EMPRENDEDORES", "emoji": "💍", "color": "#315CFF", "descripcion": "Esencia es un emprendimiento de joyería personalizada que transforma recuerdos y momentos especiales en detalles únicos. Ofrecemos collares, pulseras, llaveros y dijes personalizados con grabados de fotografías, nombres, fechas, mensajes y símbolos significativos."},
+    {"usuario": "sumaqyou", "nombre": "Sumaq You", "stand": "", "zona": "EMPRENDEDORES", "emoji": "💍", "color": "#315CFF", "descripcion": "Bisutería marca xuping"},
+    {"usuario": "yensydetalles", "nombre": "YENSY DETALLES", "stand": "", "zona": "MINI EMPRENDEDORES", "emoji": "🤝", "color": "#0F9B6C", "descripcion": "Venta de joyas en XP accesorios y más"},
+    {"usuario": "chiraartesanias", "nombre": "Chira artesanías", "stand": "", "zona": "EMPRENDEDORES", "emoji": "🎨", "color": "#315CFF", "descripcion": "Productos acabados con detalles de origen marino, perlas del rio, piedras cuarzo y piedras naturales enérgicas."}
   ]
 }
