@@ -269,7 +269,9 @@
       </form>
 
       <div id="puestosResult" style="margin-bottom:.8rem;"></div>
+      <input type="search" id="puestosBuscar" placeholder="Buscar por nombre, código o stand" maxlength="60" autocomplete="off" style="width:100%;margin-bottom:.8rem;">
       <div id="puestosLista"><div class="loading">Cargando puestos…</div></div>
+      <div id="puestosSinCoincidencias" class="soft center tiny muted" style="padding:1.4rem;" hidden>Ningún puesto coincide con la búsqueda.</div>
     </section>
 
     <!-- ================= un puesto: su QR y sus datos ================= -->
@@ -797,6 +799,27 @@
   // Se guarda el último listado para no volver a pedirlo al abrir un puesto.
   let puestosCache = [];
 
+  // Sin tildes ni mayúsculas: en la feria se busca "anmi" o "arte", no
+  // "ANMI zona kids" tal cual está escrito.
+  function normaliza(s) {
+    return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  }
+
+  // Filtra en el navegador sobre el listado ya cargado; no pide nada al servidor.
+  function filtrarPuestos() {
+    const q = normaliza(el('puestosBuscar').value.trim());
+    let visibles = 0;
+    el('puestosLista').querySelectorAll('[data-puesto]').forEach(function (fila) {
+      const p = puestosCache.find(x => x.id === fila.dataset.puesto) || {};
+      const texto = normaliza([p.nombre, p.codigo_corto, p.stand, p.rubro].join(' '));
+      const ok = !q || texto.includes(q);
+      fila.hidden = !ok;
+      if (ok) visibles++;
+    });
+    el('puestosSinCoincidencias').hidden = !(q && puestosCache.length && !visibles);
+  }
+  el('puestosBuscar').addEventListener('input', filtrarPuestos);
+
   // Ficha de un puesto: su QR grande, listo para imprimir, y sus datos.
   function abrirPuesto(id) {
     const p = puestosCache.find(x => x.id === id);
@@ -956,6 +979,9 @@
       caja.querySelectorAll('[data-puesto]').forEach(function (fila) {
         fila.addEventListener('click', function () { abrirPuesto(this.dataset.puesto); });
       });
+      // Tras crear o editar un puesto se repinta la lista: se reaplica lo que
+      // hubiera escrito en el buscador para no perder el filtro.
+      filtrarPuestos();
     } catch (e) {
       caja.innerHTML = '<div class="flash bad">' + esc(e.message) + '</div>';
     }
