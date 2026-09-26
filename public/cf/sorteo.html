@@ -136,6 +136,12 @@
     border:1.5px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);
     color:#fff;font-family:inherit;font-size:1rem;}
   .campo input:focus,.campo textarea:focus{outline:none;border-color:var(--event);}
+  /* La lista que abre el <select> la pinta el sistema: heredaba la letra
+     blanca del campo sobre su fondo blanco y los puestos no se veían.
+     `color-scheme:dark` le pide al navegador la lista oscura, y las opciones
+     llevan fondo y letra explícitos para los que no lo respetan. */
+  select{color-scheme:dark;}
+  select option{background:#0A1128;color:#fff;}
   .msg{margin-top:1rem;padding:.9rem 1.1rem;border-radius:12px;font-size:.92rem;}
   .msg.malo{background:rgba(230,0,103,.18);border:1px solid var(--event);}
   .msg.bien{background:rgba(15,155,108,.2);border:1px solid #0F9B6C;}
