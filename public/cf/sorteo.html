@@ -164,6 +164,11 @@
     letter-spacing:.22em;text-transform:uppercase;color:var(--muted);}
 
   /* ---- tarjetas del selector ---- */
+  /* Con 26 premios la rejilla no cabía y, como el body no se desplaza, los de
+     abajo quedaban tapados por la barra sin forma de llegar a ellos. El
+     selector se desplaza por dentro; el relleno deja sitio al realce de la
+     tarjeta al pasar el ratón. */
+  #zonaElegir{min-height:0;overflow-y:auto;padding:.4rem .3rem;}
   .tarjeta{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.16);
     border-radius:18px;padding:1.2rem 1rem;cursor:pointer;text-align:center;
     transition:transform .14s,border-color .14s,background .14s;}
