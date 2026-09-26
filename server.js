@@ -337,10 +337,20 @@ function clientIp(req) {
 // cliente. El token de emergencia cuenta como un actor mas.
 const porActor = req => 'staff:' + ((req.actor && req.actor.id) || 'token');
 
+// Cada limitador cuenta APARTE. Antes todos compartian un solo contador por IP
+// (o por actor) y cada ruta lo comparaba con su propio tope: en el wifi del
+// local, los ingresos de los asistentes sumaban al mismo contador y el cambio
+// de clave de un puesto (tope 10) o el boton de sortear (tope 30) respondian
+// 429 sin que nadie los hubiera usado. Cada llamada a rateLimit() es una ruta,
+// asi que un numero propio por llamada basta para separarlos.
+let limitadores = 0;
+
 function rateLimit(max, windowMs, keyFn) {
+  const id = ++limitadores;
   return async (req, reply) => {
-    const clave = keyFn ? keyFn(req) : ('ip:' + clientIp(req));
-    if (!clave) return;
+    const base = keyFn ? keyFn(req) : ('ip:' + clientIp(req));
+    if (!base) return;
+    const clave = id + '|' + base;
     const now = Date.now();
     let b = rateBuckets.get(clave);
     if (!b || now > b.reset) { b = { count: 0, reset: now + windowMs }; rateBuckets.set(clave, b); }

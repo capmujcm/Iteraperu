@@ -122,6 +122,11 @@
   .barra .info{color:var(--muted);font-size:.85rem;}
 
   /* ---- login y admin de premios ---- */
+  /* El body no se desplaza (es una proyección), así que el ingreso y la
+     administración de premios se desplazan por dentro: con varios premios
+     registrados, «Empezar el sorteo» y lo de abajo quedaban fuera de la
+     pantalla sin forma de llegar. */
+  #vLogin,#vPremios{flex:1;min-height:0;overflow-y:auto;}
   .panel{max-width:560px;margin:auto;padding:2rem;}
   .panel h1{font-size:1.8rem;margin:0 0 .4rem;}
   .panel p{color:var(--muted);margin:0 0 1.4rem;line-height:1.5;}
@@ -228,6 +233,18 @@
 
     <div style="margin-top:1.6rem;display:flex;gap:.8rem;">
       <button class="btn btn-jugar" id="btnEmpezar" style="flex:1;">Empezar el sorteo</button>
+    </div>
+
+    <!-- Para limpiar un ensayo. Está aquí, en la administración, y no en la
+         barra de la proyección: un toque por error ahí delante del público
+         borraría los resultados de verdad. -->
+    <div style="margin-top:2.4rem;padding-top:1.2rem;border-top:1px solid rgba(255,255,255,.12);">
+      <p style="font-size:.85rem;margin:0 0 .7rem;">
+        <b style="color:#fff;">Empezar de cero.</b> Borra todos los premios y todos los ganadores.
+        No toca las insignias ni a las personas. No se puede deshacer.
+      </p>
+      <button class="btn btn-sec" id="btnBorrarSorteo" style="border:1px solid var(--event);">Borrar todo el sorteo</button>
+      <div id="borrarMsg"></div>
     </div>
   </div>
 </div>
@@ -482,6 +499,31 @@
       await pintarPremios();
     } catch (e) {
       msg('premioMsg', 'malo', e.message);
+    }
+  });
+
+  $('btnBorrarSorteo').addEventListener('click', async function () {
+    const frase = prompt('Se borran TODOS los premios y TODOS los ganadores del sorteo.\n' +
+      'Las insignias y las personas no se tocan. No se puede deshacer.\n\n' +
+      'Para confirmar, escribe: BORRAR SORTEO');
+    if (frase === null) return;
+    if (frase.trim() !== 'BORRAR SORTEO') {
+      return msg('borrarMsg', 'malo', 'No coincide. No se borró nada.');
+    }
+    this.disabled = true;
+    try {
+      const r = await API.pedir('/api/sorteo/reiniciar', {
+        metodo: 'POST', auth: 'staff', cuerpo: { confirmar: 'BORRAR SORTEO' }
+      });
+      quitarGanadorDePantalla();
+      elegido = null;
+      msg('borrarMsg', 'bien', 'Listo: se borraron ' + r.borrado.premios + ' premio(s) y ' +
+        r.borrado.resultados + ' resultado(s). Registra los premios reales arriba.');
+      await pintarPremios();
+    } catch (e) {
+      msg('borrarMsg', 'malo', e.message);
+    } finally {
+      this.disabled = false;
     }
   });
 
