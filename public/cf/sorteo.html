@@ -37,15 +37,19 @@
   .top .est{font-size:.85rem;color:var(--muted);}
 
   /* ---- zona central ---- */
+  /* Los tamaños miran también el ALTO de la pantalla, no solo el ancho: en un
+     proyector de 1280×720 o 1024×768 el logo, el premio y el ganador no
+     cabían, y el recorte se comía justo el nombre que había que leer.
+     `safe center` evita que lo que sobra se corte por arriba. */
   .escena{flex:1;display:flex;flex-direction:column;align-items:center;
-    justify-content:center;padding:1rem 2rem;min-height:0;}
+    justify-content:center;justify-content:safe center;padding:clamp(.4rem,1.5vh,1rem) 2rem;min-height:0;}
 
   .premio-eyebrow{font-family:'JetBrains Mono',monospace;font-size:clamp(.8rem,1.6vw,1.1rem);
     letter-spacing:.3em;text-transform:uppercase;color:var(--yellow);margin-bottom:.4rem;}
-  .premio-nombre{font-size:clamp(2rem,6vw,4.5rem);font-weight:900;line-height:1.05;
+  .premio-nombre{font-size:clamp(1.8rem,min(6vw,8.5vh),4.5rem);font-weight:900;line-height:1.05;
     letter-spacing:-.03em;text-align:center;margin-bottom:.3rem;}
   .premio-desc{font-size:clamp(.9rem,1.8vw,1.3rem);color:var(--muted);text-align:center;
-    margin-bottom:2rem;}
+    margin-bottom:clamp(.6rem,3vh,2rem);}
 
   /* ---- carrete de la ruleta ---- */
   .carrete{
@@ -75,7 +79,7 @@
      degradado recortado solo se aplica donde el navegador lo soporta de
      verdad. Con `color:transparent` sin esa salvaguarda, un proyector o un
      navegador que no aplique background-clip deja el nombre en blanco. */
-  .ganador .nom{font-size:clamp(2.5rem,9vw,7rem);font-weight:900;line-height:1;
+  .ganador .nom{font-size:clamp(2.2rem,min(9vw,13vh),7rem);font-weight:900;line-height:1;
     letter-spacing:-.04em;color:#fff;
     text-shadow:0 0 80px rgba(255,222,0,.35);}
   @supports ((-webkit-background-clip:text) or (background-clip:text)){
@@ -84,12 +88,12 @@
       -webkit-background-clip:text;background-clip:text;
       -webkit-text-fill-color:transparent;}
   }
-  .ganador .meta{margin-top:1rem;font-size:clamp(1rem,2.2vw,1.6rem);color:var(--muted);}
+  .ganador .meta{margin-top:clamp(.4rem,1.5vh,1rem);font-size:clamp(1rem,2.2vw,1.6rem);color:var(--muted);}
   .ganador .cod{font-family:'JetBrains Mono',monospace;color:var(--cyan);font-weight:700;}
 
   /* ---- ganadores acumulados ---- */
-  .lista{flex:none;border-top:1px solid rgba(255,255,255,.1);padding:1rem 2rem 1.4rem;
-    max-height:34vh;overflow-y:auto;}
+  .lista{flex:none;border-top:1px solid rgba(255,255,255,.1);padding:.8rem 2rem 1rem;
+    max-height:20vh;overflow-y:auto;}
   .lista h3{margin:0 0 .7rem;font-size:.8rem;letter-spacing:.25em;text-transform:uppercase;
     color:var(--faint);font-family:'JetBrains Mono',monospace;}
   .fila-g{display:flex;align-items:center;gap:1rem;padding:.55rem 0;
@@ -103,17 +107,19 @@
   .fila-g .tk{font-family:'JetBrains Mono',monospace;color:var(--cyan);font-size:.95rem;}
 
   /* ---- controles ---- */
-  .barra{flex:none;display:flex;align-items:center;justify-content:center;gap:1rem;
-    padding:1rem 2rem;border-top:1px solid rgba(255,255,255,.1);
+  /* Los botones no parten su texto en dos líneas: eso hacía crecer la barra
+     y se comía el código de entrada del ganador en pantallas de 720p. */
+  .barra{flex:none;display:flex;align-items:center;justify-content:center;gap:.6rem 1rem;
+    flex-wrap:wrap;padding:.8rem 1.5rem;border-top:1px solid rgba(255,255,255,.1);
     background:rgba(0,0,0,.25);}
-  .btn{border:0;border-radius:14px;padding:1rem 2.4rem;font-family:inherit;
+  .btn{border:0;border-radius:14px;padding:.9rem 2rem;font-family:inherit;white-space:nowrap;
     font-size:1.1rem;font-weight:800;cursor:pointer;transition:transform .12s;}
   .btn:active{transform:scale(.97);}
   .btn[disabled]{opacity:.35;cursor:not-allowed;}
   .btn-jugar{background:linear-gradient(135deg,var(--event),#FF4D94);color:#fff;
     box-shadow:0 12px 40px -12px rgba(230,0,103,.9);}
   .btn-sec{background:rgba(255,255,255,.1);color:#fff;font-size:.9rem;padding:.7rem 1.4rem;}
-  .barra .info{color:var(--muted);font-size:.9rem;}
+  .barra .info{color:var(--muted);font-size:.85rem;}
 
   /* ---- login y admin de premios ---- */
   .panel{max-width:560px;margin:auto;padding:2rem;}
@@ -139,8 +145,8 @@
   /* ---- patrocinador ---- */
   /* El logo de quien regala el premio preside la pantalla. Si el premio no
      tiene patrocinador, se usa el del propio evento. */
-  .patro{display:flex;flex-direction:column;align-items:center;gap:.5rem;margin-bottom:1.2rem;}
-  .patro img{height:clamp(70px,11vh,130px);max-width:min(60vw,420px);object-fit:contain;
+  .patro{display:flex;flex-direction:column;align-items:center;gap:.4rem;margin-bottom:clamp(.4rem,1.6vh,1.2rem);}
+  .patro img{height:clamp(52px,10vh,130px);max-width:min(60vw,420px);object-fit:contain;
     background:rgba(255,255,255,.96);border-radius:18px;padding:.7rem 1.1rem;
     box-shadow:0 16px 50px -18px rgba(0,0,0,.8);}
   .patro-nombre{font-family:'JetBrains Mono',monospace;font-size:clamp(.65rem,1.3vw,.9rem);
@@ -262,18 +268,19 @@
         Entrada <span class="cod" id="gCodigo">—</span>
         · <span id="gBoletos">—</span>
       </div>
-      <!-- Se muestra solo con un ganador en pantalla. Si no aparece, el premio
-           vuelve al bombo sin borrar lo que ya pasó. -->
-      <button class="btn btn-sec" id="btnNoReclamado" hidden
-              style="margin-top:.9rem;font-size:.85rem;opacity:.75;">No se presentó</button>
     </div>
   </div>
 
   <div class="barra">
     <button class="btn btn-jugar" id="btnJugar">🎲 Sortear</button>
+    <!-- Solo con un ganador en pantalla. Va en la barra y no debajo del
+         nombre: en un proyector de 720p el botón quedaba tapado por esta
+         misma barra justo cuando hacía falta. Si el ganador no aparece, el
+         premio vuelve al bombo sin borrar lo que ya pasó. -->
+    <button class="btn btn-sec" id="btnNoReclamado" hidden>No se presentó</button>
     <button class="btn btn-sec" id="btnElegir" hidden>Elegir premio</button>
     <button class="btn btn-sec" id="btnPremios">Premios</button>
-    <label class="info" style="display:flex;align-items:center;gap:.4rem;cursor:pointer;">
+    <label class="info" style="display:flex;align-items:center;gap:.4rem;cursor:pointer;white-space:nowrap;">
       <input type="checkbox" id="soloPresentes" checked>
       Solo quien está en el evento
     </label>
@@ -381,10 +388,19 @@
   async function pintarPremios() {
     cargarPuestos();
     try {
-      const r = await API.pedir('/api/sorteo/premios', { auth: 'staff' });
+      const [r, g] = await Promise.all([
+        API.pedir('/api/sorteo/premios', { auth: 'staff' }),
+        API.pedir('/api/sorteo/ganadores', { auth: 'staff' })
+      ]);
       const lista = r.premios || [];
+      // Ganador vigente de cada premio, por su posición (única en el evento).
+      const vigente = {};
+      (g.ganadores || []).forEach(function (x) {
+        if (!x.no_reclamado_at) vigente[x.orden] = x;
+      });
       $('listaPremios').innerHTML = lista.length
         ? lista.map(function (p) {
+            const w = p.sorteado ? vigente[p.orden] : null;
             return '<div class="premio-item">' +
               '<span class="n">' + esc(String(p.orden)) + 'º</span>' +
               '<div class="t"><b>' + esc(p.nombre) + '</b>' +
@@ -392,13 +408,47 @@
                   esc(p.empresa_nombre || 'Country Fest') +
                   (p.descripcion ? ' · ' + esc(p.descripcion) : '') +
                 '</span>' +
+                (w
+                  ? '<br><span style="font-size:.85rem;color:#0F9B6C;">✓ Ganó ' + NM(w) +
+                    ' · <span class="mono">' + esc(w.codigo_ticket || '') + '</span></span>'
+                  : '') +
               '</div>' +
+              // Un premio sorteado no se quita, pero sí se puede declarar
+              // desierto desde aquí. Es la salida si la pantalla se recargó o
+              // ya se pasó al siguiente premio cuando se supo que el ganador
+              // no estaba: el botón de la barra solo existe mientras su nombre
+              // está en pantalla.
               (p.sorteado
-                ? '<span style="color:#0F9B6C;font-size:.85rem;">✓ sorteado</span>'
+                // En el atributo va el nombre en texto plano: NM() puede
+                // devolver marcado, que dentro de comillas rompería el botón.
+                ? (w ? '<button data-desierto="' + esc(w.id) + '" data-quien="' +
+                       esc(((w.nombre || '') + ' ' + (w.apellido || '')).trim() || 'El ganador') +
+                       '" data-premio="' + esc(p.nombre) + '">No se presentó</button>'
+                     : '<span style="color:#0F9B6C;font-size:.85rem;">✓ sorteado</span>')
                 : '<button data-borrar="' + esc(p.id) + '">Quitar</button>') +
             '</div>';
           }).join('')
         : '<p style="opacity:.5;">Todavía no hay premios.</p>';
+
+      $('listaPremios').querySelectorAll('[data-desierto]').forEach(function (b) {
+        b.addEventListener('click', async function () {
+          if (!confirm('¿Declarar desierto «' + this.dataset.premio + '»?\n\n' +
+                       this.dataset.quien + ' pierde el turno y el premio se vuelve a sortear.')) return;
+          this.disabled = true;
+          try {
+            await API.pedir('/api/sorteo/resultados/' + encodeURIComponent(this.dataset.desierto) + '/no-reclamado',
+              { metodo: 'POST', auth: 'staff' });
+            // Si ese mismo ganador seguía en la pantalla del sorteo, ya no vale.
+            if (resultadoEnPantalla && resultadoEnPantalla.id === this.dataset.desierto) {
+              quitarGanadorDePantalla();
+            }
+            await pintarPremios();
+          } catch (e) {
+            this.disabled = false;
+            msg('premioMsg', 'malo', e.message);
+          }
+        });
+      });
 
       $('listaPremios').querySelectorAll('[data-borrar]').forEach(function (b) {
         b.addEventListener('click', async function () {
@@ -440,6 +490,15 @@
     ver('vSorteo', true);
     refrescarEstado();
   });
+
+  // Deja la escena lista para presentar un premio: sin ganador ni botón de
+  // desierto de un resultado que ya no se está mostrando.
+  function quitarGanadorDePantalla() {
+    mostrandoGanador = false;
+    resultadoEnPantalla = null;
+    $('btnNoReclamado').hidden = true;
+    ver('zonaGanador', false);
+  }
 
   $('btnPremios').addEventListener('click', function () {
     ver('vSorteo', false);
@@ -515,17 +574,26 @@
       $('estado').textContent = e.pendientes + ' premio(s) por sortear';
       pintarGanadores(e.ganadores || []);
 
+      // Los que quedan por sortear, para el selector. Se actualiza SIEMPRE:
+      // antes solo se hacía sin ganador en pantalla, y «Elegir premio» ofrecía
+      // el premio recién sorteado, que el servidor luego rechazaba.
+      pendientes = (e.premios || []).filter(p => !p.sorteado);
+      $('btnElegir').hidden = pendientes.length < 2;
+
       if (mostrandoGanador) {
-        // Solo se decide si queda algo que sortear; la cabecera se respeta.
-        $('btnJugar').disabled = !siguiente || e.participantes === 0;
-        $('btnJugar').textContent = siguiente ? '🎲 Sortear el ' + siguiente.orden + 'º' : '🎲 Sortear';
+        // La cabecera se respeta. El botón NO sortea: primero presenta el
+        // siguiente premio. Sortear no tiene vuelta atrás, y con un solo
+        // toque sobre el mismo botón que acababa de dar un ganador se
+        // sorteaba el siguiente premio sin anunciarlo ni mostrar a quien lo
+        // regala.
+        $('btnJugar').disabled = !pendientes.length;
+        $('btnJugar').textContent = pendientes.length ? 'Siguiente premio →' : 'Sorteo terminado';
         return;
       }
 
-      // Los que quedan por sortear, para el selector.
-      pendientes = (e.premios || []).filter(p => !p.sorteado);
-
-      if (elegido && !pendientes.some(p => p.id === elegido.id)) elegido = null;
+      // El elegido se refresca con los datos del servidor; si ya no está
+      // pendiente, vuelve a tocar el siguiente por orden.
+      elegido = elegido ? (pendientes.find(p => p.id === elegido.id) || null) : null;
       if (!elegido) elegido = siguiente;
 
       if (elegido) {
@@ -541,7 +609,6 @@
         $('btnJugar').disabled = true;
       }
       $('btnJugar').textContent = elegido ? '🎲 Sortear el ' + elegido.orden + 'º' : '🎲 Sortear';
-      $('btnElegir').hidden = pendientes.length < 2;
     } catch (e) {
       $('estado').textContent = 'Sin conexión';
     }
@@ -612,6 +679,16 @@
 
   $('btnJugar').addEventListener('click', async function () {
     if (jugando) return;
+
+    // Con un ganador en pantalla, este toque solo presenta el siguiente
+    // premio. El sorteo es el toque de después.
+    if (mostrandoGanador) {
+      quitarGanadorDePantalla();
+      elegido = null;
+      await refrescarEstado();
+      return;
+    }
+
     jugando = true;
     mostrandoGanador = false;
     resultadoEnPantalla = null;
@@ -661,9 +738,16 @@
       elegido = null;   // el siguiente vuelve a ser el que toca por orden
       await refrescarEstado();
     } catch (e) {
-      $('estado').textContent = e.message;
       ver('carrete', false);
       $('zonaLista').classList.remove('apagado');
+      // Sin esto el botón se quedaba deshabilitado tras cualquier error (un
+      // corte de wifi, un 409) y la única salida era recargar la página
+      // delante del público. Si el servidor llegó a grabar el resultado y se
+      // perdió la respuesta, el refresco lo trae a la lista de ganadores y
+      // el premio ya no se ofrece: no se puede sortear dos veces.
+      $('btnJugar').disabled = false;
+      await refrescarEstado();
+      $('estado').textContent = e.message;
     } finally {
       jugando = false;
       $('btnPremios').disabled = false;
@@ -691,10 +775,11 @@
       await API.pedir('/api/sorteo/resultados/' + encodeURIComponent(resultadoEnPantalla.id) + '/no-reclamado', {
         metodo: 'POST', auth: 'staff'
       });
-      resultadoEnPantalla = null;
-      this.hidden = true;
-      mostrandoGanador = false;
-      ver('zonaGanador', false);
+      // El premio que se vuelve a sortear es ESTE, no el siguiente por
+      // orden: si se estaba jugando el 5º, la pantalla se queda en el 5º.
+      const premioDesierto = resultadoEnPantalla.premio || null;
+      quitarGanadorDePantalla();
+      elegido = premioDesierto;
       await refrescarEstado();
     } catch (e) {
       $('estado').textContent = e.message;

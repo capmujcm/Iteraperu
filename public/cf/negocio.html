@@ -777,9 +777,13 @@
         go('cambiar-clave');
         return;
       }
-      if (e.sinRed) {
+      // Solo un 401 borra la sesion: un 5xx durante un reinicio del servidor
+      // no debe obligar al puesto a volver a escribir su clave.
+      if (e.status !== 401) {
         go('login');
-        aviso('loginResult', 'warn', 'No hay conexión. Inténtalo cuando tengas señal.');
+        aviso('loginResult', 'warn', e.sinRed
+          ? 'No hay conexión. Inténtalo cuando tengas señal.'
+          : 'El servidor no responde ahora mismo. Recarga en unos segundos: tu sesión sigue guardada.');
         return;
       }
       API.borrarSesionEmpresa();

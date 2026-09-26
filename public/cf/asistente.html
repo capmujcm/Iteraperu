@@ -182,6 +182,7 @@
     <!-- ================= mi entrada ================= -->
     <section class="screen" data-sc="ticket">
       <div class="schead"><h2>Mi entrada</h2></div>
+      <div id="avisoPremioTicket"></div>
       <div id="ticketBox"></div>
       <div class="card" style="margin-top:.8rem;">
         <div class="kv"><span>Estado</span><span id="ticketEstado"></span></div>
@@ -213,6 +214,7 @@
     <!-- ================= mis insignias ================= -->
     <section class="screen" data-sc="insignias">
       <div class="schead"><h2>Mis insignias</h2></div>
+      <div id="avisoPremioInsignias"></div>
       <div class="counter" id="contadorSorteo">
         <div>
           <div class="lab">Tickets para el sorteo</div>
@@ -221,6 +223,7 @@
         <div style="font-size:2rem;">🎟️</div>
       </div>
       <p class="tiny muted" style="margin:.7rem 0 .6rem;">Cada puesto da una sola insignia. Recorre puestos distintos para sumar más tickets.</p>
+      <div id="premiosBox"></div>
       <div id="insigniasBox"></div>
       <button class="btn btn-event btn-block" data-go="escanear" style="margin-top:.9rem;">Escanear otro puesto</button>
     </section>
@@ -522,6 +525,10 @@
     persona = null;
     API.borrarSesion();
     mostrarNav(false);
+    // En un celular compartido, quien entre después no debe ver el premio
+    // del anterior.
+    premioGanado = null;
+    pintarAvisoPremio();
   }
 
   // Vuelve a pedir la ficha al servidor y repinta. Se llama al entrar a "Mi
@@ -872,14 +879,84 @@
   /* --------------------------------------------------------------------- */
   let insignias = [];
   let puestos = [];
+  // Premio que ha ganado esta persona, si salió en el sorteo.
+  let premioGanado = null;
+  let ultimaCargaInsignias = 0;
 
   async function cargarInsignias() {
     if (!persona) return;
+    ultimaCargaInsignias = Date.now();
+    cargarPremios();
     try {
       const datos = await API.misInsignias();
       insignias = datos.insignias || [];
+      premioGanado = datos.premio || null;
       pintarInsignias();
+      pintarAvisoPremio();
     } catch (e) { /* se reintenta al volver a entrar a la pantalla */ }
+  }
+
+  // Cuando anuncian su nombre, la persona saca el celular: la app ya estaba
+  // abierta en segundo plano y sin esto seguiría enseñando lo de antes. Se
+  // recarga al volver a ella, como mucho una vez por minuto para no sumar
+  // carga en la hora punta.
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden || !persona) return;
+    if (Date.now() - ultimaCargaInsignias < 60000) return;
+    cargarInsignias();
+  });
+
+  // El aviso va en «Mi entrada» y en «Mis insignias»: son las dos pantallas
+  // que la persona tiene abiertas, y la de la entrada es la que enseña en el
+  // escenario junto con su DNI.
+  function pintarAvisoPremio() {
+    const p = premioGanado;
+    const html = p
+      ? '<div class="note n-good" style="margin:0 0 .8rem;font-size:.9rem;">' +
+          '<b style="font-size:1.05rem;">🎉 ¡Ganaste el ' + esc(String(p.orden)) + 'º premio!</b><br>' +
+          esc(p.nombre || '') +
+          (p.empresa_nombre ? ' · cortesía de ' + esc(p.empresa_nombre) : '') +
+          '<br><b>Acércate al escenario</b> con tu DNI y muestra esta pantalla.' +
+        '</div>'
+      : '';
+    el('avisoPremioTicket').innerHTML = html;
+    el('avisoPremioInsignias').innerHTML = html;
+  }
+
+  // Lo que se sortea. Saber que hay un televisor en juego es lo que anima a
+  // pasar por un puesto más. Sin premios registrados, la sección no aparece.
+  let premiosCache = null;
+  let premiosCacheAt = 0;
+  async function cargarPremios() {
+    if (premiosCache && Date.now() - premiosCacheAt < 60000) return pintarPremios();
+    try {
+      const r = await API.pedir('/api/sorteo/premios-publicos');
+      premiosCache = r.premios || [];
+      premiosCacheAt = Date.now();
+      pintarPremios();
+    } catch (e) { /* sin la vitrina, el resto de la pantalla sigue igual */ }
+  }
+
+  function pintarPremios() {
+    const lista = premiosCache || [];
+    if (!lista.length) { el('premiosBox').innerHTML = ''; return; }
+    el('premiosBox').innerHTML =
+      '<div class="card" style="margin:0 0 .8rem;">' +
+        '<b style="font-size:.9rem;">🎁 Premios del sorteo</b>' +
+        lista.map(function (p) {
+          return '<div class="kv" style="align-items:flex-start;">' +
+            '<span style="flex:1;min-width:0;' + (p.sorteado ? 'opacity:.5;' : '') + '">' +
+              '<b>' + esc(String(p.orden)) + 'º</b> ' + esc(p.nombre || '') +
+              (p.empresa_nombre
+                ? '<br><span class="tiny muted">Cortesía de ' + esc(p.empresa_nombre) + '</span>'
+                : '') +
+            '</span>' +
+            '<span class="tiny ' + (p.sorteado ? 'muted' : '') + '">' +
+              (p.sorteado ? 'Ya sorteado' : 'En juego') +
+            '</span>' +
+          '</div>';
+        }).join('') +
+      '</div>';
   }
 
   // La cara de la insignia es el logo del puesto cuando lo ha subido; si no,
@@ -1181,11 +1258,16 @@
         go('cambiar-clave');
         return;
       }
-      // Sin red no se cierra la sesion: la persona puede estar en un sotano y
-      // borrarle el acceso ahi seria lo peor que podria pasarle.
-      if (e.sinRed) {
+      // La sesion solo se borra cuando el servidor dice que ya no vale (401).
+      // Antes se borraba ante cualquier error: un 502 de Railway durante un
+      // reinicio, o un 503 mientras la base arranca, dejaba fuera a todo el
+      // que abria la app en ese momento, y sin su clave terminaba en la cola
+      // del Punto de Ayuda. Sin red, o con el servidor fallando, se conserva.
+      if (e.status !== 401) {
         go('login');
-        aviso('loginResult', 'warn', 'No hay conexión. Vuelve a intentarlo cuando tengas señal.');
+        aviso('loginResult', 'warn', e.sinRed
+          ? 'No hay conexión. Vuelve a intentarlo cuando tengas señal.'
+          : 'El servidor no responde ahora mismo. Recarga en unos segundos: tu sesión sigue guardada.');
         return;
       }
       cerrarSesionLocal();

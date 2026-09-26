@@ -234,7 +234,8 @@ Cada puesto participante tiene un QR impreso. El asistente lo escanea y gana
 |---|---|
 | `GET /api/empresas` | Público — catálogo **sin** los tokens de QR |
 | `POST /api/insignias/scan` | Sesión de la persona |
-| `GET /api/insignias/mias` | Sesión de la persona |
+| `GET /api/insignias/mias` | Sesión de la persona — incluye `premio` si esa persona ganó y el resultado sigue vigente |
+| `GET /api/sorteo/premios-publicos` | Público — premios, quién los regala y si ya se sortearon; **sin** ganadores ni recuentos |
 | `POST /api/soporte/empresas` | Organizador — alta de puesto |
 | `PATCH /api/soporte/empresas/:id` | Organizador — corregir datos o dar de baja / reactivar |
 | `GET /api/soporte/empresas` | Organizador — puestos con su QR para imprimir |
@@ -262,7 +263,29 @@ Cada puesto participante tiene un QR impreso. El asistente lo escanea y gana
 
 Pasa: la persona se fue temprano, no oye su nombre, está en la cola de un
 puesto. `POST /api/sorteo/resultados/:id/no-reclamado` (organizador) declara el
-premio desierto desde la propia pantalla del sorteo.
+premio desierto desde la propia pantalla del sorteo: botón «No se presentó» en
+la barra mientras el ganador está en pantalla, o desde «Premios» para cualquier
+premio ya sorteado (sirve si la pantalla se recargó o ya se pasó al siguiente).
+Tras declararlo desierto, la pantalla se queda en ese mismo premio para volver
+a sortearlo.
+
+Para que el ganador se entere aunque no oiga su nombre, su app muestra
+«¡Ganaste el Nº premio!» en «Mi entrada» y en «Mis insignias» (se refresca al
+volver a la app, como mucho una vez por minuto). Si el premio se declara
+desierto, el aviso desaparece.
+
+### En el escenario
+
+Después de un ganador, el botón principal dice **«Siguiente premio →»** y solo
+presenta el premio que sigue (con el logo de quien lo regala); el sorteo es el
+toque siguiente. Antes, el mismo botón que acababa de dar un ganador sorteaba
+el siguiente premio de inmediato: un toque de más era un resultado grabado que
+solo se podía deshacer declarándolo desierto, y eso le quita el turno a alguien
+que no hizo nada.
+
+La pantalla está probada a 1280×720: el logo, el premio, el ganador y su código
+caben sin que la barra los tape. La lista de ganadores ocupa como mucho un 20 %
+del alto y se desplaza.
 
 El resultado **no se borra: se marca**. El premio vuelve a estar pendiente y se
 puede sortear otra vez; la lista de ganadores sigue mostrando al primero,

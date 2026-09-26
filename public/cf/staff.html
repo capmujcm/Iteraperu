@@ -269,7 +269,7 @@
       </form>
 
       <div id="puestosResult" style="margin-bottom:.8rem;"></div>
-      <input type="search" id="puestosBuscar" placeholder="Buscar por nombre, código o stand" maxlength="60" autocomplete="off" style="width:100%;margin-bottom:.8rem;">
+      <input type="search" id="puestosBuscar" placeholder="Buscar por nombre, código, stand o lo que vende" maxlength="60" autocomplete="off" style="width:100%;margin-bottom:.8rem;">
       <div id="puestosLista"><div class="loading">Cargando puestos…</div></div>
       <div id="puestosSinCoincidencias" class="soft center tiny muted" style="padding:1.4rem;" hidden>Ningún puesto coincide con la búsqueda.</div>
     </section>
@@ -811,7 +811,7 @@
     let visibles = 0;
     el('puestosLista').querySelectorAll('[data-puesto]').forEach(function (fila) {
       const p = puestosCache.find(x => x.id === fila.dataset.puesto) || {};
-      const texto = normaliza([p.nombre, p.codigo_corto, p.stand, p.rubro].join(' '));
+      const texto = normaliza([p.nombre, p.codigo_corto, p.stand, p.rubro, p.usuario, p.descripcion].join(' '));
       const ok = !q || texto.includes(q);
       fila.hidden = !ok;
       if (ok) visibles++;
@@ -1294,9 +1294,13 @@
             go('staff-clave');
             return;
           }
-          if (e.sinRed) {
+          // Solo un 401 borra la sesion. Un 5xx durante un reinicio del
+          // servidor no es motivo para sacar al staff de la puerta.
+          if (e.status !== 401) {
             go('sin-token');
-            aviso('tokenResult', 'warn', 'No hay conexión. Inténtalo cuando tengas señal.');
+            aviso('tokenResult', 'warn', e.sinRed
+              ? 'No hay conexión. Inténtalo cuando tengas señal.'
+              : 'El servidor no responde ahora mismo. Recarga en unos segundos: tu sesión sigue guardada.');
             return;
           }
           API.borrarSesionStaff();
@@ -1314,9 +1318,11 @@
           go('home');
         })
         .catch(function (e) {
-          if (e.sinRed) {
+          if (e.status !== 401) {
             go('sin-token');
-            aviso('tokenResult', 'warn', 'No hay conexión. Inténtalo cuando tengas señal.');
+            aviso('tokenResult', 'warn', e.sinRed
+              ? 'No hay conexión. Inténtalo cuando tengas señal.'
+              : 'El servidor no responde ahora mismo. Recarga en unos segundos.');
             return;
           }
           API.guardarTokenStaff('');
