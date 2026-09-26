@@ -174,6 +174,20 @@
           <button class="btn btn-line btn-sm" id="btnDeshacerReinicio">↩ Deshacer el reinicio de hoy</button>
         </div>
         <div id="reinicioResult" style="margin-top:.6rem;"></div>
+
+        <!-- TEMPORAL: limpieza del ensayo antes de abrir el día 1. Va APARTE de
+             «Reiniciar» a propósito: el reinicio del domingo conserva las
+             insignias del sábado, y la app se lo promete a la gente. -->
+        <div style="margin-top:.9rem;padding-top:.8rem;border-top:1px dashed var(--line, #ddd);">
+          <p class="tiny muted" style="margin-bottom:.6rem;">
+            <b>Solo hoy, antes de abrir · limpiar el ensayo.</b> En un paso: todos vuelven a
+            «pendiente de ingreso», se borran <b>todas las insignias</b> y se borra <b>todo el
+            sorteo</b> (premios y ganadores). No toca personas, entradas, puestos ni sus claves.
+            Si ya hay más de 20 personas dentro, se niega.
+          </p>
+          <button class="btn btn-line btn-sm" id="btnEmpezarDeCero">🧹 Dejar todo en cero para abrir</button>
+          <div id="insigniasResult" style="margin-top:.6rem;"></div>
+        </div>
       </div>
 
       <div class="card" style="margin-top:.7rem;">
@@ -446,6 +460,38 @@
       await refrescar();
     } catch (e) {
       aviso('reinicioResult', 'bad', e.message);
+    } finally {
+      this.disabled = false; this.textContent = original;
+    }
+  });
+
+  // Limpieza del ensayo en un paso. El servidor se niega si el evento ya abrió.
+  el('btnEmpezarDeCero').addEventListener('click', async function () {
+    if (!confirm('Se van a:\n' +
+                 '  • poner a todos en "pendiente de ingreso"\n' +
+                 '  • borrar TODAS las insignias (boletos)\n' +
+                 '  • borrar TODO el sorteo (premios y ganadores)\n\n' +
+                 'Solo para limpiar el ensayo antes de abrir. No se puede deshacer. ¿Continuar?')) return;
+    const palabra = prompt('Para confirmar, escribe EMPEZAR DE CERO en mayúsculas:');
+    if (palabra === null || palabra.trim() !== 'EMPEZAR DE CERO') {
+      aviso('insigniasResult', 'warn', 'Cancelado. No se borró nada.');
+      return;
+    }
+    const original = this.textContent;
+    this.disabled = true; this.textContent = 'Limpiando…';
+    try {
+      const r = await API.pedir('/api/soporte/empezar-de-cero', {
+        metodo: 'POST', auth: 'staff', cuerpo: { confirmar: 'EMPEZAR DE CERO' }
+      });
+      aviso('insigniasResult', r.insignias_bloqueadas ? 'warn' : 'good',
+        '✓ Ingresos reiniciados: ' + n(r.reiniciados) + '. Insignias borradas: ' + n(r.insignias) +
+        '. Sorteo: ' + n(r.premios) + ' premio(s) y ' + n(r.resultados) + ' ganador(es) borrados.' +
+        (r.insignias_bloqueadas
+          ? ' OJO: alguien entró durante la limpieza y las insignias NO se borraron.'
+          : ' Todo listo para abrir.'));
+      await refrescar();
+    } catch (e) {
+      aviso('insigniasResult', 'bad', e.message);
     } finally {
       this.disabled = false; this.textContent = original;
     }

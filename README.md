@@ -242,6 +242,7 @@ Cada puesto participante tiene un QR impreso. El asistente lo escanea y gana
 | `GET /api/sorteo/estado` | Organizador — admite `?solo_presentes=false` |
 | `POST /api/sorteo/jugar` | Organizador — cuerpo `{ solo_presentes }` opcional |
 | `POST /api/sorteo/resultados/:id/no-reclamado` | Organizador — declara el premio desierto |
+| `POST /api/soporte/empezar-de-cero` | **Temporal** (limpieza del ensayo del día 1; retirar tras usarlo). Organizador, cuerpo `{ "confirmar": "EMPEZAR DE CERO" }`. Reinicia ingresos, borra todas las insignias y todo el sorteo; se niega con más de 20 personas dentro. No toca personas, entradas, puestos ni claves. Botón en la consola junto a «Reiniciar ingresos» |
 | `POST /api/sorteo/reiniciar` | Organizador — cuerpo `{ "confirmar": "BORRAR SORTEO" }`. Borra **todos** los premios y resultados; no toca insignias, personas, puestos ni ingresos. Deja en `acciones_staff` cada resultado borrado (posición, premio, código, hora). Botón «Borrar todo el sorteo» al final de «Premios» |
 
 ### Quién participa
