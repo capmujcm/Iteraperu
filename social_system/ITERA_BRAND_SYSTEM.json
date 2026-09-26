@@ -1,0 +1,45 @@
+{
+  "brand": {
+    "name": "ITERA",
+    "tagline": "Transformamos la forma en que trabajan las empresas.",
+    "secondary_signature": "Entender · Optimizar · Anticipar",
+    "purpose": "Transformar la forma en que trabajan las empresas.",
+    "positioning": "Socio de transformación empresarial.",
+    "golden_rule": "Nunca automatizamos un proceso que primero no hemos cuestionado."
+  },
+  "strategy": {
+    "method": [
+      { "step": 1, "name": "CUESTIONAR", "meaning": "Desafiar lo establecido." },
+      { "step": 2, "name": "ELIMINAR", "meaning": "Quitar lo que no agrega valor." },
+      { "step": 3, "name": "SIMPLIFICAR", "meaning": "Diseñar una mejor forma de hacerlo." },
+      { "step": 4, "name": "ACELERAR", "meaning": "Reducir el tiempo entre acción y resultado." },
+      { "step": 5, "name": "EVOLUCIONAR", "meaning": "Usar tecnología e inteligencia para llevarlo más lejos." }
+    ],
+    "vision_360": [
+      { "dimension": "PASADO", "verb": "ENTENDER", "question": "¿Qué ocurrió?" },
+      { "dimension": "PRESENTE", "verb": "OPTIMIZAR", "question": "¿Qué está ocurriendo?" },
+      { "dimension": "FUTURO", "verb": "ANTICIPAR", "question": "¿Qué podría ocurrir?" }
+    ]
+  },
+  "pillars": [
+    "Estrategia",
+    "Procesos",
+    "Tecnología",
+    "Automatización",
+    "Datos",
+    "Inteligencia"
+  ],
+  "visual": {
+    "colors": {
+      "blue": "#315CFF",
+      "black": "#0B0D10",
+      "gray": "#69717E",
+      "light": "#F2F4F7",
+      "white": "#FFFFFF"
+    },
+    "typography": {
+      "family": "Satoshi",
+      "mono": "JetBrains Mono"
+    }
+  }
+}

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>ITERA Post 09</title>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 1080px;
+      height: 1080px;
+      overflow: hidden;
+      background: #F4F6F9;
+      color: #0B0D10;
+      font-family: 'Satoshi', sans-serif;
+    }
+    .post-container {
+      position: relative;
+      width: 1080px;
+      height: 1080px;
+      padding: 80px 84px 74px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #F4F6F9;
+      overflow: hidden;
+    }
+    .bg-geometry {
+      position: absolute;
+      right: 60px;
+      bottom: 120px;
+      width: 380px;
+      height: 380px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .top-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+    }
+    .brand-name {
+      font-weight: 900;
+      font-size: 32px;
+      letter-spacing: 0.16em;
+      color: #0B0D10;
+    }
+    .tag-series {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      color: #315CFF;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      background: rgba(49, 92, 255, 0.08);
+      border: 1px solid rgba(49, 92, 255, 0.25);
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .content-block {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
+      max-width: 860px;
+    }
+    .category-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      color: #315CFF;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .category-label::before {
+      content: "";
+      width: 24px;
+      height: 2px;
+      background: #315CFF;
+    }
+    .headline {
+      font-size: 64px;
+      font-weight: 700;
+      line-height: 1.12;
+      letter-spacing: -0.03em;
+      color: #0B0D10;
+    }
+    .headline span.accent {
+      color: #315CFF;
+    }
+    .subheadline {
+      font-size: 28px;
+      font-weight: 400;
+      color: #555E6D;
+      line-height: 1.45;
+      max-width: 780px;
+    }
+    .bottom-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 24px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+    .tagline {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 0.14em;
+      color: #315CFF;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 0.12em;
+      color: #8C96A5;
+    }
+  </style>
+</head>
+<body>
+  <div class="post-container">
+    <svg class="bg-geometry" viewBox="0 0 380 380" fill="none">
+      <rect x="40" y="40" width="140" height="140" rx="16" stroke="#315CFF" stroke-width="2.5" stroke-dasharray="6 6"/>
+      <rect x="200" y="40" width="140" height="140" rx="16" fill="rgba(49,92,255,0.06)" stroke="#315CFF" stroke-width="1.5"/>
+      <rect x="40" y="200" width="140" height="140" rx="16" fill="#315CFF"/>
+      <rect x="200" y="200" width="140" height="140" rx="16" stroke="#0B0D10" stroke-opacity="0.2" stroke-width="2"/>
+      <circle cx="110" cy="270" r="10" fill="#FFFFFF"/>
+    </svg>
+
+    <div class="top-bar">
+      <div class="brand-wrap">
+        <img class="brand-logo" src="assets/itera-mark.svg" alt="ITERA">
+        <span class="brand-name">ITERA</span>
+      </div>
+      <span class="tag-series">S17 · TECNOLOGÍA</span>
+    </div>
+
+    <div class="content-block">
+      <div class="category-label">POSICIONAMIENTO</div>
+      <h1 class="headline">Soluciones que se adaptan a tu negocio.<br><span class="accent">No al revés.</span></h1>
+      <p class="subheadline">La tecnología es el medio. Tu operación, tus clientes y tu propósito de negocio son la prioridad.</p>
+    </div>
+
+    <div class="bottom-bar">
+      <span class="tagline">Entender · Optimizar · Anticipar</span>
+      <span class="url">itera.pe</span>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ITERA — Parrilla Oficial de 9 Posts (Instagram & FB)</title>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <style>
+    :root {
+      --blue: #315CFF;
+      --void: #06080B;
+      --card: #0F1218;
+      --border: rgba(255,255,255,0.08);
+      --gray: #69717E;
+      --white: #FFFFFF;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--void);
+      color: #EDF0F6;
+      font-family: 'Satoshi', sans-serif;
+      padding: 3rem 1.5rem 6rem;
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      margin-bottom: 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .brand-title h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--blue);
+      background: rgba(49,92,255,0.12);
+      border: 1px solid rgba(49,92,255,0.3);
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .intro-text {
+      color: var(--gray);
+      font-size: 0.95rem;
+      margin-top: 0.4rem;
+    }
+
+    /* Instagram 3x3 Grid */
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .ig-grid-container {
+      background: #0B0D10;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 4rem;
+    }
+    .ig-grid-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+    .ig-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #121620;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--blue);
+      padding: 10px;
+    }
+    .ig-avatar img {
+      width: 100%;
+      height: 100%;
+    }
+    .ig-info h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .ig-info p {
+      font-size: 0.85rem;
+      color: var(--gray);
+      margin-top: 0.2rem;
+    }
+    .ig-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .ig-item {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #141820;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .ig-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.5);
+      border-color: rgba(49,92,255,0.4);
+    }
+    .ig-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .ig-item-overlay {
+      position: absolute;
+      top: 10px; left: 10px;
+      background: rgba(11,13,16,0.85);
+      backdrop-filter: blur(4px);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* Listado detallado con copys y botones de descarga */
+    .posts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+    .post-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .post-card {
+        grid-template-columns: 1fr;
+      }
+    }
+    .post-card-preview {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+    }
+    .post-card-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .post-card-details {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    .post-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .pill-tofu { background: rgba(0, 200, 150, 0.12); color: #00d5a0; border: 1px solid rgba(0,200,150,0.25); }
+    .pill-mofu { background: rgba(49, 92, 255, 0.12); color: #7C97FF; border: 1px solid rgba(49,92,255,0.25); }
+    .pill-bofu { background: rgba(255, 140, 0, 0.12); color: #ffaa40; border: 1px solid rgba(255,140,0,0.25); }
+    .pill-series { background: rgba(255, 255, 255, 0.06); color: rgba(255,255,255,0.7); border: 1px solid var(--border); }
+
+    .post-card-details h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      color: #fff;
+    }
+    .post-caption-box {
+      background: #06080B;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      position: relative;
+    }
+    .post-caption-text {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: rgba(237,240,246,0.85);
+      white-space: pre-wrap;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(49,92,255,0.15);
+      border: 1px solid rgba(49,92,255,0.35);
+      color: #7C97FF;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover {
+      background: var(--blue);
+      color: #fff;
+    }
+    .post-card-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.2rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.2s;
+    }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-secondary { background: rgba(255,255,255,0.08); color: #fff; }
+    .btn:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand-title">
+        <img src="assets/itera-mark.svg" alt="ITERA" style="width: 36px; height: 36px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <h1>ITERA Social Grid</h1>
+            <span class="badge">9 Posts Listos</span>
+          </div>
+          <p class="intro-text">Parrilla oficial 1080×1080 lista para Instagram Feed & Facebook</p>
+        </div>
+      </div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--gray);">
+        Resolución nativa: 1080×1080 px · Satoshi · #315CFF
+      </div>
+    </header>
+
+    <!-- 1. Vista de Feed 3x3 de Instagram -->
+    <div class="ig-grid-container">
+      <div class="ig-grid-header">
+        <div class="ig-avatar">
+          <img src="assets/itera-mark.svg" alt="ITERA">
+        </div>
+        <div class="ig-info">
+          <h3>@itera.pe</h3>
+          <p>Transformamos la forma en que trabajan las empresas. · Entender · Optimizar · Anticipar</p>
+        </div>
+      </div>
+
+      <div class="ig-grid">
+        <div class="ig-item" onclick="document.getElementById('p1').scrollIntoView({behavior:'smooth'})">
+          <img src="assets/social/post-1.jpg" alt="Post 1">
+          <span class="ig-item-overlay">01 · PROCESOS</span>
+        </div>
+        <div class="ig-item" onclick="document.getElementById('p2').scrollIntoView({behavior:'smooth'})">
+          <img src="assets/social/post-2.jpg" alt="Post 2">
+          <span class="ig-item-overlay">02 · FILOSOFÍA</span>
+        </div>
+        <div class="ig-item" onclick="document.getElementById('p3').scrollIntoView({behavior:'smooth'})">
+          <img src="assets/social/post-3.jpg" alt="Post 3">
+          <span class="ig-item-overlay">03 · 360°</span>
+        </div>
+        <div class="ig-item" onclick="document.getElementById('p4').scrollIntoView({behavior:'smooth'})">
+          <img src="assets/social/post-4.jpg" alt="Post 4">
+          <span class="ig-item-overlay">04 · PILARES</span>
+        </div>
+        <div class="ig-item" onclick="document.getElementById('p5').scrollIntoView({behavior:'smooth'})">
+          <img src="assets/social/post-5.jpg" alt="Post 5">
+          <span class="ig-item-overlay">05 · RESULTADOS</span>
+        </div>
+        <div class="ig-item" onclick="document.getElementById('p6').scrollIntoView({behavior:'smooth'})">
+          <img src="assets/social/post-6.jpg" alt="Post 6">
+          <span class="ig-item-overlay">06 · MÉTODO</span>
+        </div>
+        <div class="ig-item" onclick="document.getElementById('p7').scrollIntoView({behavior:'smooth'})">
+          <img src="assets/social/post-7.jpg" alt="Post 7">
+          <span class="ig-item-overlay">07 · DATOS</span>
+        </div>
+        <div class="ig-item" onclick="document.getElementById('p8').scrollIntoView({behavior:'smooth'})">
+          <img src="assets/social/post-8.jpg" alt="Post 8">
+          <span class="ig-item-overlay">08 · CICLO</span>
+        </div>
+        <div class="ig-item" onclick="document.getElementById('p9').scrollIntoView({behavior:'smooth'})">
+          <img src="assets/social/post-9.jpg" alt="Post 9">
+          <span class="ig-item-overlay">09 · PROPÓSITO</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Listado Detallado con Copys y Botones -->
+    <div class="section-title">
+      <span>Contenido Detallado y Copys para Publicar</span>
+      <span class="badge">Listos para copiar</span>
+    </div>
+
+    <div class="posts-list">
+      <!-- POST 1 -->
+      <div class="post-card" id="p1">
+        <div class="post-card-preview">
+          <img src="assets/social/post-1.jpg" alt="Post 1">
+        </div>
+        <div class="post-card-details">
+          <div class="post-meta-row">
+            <span class="pill pill-tofu">TOFU · Problema</span>
+            <span class="pill pill-series">S01 · PROCESOS</span>
+          </div>
+          <h2>¿Qué podría funcionar mejor en tu empresa?</h2>
+          <div class="post-caption-box">
+            <button class="copy-btn" onclick="copyText('c1')">Copiar Caption</button>
+            <div class="post-caption-text" id="c1">La mayoría de empresas no tienen un problema de tecnología.
+Tienen un problema de procesos que nadie se ha detenido a cuestionar.
+
+Cuando automatizas el desorden, lo único que obtienes es desorden a mayor velocidad.
+
+En ITERA aplicamos una regla simple antes de implementar cualquier herramienta:
+01. Cuestionar por qué existe.
+02. Eliminar lo que no aporta valor.
+03. Simplificar la ruta.
+04. Recién entonces, acelerar.
+
+¿Qué proceso de tu empresa sabes que necesita una revisión hoy?
+
+#ITERA #MejoraContinua #Procesos #EficienciaOperativa #TransformacionEmpresarial</div>
+          </div>
+          <div class="post-card-actions">
+            <a href="assets/social/post-1.jpg" download="itera-post-1.jpg" class="btn btn-primary">Descargar JPG (1080×1080)</a>
+            <a href="social-post-1.html" target="_blank" class="btn btn-secondary">Ver HTML Fuente</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST 2 -->
+      <div class="post-card" id="p2">
+        <div class="post-card-preview">
+          <img src="assets/social/post-2.jpg" alt="Post 2">
+        </div>
+        <div class="post-card-details">
+          <div class="post-meta-row">
+            <span class="pill pill-tofu">TOFU · Insight</span>
+            <span class="pill pill-series">S02 · FILOSOFÍA</span>
+          </div>
+          <h2>No se trata de automatizar. Se trata de trabajar mejor.</h2>
+          <div class="post-caption-box">
+            <button class="copy-btn" onclick="copyText('c2')">Copiar Caption</button>
+            <div class="post-caption-text" id="c2">Digitalizar no es lo mismo que transformar.
+
+Sumar plataformas sin rediseñar el flujo de trabajo suele añadir más carga administrativa de la que resuelve.
+
+Nuestra regla de oro en ITERA:
+"Nunca automatizamos un proceso que primero no hemos cuestionado."
+
+El objetivo no es que tu equipo use más pantallas. Es que el trabajo fluya con menos fricción y más claridad.
+
+¿Tu equipo siente que la tecnología que usan les ahorra tiempo o les añade pasos?
+
+#ITERA #Productividad #AutomatizacionInteligente #LiderazgoOperativo #Estrategia</div>
+          </div>
+          <div class="post-card-actions">
+            <a href="assets/social/post-2.jpg" download="itera-post-2.jpg" class="btn btn-primary">Descargar JPG (1080×1080)</a>
+            <a href="social-post-2.html" target="_blank" class="btn btn-secondary">Ver HTML Fuente</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST 3 -->
+      <div class="post-card" id="p3">
+        <div class="post-card-preview">
+          <img src="assets/social/post-3.jpg" alt="Post 3">
+        </div>
+        <div class="post-card-details">
+          <div class="post-meta-row">
+            <span class="pill pill-mofu">MOFU · Marco</span>
+            <span class="pill pill-series">S10–S12 · VISIÓN 360°</span>
+          </div>
+          <h2>Así transformamos la forma en que trabajan las empresas.</h2>
+          <div class="post-caption-box">
+            <button class="copy-btn" onclick="copyText('c3')">Copiar Caption</button>
+            <div class="post-caption-text" id="c3">Para transformar una organización con solidez no basta con mirar el momento actual. Necesitas perspectiva completa:
+
+• PASADO → ENTENDER: ¿Qué ocurrió históricamente en este proceso y por qué fue diseñado así?
+• PRESENTE → OPTIMIZAR: ¿Dónde se pierde tiempo, margen e información en la operación diaria?
+• FUTURO → ANTICIPAR: ¿Qué escenarios podemos prever con datos y modelos inteligentes?
+
+La verdadera ventaja competitiva está en conectar los tres tiempos.
+
+#ITERA #Vision360 #Estrategia #Optimizacion #Datos #InteligenciaEmpresarial</div>
+          </div>
+          <div class="post-card-actions">
+            <a href="assets/social/post-3.jpg" download="itera-post-3.jpg" class="btn btn-primary">Descargar JPG (1080×1080)</a>
+            <a href="social-post-3.html" target="_blank" class="btn btn-secondary">Ver HTML Fuente</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST 4 -->
+      <div class="post-card" id="p4">
+        <div class="post-card-preview">
+          <img src="assets/social/post-4.jpg" alt="Post 4">
+        </div>
+        <div class="post-card-details">
+          <div class="post-meta-row">
+            <span class="pill pill-mofu">MOFU · Plataforma</span>
+            <span class="pill pill-series">S04 · PILARES</span>
+          </div>
+          <h2>Nuestra plataforma de transformación</h2>
+          <div class="post-caption-box">
+            <button class="copy-btn" onclick="copyText('c4')">Copiar Caption</button>
+            <div class="post-caption-text" id="c4">No somos una agencia de software ni una consultora teórica.
+
+En ITERA combinamos 6 pilares para generar impacto real:
+01. Estrategia: Visión y foco de negocio.
+02. Procesos: Flujos limpios y sin fricción.
+03. Tecnología: Herramientas que se adaptan a la empresa.
+04. Automatización: Reducción drástica de tareas manuales.
+05. Datos: Visibilidad operativa en tiempo real.
+06. Inteligencia: Modelos predictivos y toma de decisiones.
+
+Cuando estos 6 componentes se alinean, las empresas escalan.
+
+#ITERA #TransformacionDigital #Innovacion #PYMES #Escalabilidad</div>
+          </div>
+          <div class="post-card-actions">
+            <a href="assets/social/post-4.jpg" download="itera-post-4.jpg" class="btn btn-primary">Descargar JPG (1080×1080)</a>
+            <a href="social-post-4.html" target="_blank" class="btn btn-secondary">Ver HTML Fuente</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST 5 -->
+      <div class="post-card" id="p5">
+        <div class="post-card-preview">
+          <img src="assets/social/post-5.jpg" alt="Post 5">
+        </div>
+        <div class="post-card-details">
+          <div class="post-meta-row">
+            <span class="pill pill-bofu">BOFU · Resultados</span>
+            <span class="pill pill-series">S23 · RESULTADOS</span>
+          </div>
+          <h2>Transformación real. Resultados medibles.</h2>
+          <div class="post-caption-box">
+            <button class="copy-btn" onclick="copyText('c5')">Copiar Caption</button>
+            <div class="post-caption-text" id="c5">Toda iniciativa de transformación debe justificar su impacto en los números del negocio:
+
+• Menor tiempo de ciclo entre la solicitud del cliente y la entrega.
+• Trazabilidad total de la operación sin depender de hojas de cálculo aisladas.
+• Eliminación de tareas redundantes que desgastan a los mejores talentos.
+
+Si un proyecto no reduce costos, no acelera ventas ni mejora la experiencia, se tiene que replantear.
+
+¿Qué métrica operativa es tu mayor dolor de cabeza este trimestre?
+
+#ITERA #Resultados #KPIs #Eficiencia #GestionEmpresarial</div>
+          </div>
+          <div class="post-card-actions">
+            <a href="assets/social/post-5.jpg" download="itera-post-5.jpg" class="btn btn-primary">Descargar JPG (1080×1080)</a>
+            <a href="social-post-5.html" target="_blank" class="btn btn-secondary">Ver HTML Fuente</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST 6 -->
+      <div class="post-card" id="p6">
+        <div class="post-card-preview">
+          <img src="assets/social/post-6.jpg" alt="Post 6">
+        </div>
+        <div class="post-card-details">
+          <div class="post-meta-row">
+            <span class="pill pill-mofu">MOFU · Método</span>
+            <span class="pill pill-series">S05–S09 · MÉTODO</span>
+          </div>
+          <h2>Elimina lo innecesario. Acelera lo que sí importa.</h2>
+          <div class="post-caption-box">
+            <button class="copy-btn" onclick="copyText('c6')">Copiar Caption</button>
+            <div class="post-caption-text" id="c6">El método ITERA en 5 pasos:
+
+01. CUESTIONAR: Desafiar por qué hacemos lo que hacemos.
+02. ELIMINAR: Quitar de raíz lo que no aporta valor al cliente ni al negocio.
+03. SIMPLIFICAR: Rediseñar una ruta directa y sin pasos superfluos.
+04. ACELERAR: Reducir los tiempos de respuesta.
+05. EVOLUCIONAR: Sumar automatizaciones e IA continua.
+
+El mejor sistema no es el más complicado; es el que funciona con menos obstáculos.
+
+#ITERA #Metodologia #Productividad #Sistemas #Evolucion</div>
+          </div>
+          <div class="post-card-actions">
+            <a href="assets/social/post-6.jpg" download="itera-post-6.jpg" class="btn btn-primary">Descargar JPG (1080×1080)</a>
+            <a href="social-post-6.html" target="_blank" class="btn btn-secondary">Ver HTML Fuente</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST 7 -->
+      <div class="post-card" id="p7">
+        <div class="post-card-preview">
+          <img src="assets/social/post-7.jpg" alt="Post 7">
+        </div>
+        <div class="post-card-details">
+          <div class="post-meta-row">
+            <span class="pill pill-mofu">MOFU · Datos</span>
+            <span class="pill pill-series">S15 · DATOS</span>
+          </div>
+          <h2>Tus datos ya cuentan la historia. Aprovechémosla.</h2>
+          <div class="post-caption-box">
+            <button class="copy-btn" onclick="copyText('c7')">Copiar Caption</button>
+            <div class="post-caption-text" id="c7">Tu empresa genera cientos de datos por hora: pedidos, incidencias, tiempos de respuesta, conversiones.
+
+Pero los datos aislados en silos o reportes desactualizados no ayudan a decidir.
+
+En ITERA unificamos y conectamos la información clave de tu negocio para que cada líder tenga visibilidad en tiempo real.
+
+Decidir con datos limpios no es un lujo corporativo: es la diferencia entre anticiparse o reaccionar tarde.
+
+#ITERA #BusinessIntelligence #Datos #Analitica #DecisionesEstrategicas</div>
+          </div>
+          <div class="post-card-actions">
+            <a href="assets/social/post-7.jpg" download="itera-post-7.jpg" class="btn btn-primary">Descargar JPG (1080×1080)</a>
+            <a href="social-post-7.html" target="_blank" class="btn btn-secondary">Ver HTML Fuente</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST 8 -->
+      <div class="post-card" id="p8">
+        <div class="post-card-preview">
+          <img src="assets/social/post-8.jpg" alt="Post 8">
+        </div>
+        <div class="post-card-details">
+          <div class="post-meta-row">
+            <span class="pill pill-tofu">TOFU · Visión</span>
+            <span class="pill pill-series">S30 · FILOSOFÍA</span>
+          </div>
+          <h2>Mejorar no es un proyecto. Es un ciclo permanente.</h2>
+          <div class="post-caption-box">
+            <button class="copy-btn" onclick="copyText('c8')">Copiar Caption</button>
+            <div class="post-caption-text" id="c8">Muchas empresas tratan la mejora de procesos como un evento que ocurre una vez cada tres años.
+
+La realidad es que el mercado, los clientes y las herramientas cambian constantemente.
+
+En ITERA creemos en el ciclo continuo:
+Entender → Optimizar → Anticipar → Evolucionar.
+
+Las empresas que perduran no son las que implementan una solución y se detienen, sino las que adoptan la iteración como hábito operativo.
+
+#ITERA #MejoraContinua #CulturaOperativa #Liderazgo #Evolucion</div>
+          </div>
+          <div class="post-card-actions">
+            <a href="assets/social/post-8.jpg" download="itera-post-8.jpg" class="btn btn-primary">Descargar JPG (1080×1080)</a>
+            <a href="social-post-8.html" target="_blank" class="btn btn-secondary">Ver HTML Fuente</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST 9 -->
+      <div class="post-card" id="p9">
+        <div class="post-card-preview">
+          <img src="assets/social/post-9.jpg" alt="Post 9">
+        </div>
+        <div class="post-card-details">
+          <div class="post-meta-row">
+            <span class="pill pill-bofu">BOFU · Propósito</span>
+            <span class="pill pill-series">S17 · TECNOLOGÍA</span>
+          </div>
+          <h2>Soluciones que se adaptan a tu negocio. No al revés.</h2>
+          <div class="post-caption-box">
+            <button class="copy-btn" onclick="copyText('c9')">Copiar Caption</button>
+            <div class="post-caption-text" id="c9">Forzar a tu equipo a adaptarse a un software rígido o genérico crea resistencia y cuellos de botella.
+
+La tecnología debe estar al servicio de la estrategia, no definirla.
+
+En ITERA diseñamos soluciones que respetan la identidad y dinámica de tu empresa, automatizando donde agrega valor y simplificando donde hay fricción.
+
+¿Hablamos sobre cómo destrabar tus procesos clave? Escríbenos por mensaje directo o visita el enlace en nuestra bio.
+
+#ITERA #TransformacionEmpresarial #TecnologiaConProposito #Eficiencia #Consultoria</div>
+          </div>
+          <div class="post-card-actions">
+            <a href="assets/social/post-9.jpg" download="itera-post-9.jpg" class="btn btn-primary">Descargar JPG (1080×1080)</a>
+            <a href="social-post-9.html" target="_blank" class="btn btn-secondary">Ver HTML Fuente</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function copyText(id) {
+      const text = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('¡Caption copiado al portapapeles!');
+      });
+    }
+  </script>
+</body>
+</html>

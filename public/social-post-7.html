@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>ITERA Post 07</title>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 1080px;
+      height: 1080px;
+      overflow: hidden;
+      background: #0B0D10;
+      color: #FFFFFF;
+      font-family: 'Satoshi', sans-serif;
+    }
+    .post-container {
+      position: relative;
+      width: 1080px;
+      height: 1080px;
+      padding: 80px 84px 74px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #0B0D10;
+      overflow: hidden;
+    }
+    .top-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+    }
+    .brand-name {
+      font-weight: 900;
+      font-size: 32px;
+      letter-spacing: 0.16em;
+      color: #FFFFFF;
+    }
+    .tag-series {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 8px 18px;
+      border-radius: 6px;
+    }
+    .content-block {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .category-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      color: #7C97FF;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+    .category-label::before {
+      content: "";
+      width: 24px;
+      height: 2px;
+      background: #315CFF;
+    }
+    .headline {
+      font-size: 58px;
+      font-weight: 700;
+      line-height: 1.14;
+      letter-spacing: -0.025em;
+      color: #FFFFFF;
+      max-width: 880px;
+    }
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 280px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 24px 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      color: rgba(255,255,255,0.5);
+    }
+    .chart-svg {
+      width: 100%;
+      height: 180px;
+    }
+    .bottom-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.12);
+    }
+    .tagline {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 0.14em;
+      color: #315CFF;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="post-container">
+    <div class="top-bar">
+      <div class="brand-wrap">
+        <img class="brand-logo" src="assets/itera-mark.svg" alt="ITERA">
+        <span class="brand-name">ITERA</span>
+      </div>
+      <span class="tag-series">S15 · DATOS</span>
+    </div>
+
+    <div class="content-block">
+      <div class="category-label">INTELIGENCIA DE NEGOCIO</div>
+      <h1 class="headline">Tus datos ya cuentan la historia. Aprovechémosla.</h1>
+
+      <div class="chart-container">
+        <div class="chart-header">
+          <span>VISIBILIDAD OPERATIVA</span>
+          <span style="color: #315CFF;">PRECISIÓN: 99.4%</span>
+        </div>
+        <svg class="chart-svg" viewBox="0 0 850 180" fill="none">
+          <defs>
+            <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#315CFF" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#315CFF" stop-opacity="0.0"/>
+            </linearGradient>
+          </defs>
+          <line x1="0" y1="45" x2="850" y2="45" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4 4" />
+          <line x1="0" y1="90" x2="850" y2="90" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4 4" />
+          <line x1="0" y1="135" x2="850" y2="135" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4 4" />
+          <path d="M 0 160 Q 200 150, 350 110 T 600 70 T 850 30 L 850 180 L 0 180 Z" fill="url(#areaGrad)" />
+          <path d="M 0 160 Q 200 150, 350 110 T 600 70 T 850 30" stroke="#315CFF" stroke-width="4" fill="none" />
+          <circle cx="350" cy="110" r="6" fill="#315CFF" stroke="#0B0D10" stroke-width="2"/>
+          <circle cx="600" cy="70" r="6" fill="#315CFF" stroke="#0B0D10" stroke-width="2"/>
+          <circle cx="850" cy="30" r="8" fill="#FFFFFF" stroke="#315CFF" stroke-width="3"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <span class="tagline">Entender · Optimizar · Anticipar</span>
+      <span class="url">itera.pe</span>
+    </div>
+  </div>
+</body>
+</html>

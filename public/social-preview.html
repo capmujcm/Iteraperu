@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ITERA — Social Preview & Composición</title>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <style>
+    :root {
+      --blue: #315CFF;
+      --void: #0B0D10;
+      --card: #12151B;
+      --gray: #69717E;
+      --light: #F2F4F7;
+      --white: #FFFFFF;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #06080B;
+      color: #EDF0F6;
+      font-family: 'Satoshi', system-ui, sans-serif;
+      padding: 2.5rem 1.5rem;
+      min-height: 100vh;
+    }
+    header {
+      max-width: 1100px;
+      margin: 0 auto 2.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .brand-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--blue);
+      background: rgba(49,92,255,0.12);
+      border: 1px solid rgba(49,92,255,0.3);
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+      gap: 2.5rem;
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .panel-header h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .panel-header p {
+      color: var(--gray);
+      font-size: 0.88rem;
+    }
+
+    /* Contenedor cuadrado 1:1 para previsualizar como Post de Instagram */
+    .post-canvas {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 2.5rem;
+    }
+    .post-bg {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+    .post-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(11,13,16,0.65) 0%, rgba(11,13,16,0.1) 40%, rgba(11,13,16,0.75) 100%);
+      z-index: 2;
+    }
+    .post-content-top {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .post-logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .post-logo-img {
+      width: 32px;
+      height: 32px;
+    }
+    .post-logo-text {
+      font-weight: 900;
+      font-size: 1.15rem;
+      letter-spacing: 0.15em;
+      color: #fff;
+    }
+    .post-series-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: #EDF0F6;
+      opacity: 0.6;
+      letter-spacing: 0.1em;
+    }
+    .post-content-bottom {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .post-headline {
+      font-size: 1.85rem;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      color: #FFFFFF;
+      max-width: 90%;
+    }
+    .post-subheadline {
+      font-size: 0.98rem;
+      color: rgba(255,255,255,0.78);
+      font-weight: 400;
+      line-height: 1.45;
+      max-width: 85%;
+    }
+    .post-footer-tagline {
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255,255,255,0.14);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      color: var(--blue);
+      text-transform: uppercase;
+    }
+
+    /* Vista cruda de imagen */
+    .raw-view {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #0B0D10;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .raw-view img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.2s;
+    }
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+    .btn:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand-title">
+      <img src="assets/itera-mark.svg" alt="ITERA" style="width: 28px; height: 28px;">
+      <span>ITERA Social Engine</span>
+      <span class="badge">Preview en Vivo</span>
+    </div>
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--gray);">
+      Paleta: #0B0D10 · #315CFF · #FFFFFF
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- Panel 1: Post Maquetado Final (Logo real + Satoshi + Fondo IA) -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="badge">Pieza Maquetada</span>
+        <h3 style="margin-top: 0.5rem;">Post #1 (TOFU) — Composición Final</h3>
+        <p>Isotipo oficial SVG + Tipografía Satoshi sobre el fondo generado</p>
+      </div>
+
+      <div class="post-canvas">
+        <img class="post-bg" src="assets/social/itera-post-01.jpg" alt="Fondo ITERA">
+        <div class="post-overlay"></div>
+
+        <div class="post-content-top">
+          <div class="post-logo-wrap">
+            <img class="post-logo-img" src="assets/itera-mark.svg" alt="Logo">
+            <span class="post-logo-text">ITERA</span>
+          </div>
+          <span class="post-series-tag">S01 · PROCESOS</span>
+        </div>
+
+        <div class="post-content-bottom">
+          <h2 class="post-headline">¿Qué podría funcionar mejor en tu empresa?</h2>
+          <p class="post-subheadline">Antes de automatizar, entendamos qué se puede mejorar.</p>
+          <div class="post-footer-tagline">
+            <span>Entender · Optimizar · Anticipar</span>
+            <span>itera.pe</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a href="assets/social/itera-post-01.jpg" target="_blank" class="btn btn-secondary">Ver imagen sola</a>
+      </div>
+    </div>
+
+    <!-- Panel 2: Fondo Crudo Generado por IA -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="badge">Arte Base IA</span>
+        <h3 style="margin-top: 0.5rem;">Fondo Limpio Generado (1080×1080)</h3>
+        <p>Metáfora: Complejidad y fricción transformándose en orden y dirección</p>
+      </div>
+
+      <div class="raw-view">
+        <img src="assets/social/itera-post-01.jpg" alt="Fondo ITERA Limpio">
+      </div>
+
+      <div class="actions">
+        <a href="assets/social/itera-post-01.jpg" download="itera-post-01.jpg" class="btn btn-primary">Descargar Fondo JPG</a>
+        <a href="assets/social/itera-visual-flow.jpg" target="_blank" class="btn btn-secondary">Ver Variante 2</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

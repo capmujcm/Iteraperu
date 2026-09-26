@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>ITERA Post 03</title>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 1080px;
+      height: 1080px;
+      overflow: hidden;
+      background: #0B0D10;
+      color: #FFFFFF;
+      font-family: 'Satoshi', sans-serif;
+    }
+    .post-container {
+      position: relative;
+      width: 1080px;
+      height: 1080px;
+      padding: 80px 84px 74px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #0B0D10;
+      overflow: hidden;
+    }
+    .top-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+    }
+    .brand-name {
+      font-weight: 900;
+      font-size: 32px;
+      letter-spacing: 0.16em;
+      color: #FFFFFF;
+    }
+    .tag-series {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 8px 18px;
+      border-radius: 6px;
+    }
+    .content-block {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .category-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      color: #7C97FF;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+    .category-label::before {
+      content: "";
+      width: 24px;
+      height: 2px;
+      background: #315CFF;
+    }
+    .headline {
+      font-size: 58px;
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.025em;
+      color: #FFFFFF;
+    }
+    .timeline-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 10px;
+    }
+    .card-node {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-node.highlight {
+      background: rgba(49,92,255,0.08);
+      border-color: rgba(49,92,255,0.4);
+    }
+    .card-node.highlight::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: #315CFF;
+    }
+    .node-dim {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      color: #7C97FF;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+    .node-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -0.01em;
+    }
+    .node-desc {
+      font-size: 18px;
+      color: rgba(237,240,246,0.65);
+      line-height: 1.4;
+    }
+    .bottom-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.12);
+    }
+    .tagline {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 0.14em;
+      color: #315CFF;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="post-container">
+    <div class="top-bar">
+      <div class="brand-wrap">
+        <img class="brand-logo" src="assets/itera-mark.svg" alt="ITERA">
+        <span class="brand-name">ITERA</span>
+      </div>
+      <span class="tag-series">S10–S12 · VISIÓN 360°</span>
+    </div>
+
+    <div class="content-block">
+      <div class="category-label">MARCO ESTRATÉGICO</div>
+      <h1 class="headline">Así transformamos la forma en que trabajan las empresas.</h1>
+
+      <div class="timeline-grid">
+        <div class="card-node">
+          <span class="node-dim">PASADO</span>
+          <h3 class="node-title">ENTENDER</h3>
+          <p class="node-desc">¿Qué ocurrió y por qué existe este proceso?</p>
+        </div>
+        <div class="card-node highlight">
+          <span class="node-dim">PRESENTE</span>
+          <h3 class="node-title">OPTIMIZAR</h3>
+          <p class="node-desc">¿Cómo eliminamos fricción y aceleramos hoy?</p>
+        </div>
+        <div class="card-node">
+          <span class="node-dim">FUTURO</span>
+          <h3 class="node-title">ANTICIPAR</h3>
+          <p class="node-desc">¿Qué escenarios podemos prever con datos e IA?</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <span class="tagline">Entender · Optimizar · Anticipar</span>
+      <span class="url">itera.pe</span>
+    </div>
+  </div>
+</body>
+</html>

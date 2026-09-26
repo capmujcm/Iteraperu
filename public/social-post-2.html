@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>ITERA Post 02</title>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 1080px;
+      height: 1080px;
+      overflow: hidden;
+      background: #F4F6F9;
+      color: #0B0D10;
+      font-family: 'Satoshi', sans-serif;
+    }
+    .post-container {
+      position: relative;
+      width: 1080px;
+      height: 1080px;
+      padding: 80px 84px 74px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #F4F6F9;
+      overflow: hidden;
+    }
+    .bg-svg {
+      position: absolute;
+      top: 0; right: 0;
+      width: 1080px; height: 1080px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .top-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+    }
+    .brand-name {
+      font-weight: 900;
+      font-size: 32px;
+      letter-spacing: 0.16em;
+      color: #0B0D10;
+    }
+    .tag-series {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      color: #315CFF;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      background: rgba(49, 92, 255, 0.08);
+      border: 1px solid rgba(49, 92, 255, 0.25);
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .content-block {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 900px;
+    }
+    .category-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      color: #315CFF;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .category-label::before {
+      content: "";
+      width: 24px;
+      height: 2px;
+      background: #315CFF;
+    }
+    .headline {
+      font-size: 68px;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: #0B0D10;
+    }
+    .headline span.accent {
+      color: #315CFF;
+    }
+    .subheadline {
+      font-size: 28px;
+      font-weight: 400;
+      color: #555E6D;
+      line-height: 1.45;
+      max-width: 800px;
+    }
+    .bottom-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 24px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+    .tagline {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 0.14em;
+      color: #315CFF;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 0.12em;
+      color: #8C96A5;
+    }
+  </style>
+</head>
+<body>
+  <div class="post-container">
+    <svg class="bg-svg" viewBox="0 0 1080 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="curveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#315CFF" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#315CFF" stop-opacity="0.02"/>
+        </linearGradient>
+      </defs>
+      <path d="M 450 1080 C 650 900, 750 650, 1080 550 L 1080 1080 Z" fill="url(#curveGrad)" />
+      <path d="M 350 1080 C 600 850, 700 600, 1080 480" stroke="#315CFF" stroke-width="2.5" stroke-opacity="0.35" fill="none" />
+      <path d="M 380 1080 C 620 870, 720 630, 1080 520" stroke="#315CFF" stroke-width="1.5" stroke-opacity="0.2" fill="none" />
+      <circle cx="850" cy="580" r="6" fill="#315CFF" />
+      <circle cx="850" cy="580" r="16" stroke="#315CFF" stroke-opacity="0.3" fill="none" />
+    </svg>
+
+    <div class="top-bar">
+      <div class="brand-wrap">
+        <img class="brand-logo" src="assets/itera-mark.svg" alt="ITERA">
+        <span class="brand-name">ITERA</span>
+      </div>
+      <span class="tag-series">S02 · FILOSOFÍA</span>
+    </div>
+
+    <div class="content-block">
+      <div class="category-label">REGLA DE ORO</div>
+      <h1 class="headline">No se trata de automatizar.<br><span class="accent">Se trata de trabajar mejor.</span></h1>
+      <p class="subheadline">Nunca automatizamos un proceso que primero no hemos cuestionado, simplificado y optimizado.</p>
+    </div>
+
+    <div class="bottom-bar">
+      <span class="tagline">Entender · Optimizar · Anticipar</span>
+      <span class="url">itera.pe</span>
+    </div>
+  </div>
+</body>
+</html>

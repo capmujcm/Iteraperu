@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>ITERA Post 04</title>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 1080px;
+      height: 1080px;
+      overflow: hidden;
+      background: #0B0D10;
+      color: #FFFFFF;
+      font-family: 'Satoshi', sans-serif;
+    }
+    .post-container {
+      position: relative;
+      width: 1080px;
+      height: 1080px;
+      padding: 80px 84px 74px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #0B0D10;
+      overflow: hidden;
+    }
+    .top-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+    }
+    .brand-name {
+      font-weight: 900;
+      font-size: 32px;
+      letter-spacing: 0.16em;
+      color: #FFFFFF;
+    }
+    .tag-series {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 8px 18px;
+      border-radius: 6px;
+    }
+    .content-block {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .category-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      color: #7C97FF;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+    .category-label::before {
+      content: "";
+      width: 24px;
+      height: 2px;
+      background: #315CFF;
+    }
+    .headline {
+      font-size: 54px;
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.025em;
+      color: #FFFFFF;
+    }
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .pillar-card {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pillar-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      color: #315CFF;
+      font-weight: 600;
+    }
+    .pillar-name {
+      font-size: 24px;
+      font-weight: 700;
+      color: #EDF0F6;
+    }
+    .bottom-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.12);
+    }
+    .tagline {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 0.14em;
+      color: #315CFF;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="post-container">
+    <div class="top-bar">
+      <div class="brand-wrap">
+        <img class="brand-logo" src="assets/itera-mark.svg" alt="ITERA">
+        <span class="brand-name">ITERA</span>
+      </div>
+      <span class="tag-series">S04 · PILARES</span>
+    </div>
+
+    <div class="content-block">
+      <div class="category-label">ECOSISTEMA INTEGRADO</div>
+      <h1 class="headline">Nuestra plataforma de transformación</h1>
+
+      <div class="pillars-grid">
+        <div class="pillar-card">
+          <span class="pillar-num">01</span>
+          <span class="pillar-name">Estrategia</span>
+        </div>
+        <div class="pillar-card">
+          <span class="pillar-num">02</span>
+          <span class="pillar-name">Procesos</span>
+        </div>
+        <div class="pillar-card">
+          <span class="pillar-num">03</span>
+          <span class="pillar-name">Tecnología</span>
+        </div>
+        <div class="pillar-card">
+          <span class="pillar-num">04</span>
+          <span class="pillar-name">Automatización</span>
+        </div>
+        <div class="pillar-card">
+          <span class="pillar-num">05</span>
+          <span class="pillar-name">Datos</span>
+        </div>
+        <div class="pillar-card">
+          <span class="pillar-num">06</span>
+          <span class="pillar-name">Inteligencia</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <span class="tagline">Entender · Optimizar · Anticipar</span>
+      <span class="url">itera.pe</span>
+    </div>
+  </div>
+</body>
+</html>

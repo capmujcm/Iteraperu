@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>ITERA Post 06</title>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 1080px;
+      height: 1080px;
+      overflow: hidden;
+      background: #0B0D10;
+      color: #FFFFFF;
+      font-family: 'Satoshi', sans-serif;
+    }
+    .post-container {
+      position: relative;
+      width: 1080px;
+      height: 1080px;
+      padding: 80px 84px 74px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #0B0D10;
+      overflow: hidden;
+    }
+    .top-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+    }
+    .brand-name {
+      font-weight: 900;
+      font-size: 32px;
+      letter-spacing: 0.16em;
+      color: #FFFFFF;
+    }
+    .tag-series {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 8px 18px;
+      border-radius: 6px;
+    }
+    .content-block {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .category-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      color: #7C97FF;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+    .category-label::before {
+      content: "";
+      width: 24px;
+      height: 2px;
+      background: #315CFF;
+    }
+    .headline {
+      font-size: 56px;
+      font-weight: 700;
+      line-height: 1.14;
+      letter-spacing: -0.025em;
+      color: #FFFFFF;
+    }
+    .headline span.accent {
+      color: #315CFF;
+    }
+    .method-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 6px;
+    }
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 14px 22px;
+    }
+    .step-item.active {
+      background: rgba(49,92,255,0.1);
+      border-color: rgba(49,92,255,0.4);
+    }
+    .step-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      font-weight: 600;
+      color: #315CFF;
+    }
+    .step-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: 0.04em;
+    }
+    .step-desc {
+      font-size: 16px;
+      color: rgba(237,240,246,0.65);
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .bottom-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.12);
+    }
+    .tagline {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 0.14em;
+      color: #315CFF;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="post-container">
+    <div class="top-bar">
+      <div class="brand-wrap">
+        <img class="brand-logo" src="assets/itera-mark.svg" alt="ITERA">
+        <span class="brand-name">ITERA</span>
+      </div>
+      <span class="tag-series">S05–S09 · MÉTODO</span>
+    </div>
+
+    <div class="content-block">
+      <div class="category-label">EL MÉTODO ITERA</div>
+      <h1 class="headline">Elimina lo innecesario.<br><span class="accent">Acelera lo que sí importa.</span></h1>
+
+      <div class="method-flow">
+        <div class="step-item">
+          <span class="step-num">01</span>
+          <span class="step-name">CUESTIONAR</span>
+          <span class="step-desc">Desafiar lo establecido</span>
+        </div>
+        <div class="step-item active">
+          <span class="step-num">02</span>
+          <span class="step-name">ELIMINAR</span>
+          <span class="step-desc">Quitar lo que no aporta valor</span>
+        </div>
+        <div class="step-item">
+          <span class="step-num">03</span>
+          <span class="step-name">SIMPLIFICAR</span>
+          <span class="step-desc">Diseñar una mejor ruta</span>
+        </div>
+        <div class="step-item">
+          <span class="step-num">04</span>
+          <span class="step-name">ACELERAR</span>
+          <span class="step-desc">Reducir tiempo y fricción</span>
+        </div>
+        <div class="step-item">
+          <span class="step-num">05</span>
+          <span class="step-name">EVOLUCIONAR</span>
+          <span class="step-desc">Automatizar e integrar IA</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <span class="tagline">Entender · Optimizar · Anticipar</span>
+      <span class="url">itera.pe</span>
+    </div>
+  </div>
+</body>
+</html>
